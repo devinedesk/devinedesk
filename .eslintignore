@@ -1,0 +1,6 @@
+.next/
+dist/
+out/
+node_modules/
+packages/*/dist/
+packages/*/node_modules/

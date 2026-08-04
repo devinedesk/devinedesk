@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { ImageStudio, VideoStudio, ClippingStudio, VibeMotionStudio, LipSyncStudio, RecastStudio, CinemaStudio, AudioStudio, MarketingStudio, WorkflowStudio, AgentStudio, AppsStudio, AiInfluencerStudio, getUserBalance } from 'studio';
 
@@ -725,7 +726,7 @@ export default function StandaloneShell() {
 
             {/* Logo & Title */}
             <div className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="devinedesk" className="w-8 h-8 rounded-lg object-contain" />
+              <Image src="/logo.png" alt="devinedesk" width={32} height={32} className="w-8 h-8 rounded-lg object-contain" />
               <span className="text-sm font-bold tracking-tight hidden sm:block text-white">
                 devinedesk
               </span>
