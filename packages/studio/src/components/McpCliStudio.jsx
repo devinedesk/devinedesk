@@ -153,7 +153,7 @@ export default function McpCliStudio() {
           </div>
         </section>
 
-        <p className="text-center text-xs text-white/40 pb-4">
+        <p className="text-center text-xs text-white/60 pb-4">
           Open-source · MIT licensed · Works with Claude, Cursor, Windsurf, and Gemini CLI
         </p>
       </div>

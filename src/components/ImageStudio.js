@@ -14,11 +14,11 @@ import { savePendingJob, removePendingJob, getPendingJobs } from '../lib/pending
 
 function createInlineInstructions(type) {
     const el = document.createElement('div');
-    el.className = 'w-full text-center text-white/30 text-sm flex flex-col items-center gap-2 py-2';
+    el.className = 'w-full text-center text-white/60 text-sm flex flex-col items-center gap-2 py-2';
     const icon = type === 'image' ? '🖼️' : '🎬';
     el.innerHTML = `
         <p>${icon} Enter a prompt above and click <span class="text-primary font-semibold">Generate</span> to create your ${type}.</p>
-        <p class="text-xs text-white/20">Tip: Be descriptive — include style, lighting, mood, and subject for best results.</p>
+        <p class="text-xs text-white/60">Tip: Be descriptive — include style, lighting, mood, and subject for best results.</p>
     `;
     return el;
 }
@@ -305,7 +305,7 @@ export function ImageStudio() {
         <div class="bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
             <div class="flex items-center justify-between pb-3 border-b border-white/5">
                 <h3 class="text-sm font-bold text-white">${t('image.quickTools')}</h3>
-                <button id="close-tools-btn" class="text-white/40 hover:text-white transition-colors">
+                <button id="close-tools-btn" class="text-white/60 hover:text-white transition-colors">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -372,7 +372,7 @@ export function ImageStudio() {
         <div class="bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
             <div class="flex items-center justify-between pb-3 border-b border-white/5">
                 <h3 class="text-sm font-bold text-white">${t('image.advancedOptions')}</h3>
-                <button id="close-adv-btn" class="text-white/40 hover:text-white transition-colors">
+                <button id="close-adv-btn" class="text-white/60 hover:text-white transition-colors">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -1284,7 +1284,7 @@ export function ImageStudio() {
                 res = await muapi.generateImage(genParams);
             }
 
-            console.log('[ImageStudio] Full response:', res);
+            console.debug('[] Full response:', res);
 
             if (res && res.url) {
                 if (capturedRequestId) removePendingJob(capturedRequestId);

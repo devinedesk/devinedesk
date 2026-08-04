@@ -7,6 +7,9 @@ const TABS = [
 
 test.describe('devinedesk Crawler', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/{api,agents,workflow}/**', async route => {
+      await route.fulfill({ status: 200, json: { balance: 100, success: true, data: [] } });
+    });
     // Navigate to a blank page on the domain to set localStorage
     await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {

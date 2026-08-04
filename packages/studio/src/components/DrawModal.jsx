@@ -999,7 +999,7 @@ export default function DrawModal({
               className={`px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
                 activeTab === "sketch-to-video"
                   ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white/70"
+                  : "text-white/60 hover:text-white/70"
               }`}
             >
               Sketch to Video
@@ -1012,7 +1012,7 @@ export default function DrawModal({
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeTab === "draw-to-video"
                   ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white/70"
+                  : "text-white/60 hover:text-white/70"
               }`}
             >
               Draw to Video
@@ -1022,7 +1022,7 @@ export default function DrawModal({
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 activeTab === "draw-to-edit"
                   ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white/70"
+                  : "text-white/60 hover:text-white/70"
               }`}
             >
               Draw to Edit
@@ -1061,7 +1061,7 @@ export default function DrawModal({
                 <h2 className="text-white font-extrabold text-lg tracking-wide mb-1.5 uppercase">
                   DRAW TO EDIT
                 </h2>
-                <p className="text-white/40 text-xs font-medium max-w-xs leading-relaxed mx-auto">
+                <p className="text-white/60 text-xs font-medium max-w-xs leading-relaxed mx-auto">
                   From sketch to a complete picture in a second. No prompt
                   needed.
                 </p>
@@ -1599,7 +1599,7 @@ export default function DrawModal({
 
                 {isModelDropdownOpen && (
                   <div className="absolute bottom-[calc(100%+8px)] left-0 bg-[#0f0f12] border border-white/10 rounded-2xl p-2 w-64 shadow-2xl flex flex-col gap-1 z-30">
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest p-1.5 pb-1 select-none">
+                    <div className="text-[10px] font-black text-white/60 uppercase tracking-widest p-1.5 pb-1 select-none">
                       Select model
                     </div>
 
@@ -1620,7 +1620,7 @@ export default function DrawModal({
                           <span className="text-[#b5f500]">✓</span>
                         )}
                       </div>
-                      <div className="text-[9px] text-white/30 leading-snug mt-0.5">
+                      <div className="text-[9px] text-white/60 leading-snug mt-0.5">
                         Google's Advanced Image Editing Model
                       </div>
                     </button>
@@ -1642,7 +1642,7 @@ export default function DrawModal({
                           <span className="text-[#b5f500]">✓</span>
                         )}
                       </div>
-                      <div className="text-[9px] text-white/30 leading-snug mt-0.5">
+                      <div className="text-[9px] text-white/60 leading-snug mt-0.5">
                         Best 4K Image Model Ever
                       </div>
                     </button>
@@ -1679,7 +1679,7 @@ export default function DrawModal({
 
                 {showSettingsPopover && (
                   <div className="absolute bottom-[calc(100%+8px)] left-0 bg-[#0f0f12] border border-white/10 rounded-2xl p-3.5 w-44 shadow-2xl flex flex-col gap-2 z-30">
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest">
+                    <div className="text-[10px] font-black text-white/60 uppercase tracking-widest">
                       {selectedObj && selectedObj.type === "text"
                         ? "Text Size"
                         : "Brush Size"}
@@ -1736,7 +1736,7 @@ export default function DrawModal({
 
                 {isArDropdownOpen && (
                   <div className="absolute bottom-[calc(100%+8px)] right-0 bg-[#0f0f12] border border-white/10 rounded-xl p-2 w-36 max-h-72 overflow-y-auto shadow-2xl flex flex-col gap-1 z-30">
-                    <div className="text-[10px] font-black text-white/30 uppercase tracking-widest p-1.5 pb-1 select-none">
+                    <div className="text-[10px] font-black text-white/60 uppercase tracking-widest p-1.5 pb-1 select-none">
                       Aspect Ratio
                     </div>
                     {["16:9", "9:16", "4:3", "3:4", "1:1", "Auto"].map((r) => (

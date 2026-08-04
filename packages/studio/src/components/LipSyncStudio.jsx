@@ -851,7 +851,7 @@ export default function LipSyncStudio({
                         Lip Sync
                       </span>
                       {entry.resolution && (
-                        <span className="text-[10px] text-white/40">{entry.resolution}</span>
+                        <span className="text-[10px] text-white/60">{entry.resolution}</span>
                       )}
                     </div>
                   </div>
@@ -899,7 +899,7 @@ export default function LipSyncStudio({
                 LIP SYNC STUDIO
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               Sync any voice with any face video to create premium talking avatars and videos.
             </p>
           </div>
@@ -953,7 +953,7 @@ export default function LipSyncStudio({
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
-                      className="text-white/40 group-hover:text-[#22d3ee] transition-colors"
+                      className="text-white/60 group-hover:text-[#22d3ee] transition-colors"
                     >
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
@@ -981,7 +981,7 @@ export default function LipSyncStudio({
                   accept="video/*"
                   label="Video"
                   icon={
-                    <VideoIcon className="text-white/40 group-hover:text-[#22d3ee] transition-colors" />
+                    <VideoIcon className="text-white/60 group-hover:text-[#22d3ee] transition-colors" />
                   }
                   onUpload={handleVideoPick}
                   onClear={() => {
@@ -1003,7 +1003,7 @@ export default function LipSyncStudio({
                 accept="audio/*"
                 label="Audio"
                 icon={
-                  <MicIcon className="text-white/40 group-hover:text-[#22d3ee] transition-colors" />
+                  <MicIcon className="text-white/60 group-hover:text-[#22d3ee] transition-colors" />
                 }
                 onUpload={handleAudioPick}
                 onClear={() => {

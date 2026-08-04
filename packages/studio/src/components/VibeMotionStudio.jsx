@@ -292,9 +292,9 @@ export default function VibeMotionStudio({
                 <span className="text-white/80 font-semibold text-sm">
                   {editMode ? "Remixing motion graphics…" : "Generating motion graphics…"}
                 </span>
-                <span className="text-white/30 text-xs">React/Remotion rendering on Modal</span>
+                <span className="text-white/60 text-xs">React/Remotion rendering on Modal</span>
               </div>
-              <div className="flex items-center gap-2 text-white/30 text-xs bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.05]">
+              <div className="flex items-center gap-2 text-white/60 text-xs bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.05]">
                 <svg className="animate-spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                   <circle cx="12" cy="12" r="10" strokeOpacity="0.2"/>
                   <path d="M12 2a10 10 0 0 1 10 10"/>
@@ -372,7 +372,7 @@ export default function VibeMotionStudio({
                     /* Legacy generation — animation code not saved by API, remix not available */
                     <div
                       title="Legacy generation — remix not available. Generate a new motion graphic to enable editing."
-                      className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white/20 border border-white/5 cursor-not-allowed"
+                      className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white/60 border border-white/5 cursor-not-allowed"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -446,10 +446,10 @@ export default function VibeMotionStudio({
                       </span>
                       <div className="flex gap-2">
                         {entry.aspectRatio && (
-                          <span className="text-[10px] text-white/40">{entry.aspectRatio}</span>
+                          <span className="text-[10px] text-white/60">{entry.aspectRatio}</span>
                         )}
                         {entry.duration && (
-                          <span className="text-[10px] text-white/40">{entry.duration}s</span>
+                          <span className="text-[10px] text-white/60">{entry.duration}s</span>
                         )}
                       </div>
                     </div>
@@ -499,7 +499,7 @@ export default function VibeMotionStudio({
                 VIBE MOTION STUDIO
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               Generate animated motion graphics from a text prompt — kinetic typography, data charts, logo reveals, and more.
             </p>
           </div>
@@ -677,7 +677,7 @@ export default function VibeMotionStudio({
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[11px] text-white/70 truncate leading-tight group-hover/opt:text-white">{src.prompt}</p>
-                              <p className="text-[9px] text-white/30 mt-0.5">{src.aspectRatio} · {src.duration}s</p>
+                              <p className="text-[9px] text-white/60 mt-0.5">{src.aspectRatio} · {src.duration}s</p>
                             </div>
                             {editSourceId === src.requestId && <CheckSvg />}
                           </div>
@@ -688,7 +688,7 @@ export default function VibeMotionStudio({
                 </div>
               )}
 
-              <span className="text-[10px] text-white/20 hidden sm:block ml-2">Ctrl+Enter to run</span>
+              <span className="text-[10px] text-white/60 hidden sm:block ml-2">Ctrl+Enter to run</span>
             </PromptControls>
 
             {/* ── Generate Button — matches VideoStudio exactly ── */}

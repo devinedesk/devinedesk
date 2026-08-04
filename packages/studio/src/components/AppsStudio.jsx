@@ -200,7 +200,7 @@ export default function AppsStudio({ apiKey }) {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate">{app.name}</h3>
-              <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{app.category || 'Template'}</p>
+              <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">{app.category || 'Template'}</p>
             </div>
           </div>
           
@@ -268,7 +268,7 @@ export default function AppsStudio({ apiKey }) {
           <h1 className="text-5xl font-black text-white tracking-tighter leading-[0.9]">
             LAUNCH AN AI APP.<br />START EARNING TODAY.
           </h1>
-          <p className="text-white/40 text-sm font-medium leading-relaxed max-w-xl mx-auto">
+          <p className="text-white/60 text-sm font-medium leading-relaxed max-w-xl mx-auto">
             Each template is a fully-functional, Stripe-integrated AI SaaS you can deploy in minutes.
             Charge your users, keep the revenue — muapi handles the AI infrastructure.
           </p>
@@ -301,9 +301,9 @@ export default function AppsStudio({ apiKey }) {
                 <Icon className="text-lg" />
               </div>
               <div>
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Step {step}</p>
+                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Step {step}</p>
                 <h3 className="text-sm font-bold text-white mb-1.5">{title}</h3>
-                <p className="text-xs text-white/40 leading-relaxed font-medium">{body}</p>
+                <p className="text-xs text-white/60 leading-relaxed font-medium">{body}</p>
               </div>
             </div>
           ))}
@@ -319,7 +319,7 @@ export default function AppsStudio({ apiKey }) {
         <div className="pt-24 pb-12 flex flex-col items-center gap-4">
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/5">
             <span className="block w-1.5 h-1.5 rounded-full bg-[#22d3ee] animate-pulse" />
-            <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">Muapi Ecosystem — More templates coming soon</span>
+            <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">Muapi Ecosystem — More templates coming soon</span>
           </div>
         </div>
       </div>
@@ -336,7 +336,7 @@ export default function AppsStudio({ apiKey }) {
               <h2 className="text-2xl font-black text-white uppercase tracking-tight">
                 Deploy {selectedApp.name}
               </h2>
-              <p className="text-sm font-medium text-white/40 leading-relaxed px-4">
+              <p className="text-sm font-medium text-white/60 leading-relaxed px-4">
                 Enter your details and we&apos;ll send you the <b>{selectedApp.name}</b> template along with setup instructions so you can deploy and start earning immediately.
               </p>
             </div>

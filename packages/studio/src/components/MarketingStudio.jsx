@@ -148,7 +148,7 @@ function UploadSlot({ icon, url, progress, label, onUpload, onClear, multiple = 
             <img src={url} className="w-full h-full object-cover" alt={label} />
           </div>
         ) : (
-          <div className="text-white/40 group-hover:text-primary transition-colors">
+          <div className="text-white/60 group-hover:text-primary transition-colors">
             {icon}
           </div>
         )}
@@ -509,7 +509,7 @@ export default function MarketingStudio({
                       Marketing Studio
                     </span>
                     {entry.format && (
-                      <span className="text-[9px] text-white/40 font-bold">{entry.format}</span>
+                      <span className="text-[9px] text-white/60 font-bold">{entry.format}</span>
                     )}
                   </div>
                 </div>
@@ -556,7 +556,7 @@ export default function MarketingStudio({
                 MARKETING STUDIO
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               Describe your scene, upload your product, and watch high-converting AI video ads come to life.
             </p>
           </div>
@@ -687,7 +687,7 @@ export default function MarketingStudio({
                     }}
                     className={promptControlClassName({
                       iconOnly: true,
-                      className: "text-white/40 hover:text-[#22d3ee]",
+                      className: "text-white/60 hover:text-[#22d3ee]",
                     })}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

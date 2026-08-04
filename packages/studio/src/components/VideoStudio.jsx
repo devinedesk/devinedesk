@@ -277,7 +277,7 @@ function ModelDropdown({ imageMode, selectedModel, onSelect, onClose }) {
             </span>
           ) : (
             selectedProvider === "all" && m.provider_name && (
-              <span className="text-[9px] text-white/40">
+              <span className="text-[9px] text-white/60">
                 {m.provider_name}
               </span>
             )
@@ -320,7 +320,7 @@ function ModelDropdown({ imageMode, selectedModel, onSelect, onClose }) {
               className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center font-black text-[10px] border transition-all flex-shrink-0 cursor-pointer overflow-hidden ${
                 isSelected
                   ? `${style.bg} border-white/25 scale-105 shadow-md`
-                  : "bg-white/[0.02] text-white/40 border-white/[0.02] hover:bg-white/5 hover:text-white/80"
+                  : "bg-white/[0.02] text-white/60 border-white/[0.02] hover:bg-white/5 hover:text-white/80"
               }`}
               title={p.name}
             >
@@ -376,7 +376,7 @@ function ModelDropdown({ imageMode, selectedModel, onSelect, onClose }) {
         
         <div className="flex flex-col gap-1.5 overflow-y-auto custom-scrollbar pr-1 pb-2 flex-1">
           {filteredMain.length === 0 && filteredV2V.length === 0 ? (
-            <div className="text-xs text-white/30 text-center py-6">
+            <div className="text-xs text-white/60 text-center py-6">
               No models found
             </div>
           ) : (
@@ -1485,10 +1485,10 @@ export default function VideoStudio({
                         </span>
                         <div className="flex gap-2">
                           {entry.resolution && (
-                            <span className="text-[10px] text-white/40">{entry.resolution}</span>
+                            <span className="text-[10px] text-white/60">{entry.resolution}</span>
                           )}
                           {entry.duration && (
-                            <span className="text-[10px] text-white/40">{entry.duration}s</span>
+                            <span className="text-[10px] text-white/60">{entry.duration}s</span>
                           )}
                         </div>
                       </div>
@@ -1538,7 +1538,7 @@ export default function VideoStudio({
                 {selectedModelName}
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               Animate images into stunning AI videos with motion effects
             </p>
           </div>
@@ -1660,7 +1660,7 @@ export default function VideoStudio({
                             <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{imageProgress}%</span>
                           </div>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40 group-hover:text-[#22d3ee] transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
@@ -1703,7 +1703,7 @@ export default function VideoStudio({
                             <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{imageProgress}%</span>
                           </div>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40 group-hover:text-[#22d3ee] transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
@@ -1749,7 +1749,7 @@ export default function VideoStudio({
                         <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{endImageProgress}%</span>
                       </div>
                     ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40 group-hover:text-[#22d3ee] transition-colors">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
@@ -1801,7 +1801,7 @@ export default function VideoStudio({
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
-                        className="text-white/40 group-hover:text-[#22d3ee] transition-colors"
+                        className="text-white/60 group-hover:text-[#22d3ee] transition-colors"
                       >
                         <polygon points="23 7 16 12 23 17 23 7" fill="currentColor" />
                         <rect x="1" y="5" width="15" height="14" rx="2" ry="2" fill="currentColor" />

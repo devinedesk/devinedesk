@@ -472,7 +472,7 @@ function CameraControlsOverlay({
             onClick={onClose}
             aria-label="Close camera settings"
             title="Close"
-            className="ml-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] text-white/40 transition-all hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
+            className="ml-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] text-white/60 transition-all hover:border-white/15 hover:bg-white/[0.07] hover:text-white"
           >
             <svg
               width="16"
@@ -984,7 +984,7 @@ export default function CinemaStudio({
                         Cinema Studio
                       </span>
                       {entry.settings?.camera && (
-                        <span className="text-[10px] text-white/40">{entry.settings.camera}</span>
+                        <span className="text-[10px] text-white/60">{entry.settings.camera}</span>
                       )}
                     </div>
                   </div>
@@ -1032,7 +1032,7 @@ export default function CinemaStudio({
                 CINEMA STUDIO
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               What would you shoot with infinite budget? Control cameras, lighting, lenses, and prompt high-end cinematic scenes.
             </p>
           </div>
@@ -1109,7 +1109,7 @@ export default function CinemaStudio({
                     </div>
                   </div>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/40 group-hover:text-[#22d3ee] transition-colors">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <polyline points="21 15 16 10 5 21" />

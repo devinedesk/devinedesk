@@ -8,7 +8,7 @@ export function AuthModal(onSuccess) {
     modal.className = 'relative w-full max-w-md bg-panel-bg border border-white/10 rounded-3xl p-8 shadow-3xl animate-fade-in-up';
 
     modal.innerHTML = `
-        <button id="auth-modal-close-btn" type="button" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center">
+        <button id="auth-modal-close-btn" type="button" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 6L6 18M6 6l12 12" />
             </svg>

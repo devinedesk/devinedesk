@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -8,7 +8,7 @@ import { ImageStudio, VideoStudio, ClippingStudio, VibeMotionStudio, LipSyncStud
 
 const DesignAgentStudio = dynamic(() => import('studio').then(mod => mod.DesignAgentStudio), {
   ssr: false,
-  loading: () => <div className="h-full w-full bg-black flex items-center justify-center text-white/20">Loading Design Studio...</div>
+  loading: () => <div className="h-full w-full bg-black flex items-center justify-center text-white/60">Loading Design Studio...</div>
 });
 import axios from 'axios';
 import ApiKeyModal from './ApiKeyModal';
@@ -272,7 +272,7 @@ const persistNotifications = (notifications) => {
 export default function StandaloneShell() {
   const params = useParams();
   const router = useRouter();
-  const slug = params?.slug || []; 
+  const slug = useMemo(() => params?.slug || [], [params?.slug]);
   const idFromParams = params?.id;
   const tabFromParams = params?.tab;
 
@@ -649,7 +649,7 @@ export default function StandaloneShell() {
             </div>
             <div className="flex flex-col items-center">
               <span className="text-xl font-bold text-white">Drop your media here</span>
-              <span className="text-sm text-white/40">Images, videos, or audio files</span>
+              <span className="text-sm text-white/60">Images, videos, or audio files</span>
             </div>
           </div>
         </div>
@@ -726,7 +726,7 @@ export default function StandaloneShell() {
 
             {/* Logo & Title */}
             <div className="flex items-center gap-2.5">
-              <Image src="/logo.png" alt="devinedesk" width={32} height={32} className="w-8 h-8 rounded-lg object-contain" />
+              <Image src="/logo.png" alt="devinedesk" width={32} height={32} className="w-8 h-8 rounded-lg object-contain" priority />
               <span className="text-sm font-bold tracking-tight hidden sm:block text-white">
                 devinedesk
               </span>
@@ -1115,13 +1115,13 @@ export default function StandaloneShell() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up">
           <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 w-full max-w-sm shadow-2xl">
             <h2 className="text-white font-bold text-lg mb-2">Settings</h2>
-            <p className="text-white/40 text-[13px] mb-8">
+            <p className="text-white/60 text-[13px] mb-8">
               Manage your AI studio preferences and authentication.
             </p>
             
             <div className="space-y-4 mb-8">
               <div className="bg-white/5 border border-white/[0.03] rounded-md p-4">
-                <label className="block text-xs font-bold text-white/30 mb-2">
+                <label className="block text-xs font-bold text-white/60 mb-2">
                    Active API Key
                 </label>
                 <div className="text-[13px] font-mono text-white/80">

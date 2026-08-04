@@ -25,7 +25,7 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-3 right-3 w-8 h-8 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
+            className="absolute top-3 right-3 w-8 h-8 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -41,7 +41,7 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
           <h1 className="text-xl font-bold text-white tracking-tight mb-2">
             {title || 'devinedesk'}
           </h1>
-          <p className="text-white/40 text-[13px] leading-relaxed px-4">
+          <p className="text-white/60 text-[13px] leading-relaxed px-4">
             {subtitle || (
               <>Enter your <a href="https://muapi.ai/access-keys" target="_blank" rel="noreferrer" className="text-[#22d3ee] hover:text-[#e5ff33] transition-colors">Muapi.ai</a> API key to start creating</>
             )}
@@ -50,7 +50,7 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-white/30 ml-1">
+            <label className="block text-xs font-bold text-white/60 ml-1">
               API Access Key
             </label>
             <input
@@ -72,9 +72,9 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
             Get Started
           </button>
 
-          <p className="text-center text-[12px] text-white/20 pt-2">
+          <p className="text-center text-[12px] text-white/60 pt-2">
             Need a key?{' '}
-            <a href="https://muapi.ai/access-keys" target="_blank" rel="noreferrer" className="text-white/40 hover:text-[#22d3ee] transition-colors font-medium">
+            <a href="https://muapi.ai/access-keys" target="_blank" rel="noreferrer" className="text-white/60 hover:text-[#22d3ee] transition-colors font-medium">
               Get one free →
             </a>
           </p>

@@ -58,7 +58,7 @@ function AgentCard({ agent, onClick, onEdit }) {
             {agent.name || "Unnamed Agent"}
           </h3>
           {agent.owner_username && (
-            <p className="text-[9px] text-white/40 mt-1 uppercase tracking-tighter font-black">
+            <p className="text-[9px] text-white/60 mt-1 uppercase tracking-tighter font-black">
               By {agent.owner_username}
             </p>
           )}
@@ -97,7 +97,7 @@ function ConversationCard({ conv, onClick }) {
           {conv.agent_icon_url ? (
             <img src={conv.agent_icon_url} alt={conv.agent_name || "Agent"} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/20">
+            <div className="w-full h-full flex items-center justify-center text-white/60">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
@@ -113,7 +113,7 @@ function ConversationCard({ conv, onClick }) {
           </p>
         </div>
       </div>
-      <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-auto text-[10px] text-white/30 font-medium">
+      <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-auto text-[10px] text-white/60 font-medium">
         <span>{timeAgo(conv.updated_at)}</span>
         {conv.message_count != null && <span>{conv.message_count} msgs</span>}
       </div>
@@ -375,7 +375,7 @@ export default function AgentStudio({ apiKey }) {
 
         <form onSubmit={handleCreateSubmit} className="max-w-2xl w-full mx-auto p-8 space-y-6">
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest">Name</label>
+            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">Name</label>
             <input
               type="text"
               required
@@ -387,7 +387,7 @@ export default function AgentStudio({ apiKey }) {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest">Description</label>
+            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">Description</label>
             <input
               type="text"
               value={createForm.description}
@@ -398,7 +398,7 @@ export default function AgentStudio({ apiKey }) {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest">System Prompt</label>
+            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">System Prompt</label>
             <textarea
               required
               value={createForm.system_prompt}
@@ -409,7 +409,7 @@ export default function AgentStudio({ apiKey }) {
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest">Welcome Message (optional)</label>
+            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">Welcome Message (optional)</label>
             <input
               type="text"
               value={createForm.welcome_message}
@@ -545,7 +545,7 @@ export default function AgentStudio({ apiKey }) {
                 className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
                   activeMainTab === tab
                     ? "bg-white text-black shadow-xl"
-                    : "text-white/40 hover:text-white hover:bg-white/5"
+                    : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
               >
                 {tab.replace(/-/g, " ")}
@@ -570,7 +570,7 @@ export default function AgentStudio({ apiKey }) {
             <div className="w-10 h-10 border-2 border-white/5 border-t-[#22d3ee] rounded-full animate-spin" />
           </div>
         ) : error ? (
-          <div className="h-full flex flex-col items-center justify-center text-white/20 gap-4">
+          <div className="h-full flex flex-col items-center justify-center text-white/60 gap-4">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
@@ -579,7 +579,7 @@ export default function AgentStudio({ apiKey }) {
             <p className="text-xs font-bold uppercase tracking-widest">{error}</p>
             <button
               onClick={() => setActiveMainTab(activeMainTab)} // retrigger effect
-              className="text-[10px] text-white/40 hover:text-white border border-white/10 px-4 py-2 rounded-lg transition-colors"
+              className="text-[10px] text-white/60 hover:text-white border border-white/10 px-4 py-2 rounded-lg transition-colors"
             >
               Retry
             </button>

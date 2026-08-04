@@ -162,7 +162,7 @@ export function CameraControls(onChange) {
         viewport.appendChild(list);
 
         const label = document.createElement('div');
-        label.className = 'mb-3 text-[9px] font-black text-white/40 uppercase tracking-[0.2em] text-center';
+        label.className = 'mb-3 text-[9px] font-black text-white/60 uppercase tracking-[0.2em] text-center';
         label.textContent = title;
 
         colWrapper.appendChild(label);

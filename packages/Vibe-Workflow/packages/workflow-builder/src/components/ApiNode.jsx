@@ -684,7 +684,7 @@ const ApiNode = ({ id, data, selected }) => {
                 />
               ) : currentOutputList[currentOutputIndex]?.type === 'audio_url' ? (
                 <div className="w-full px-4">
-                  <p className="text-[10px] text-white/40 mb-2 truncate">{currentOutput}</p>
+                  <p className="text-[10px] text-white/60 mb-2 truncate">{currentOutput}</p>
                   <audio src={currentOutput} controls className="w-full" />
                 </div>
               ) : (

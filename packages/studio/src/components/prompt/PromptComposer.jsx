@@ -15,7 +15,7 @@ const DEFAULT_PANEL_CLASS =
   "w-full bg-gradient-to-b from-[#18181c]/90 via-[#0f0f12]/90 to-[#0c0c0e]/95 backdrop-blur-2xl rounded-[2rem] border border-white/[0.08] p-4 flex flex-col gap-3 shadow-[0_15px_50px_rgba(0,0,0,0.8)]";
 
 const DEFAULT_TEXTAREA_CLASS =
-  "w-full bg-transparent border-none text-white text-sm placeholder:text-white/20 focus:outline-none resize-none pt-1 leading-relaxed min-h-[40px] max-h-[150px] md:max-h-[250px] overflow-y-auto custom-scrollbar disabled:opacity-40";
+  "w-full bg-transparent border-none text-white text-sm placeholder:text-white/60 focus:outline-none resize-none pt-1 leading-relaxed min-h-[40px] max-h-[150px] md:max-h-[250px] overflow-y-auto custom-scrollbar disabled:opacity-40";
 
 const DEFAULT_ACTION_CLASS =
   "bg-[#22d3ee] text-black px-7 py-3 rounded-full font-bold text-sm hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 w-full sm:w-auto shadow-lg shadow-[#22d3ee]/20 hover:shadow-[#22d3ee]/35 border border-[#22d3ee]/10 z-10 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -188,7 +188,7 @@ export function PromptPopoverHeader({ children, className = "" }) {
   return (
     <div
       className={joinClasses(
-        "text-[11px] font-semibold text-white/30 uppercase tracking-wider pb-2 border-b border-white/[0.05] mb-2 px-1",
+        "text-[11px] font-semibold text-white/60 uppercase tracking-wider pb-2 border-b border-white/[0.05] mb-2 px-1",
         className,
       )}
     >
@@ -281,7 +281,7 @@ export function PromptSegmentOption({
         "focus:outline-none focus-visible:ring-1 focus-visible:ring-[#22d3ee]/40",
         selected
           ? "bg-[#22d3ee] text-black shadow-md shadow-[#22d3ee]/20"
-          : "text-white/40 hover:text-white/70",
+          : "text-white/60 hover:text-white/70",
         className,
       )}
     >

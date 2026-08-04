@@ -325,7 +325,7 @@ function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls = [], 
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
-      className="text-white/40 group-hover:text-[#22d3ee] transition-colors"
+      className="text-white/60 group-hover:text-[#22d3ee] transition-colors"
     >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
@@ -694,7 +694,7 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
               className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center font-black text-[10px] border transition-all flex-shrink-0 cursor-pointer overflow-hidden ${
                 isSelected
                   ? `${style.bg} border-white/25 scale-105 shadow-md`
-                  : "bg-white/[0.02] text-white/40 border-white/[0.02] hover:bg-white/5 hover:text-white/80"
+                  : "bg-white/[0.02] text-white/60 border-white/[0.02] hover:bg-white/5 hover:text-white/80"
               }`}
               title={p.name}
             >
@@ -750,7 +750,7 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
         
         <div className="flex flex-col gap-1.5 overflow-y-auto custom-scrollbar pr-1 pb-2 flex-1">
           {filtered.length === 0 ? (
-            <div className="text-xs text-white/30 text-center py-6">
+            <div className="text-xs text-white/60 text-center py-6">
               No models found
             </div>
           ) : (
@@ -794,7 +794,7 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
                       {m.name}
                     </span>
                     {selectedProvider === "all" && m.provider_name && (
-                      <span className="text-[9px] text-white/40">
+                      <span className="text-[9px] text-white/60">
                         {m.provider_name}
                       </span>
                     )}
@@ -1386,7 +1386,7 @@ export default function ImageStudio({
                       <span className="text-[10px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded border border-primary/20 capitalize">
                         {entry.model?.replace("-", " ") || "Image Studio"}
                       </span>
-                      <span className="text-[10px] text-white/40">{entry.aspect_ratio}</span>
+                      <span className="text-[10px] text-white/60">{entry.aspect_ratio}</span>
                     </div>
                   </div>
                 </div>
@@ -1433,7 +1433,7 @@ export default function ImageStudio({
                 {selectedModelName}
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               Describe a scene, character, mood, or style — and watch it come to life
             </p>
           </div>
@@ -1662,7 +1662,7 @@ export default function ImageStudio({
                 <button
                   type="button"
                   onClick={() => setBatchSize(prev => Math.max(1, prev - 1))}
-                  className="text-white/40 hover:text-white/80 font-extrabold text-xs transition-colors px-1"
+                  className="text-white/60 hover:text-white/80 font-extrabold text-xs transition-colors px-1"
                 >
                   -
                 </button>
@@ -1672,7 +1672,7 @@ export default function ImageStudio({
                 <button
                   type="button"
                   onClick={() => setBatchSize(prev => Math.min(4, prev + 1))}
-                  className="text-white/40 hover:text-white/80 font-extrabold text-xs transition-colors px-1"
+                  className="text-white/60 hover:text-white/80 font-extrabold text-xs transition-colors px-1"
                 >
                   +
                 </button>

@@ -204,7 +204,7 @@ function AssetsDropdown({
             className={`flex-1 text-center py-1 text-xs font-bold capitalize transition-colors ${
               activeTab === tab
                 ? "text-[#22d3ee] border-b border-[#22d3ee]"
-                : "text-white/40 hover:text-white/80"
+                : "text-white/60 hover:text-white/80"
             }`}
           >
             {tab}
@@ -215,7 +215,7 @@ function AssetsDropdown({
       {/* Items list */}
       <div className="overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-1.5 min-h-[180px] max-h-60">
         {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 py-10 text-xs text-white/20">
+          <div className="flex flex-col items-center justify-center flex-1 py-10 text-xs text-white/60">
             No assets found
           </div>
         ) : (
@@ -274,7 +274,7 @@ function AssetsDropdown({
                 <span className="text-xs text-white/95 font-semibold truncate" title={item.name}>
                   {item.name}
                 </span>
-                <span className="text-[9px] text-white/30 truncate mt-0.5">
+                <span className="text-[9px] text-white/60 truncate mt-0.5">
                   {new Date(item.timestamp || Date.now()).toLocaleDateString()}
                 </span>
               </div>
@@ -294,7 +294,7 @@ function AssetsDropdown({
                     e.stopPropagation();
                     onDeleteAsset(activeTab, item.url);
                   }}
-                  className="p-1.5 text-white/30 hover:text-red-500 rounded hover:bg-white/5 transition-colors"
+                  className="p-1.5 text-white/60 hover:text-red-500 rounded hover:bg-white/5 transition-colors"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <polyline points="3 6 5 6 21 6" />
@@ -371,7 +371,7 @@ function Dropdown({
 // SVG icons
 // ---------------------------------------------------------------------------
 const VideoIcon = ({
-  className = "text-white/40 group-hover:text-primary transition-colors",
+  className = "text-white/60 group-hover:text-primary transition-colors",
 }) => (
   <svg
     width="16"
@@ -388,7 +388,7 @@ const VideoIcon = ({
 );
 
 const ImageIcon = ({
-  className = "text-white/40 group-hover:text-primary transition-colors",
+  className = "text-white/60 group-hover:text-primary transition-colors",
 }) => (
   <svg
     width="16"
@@ -927,7 +927,7 @@ export default function RecastStudio({
                 BODY SWAP STUDIO
               </span>
             </h1>
-            <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
+            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
               Swap the character in any video dynamically by choosing a video clip and a target character image.
             </p>
           </div>
@@ -943,7 +943,7 @@ export default function RecastStudio({
               <MediaPickerButton
                 accept="video/*"
                 label="Video"
-                icon={<VideoIcon className="text-white/40 group-hover:text-[#22d3ee] transition-colors" />}
+                icon={<VideoIcon className="text-white/60 group-hover:text-[#22d3ee] transition-colors" />}
                 onUpload={handleVideoPick}
                 onClear={() => {
                   setVideoUrl(null);
@@ -961,7 +961,7 @@ export default function RecastStudio({
               <MediaPickerButton
                 accept="image/*"
                 label="Character image"
-                icon={<ImageIcon className="text-white/40 group-hover:text-[#22d3ee] transition-colors" />}
+                icon={<ImageIcon className="text-white/60 group-hover:text-[#22d3ee] transition-colors" />}
                 onUpload={handleImageUpload}
                 onClear={() => {
                   setImageUrl(null);

@@ -28,7 +28,7 @@ export function CinemaStudio() {
     const heroSection = document.createElement('div');
     heroSection.className = 'flex flex-col items-center justify-center text-center px-4 animate-fade-in-up';
     heroSection.innerHTML = `
-        <div class="mb-4 text-xs font-bold text-white/40 tracking-[0.2em] uppercase">${t('cinema.tagline')}</div>
+        <div class="mb-4 text-xs font-bold text-white/60 tracking-[0.2em] uppercase">${t('cinema.tagline')}</div>
         <h1 class="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tight leading-tight mb-2">
             ${t('cinema.headline')}
         </h1>
@@ -108,7 +108,7 @@ export function CinemaStudio() {
     // Textarea
     const textarea = document.createElement('textarea');
     textarea.placeholder = t('cinema.placeholder');
-    textarea.className = 'flex-1 bg-transparent border-none text-white text-lg font-medium placeholder:text-white/20 focus:outline-none resize-none h-[28px] leading-relaxed overflow-hidden';
+    textarea.className = 'flex-1 bg-transparent border-none text-white text-lg font-medium placeholder:text-white/60 focus:outline-none resize-none h-[28px] leading-relaxed overflow-hidden';
     textarea.style.height = 'auto'; // Auto-grow check
     textarea.rows = 1;
     textarea.oninput = function () {
@@ -259,7 +259,7 @@ export function CinemaStudio() {
     builderCard.innerHTML = `
         <div class="flex items-center justify-between mb-4">
             <h4 class="text-xs font-bold text-white">${t('cinema.cameraBuilder')}</h4>
-            <button id="close-builder-btn" class="text-white/40 hover:text-white transition-colors">
+            <button id="close-builder-btn" class="text-white/60 hover:text-white transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
         </div>
@@ -365,7 +365,7 @@ export function CinemaStudio() {
     historySidebar.className = 'fixed right-0 top-0 h-full w-20 md:w-24 bg-black/60 backdrop-blur-xl border-l border-white/5 z-50 flex flex-col items-center py-4 gap-3 overflow-y-auto transition-all duration-500';
 
     const historyLabel = document.createElement('div');
-    historyLabel.className = 'text-[9px] font-bold text-white/40 uppercase tracking-widest mb-2';
+    historyLabel.className = 'text-[9px] font-bold text-white/60 uppercase tracking-widest mb-2';
     historyLabel.textContent = t('cinema.history');
     historySidebar.appendChild(historyLabel);
 
