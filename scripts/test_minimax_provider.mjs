@@ -5,10 +5,10 @@
  * and that the model definition has the expected structure.
  *
  * Usage:
- *   node scripts/test_minimax_provider.js
+ *   node scripts/test_minimax_provider.mjs
  *
  * Set MUAPI_KEY env var to run the live API smoke test:
- *   MUAPI_KEY=your_key node scripts/test_minimax_provider.js
+ *   MUAPI_KEY=your_key node scripts/test_minimax_provider.mjs
  */
 
 import { readFileSync } from "fs";
@@ -21,7 +21,7 @@ const ROOT = join(__dirname, "..");
 // ── 1. Model registration check ──────────────────────────────────────────────
 
 const modelsContent = readFileSync(
-  join(ROOT, "src", "lib", "models.js"),
+  join(ROOT, "packages", "studio", "src", "models.js"),
   "utf-8"
 );
 
