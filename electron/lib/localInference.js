@@ -51,7 +51,7 @@ const activeDownloads = new Map(); // modelId → request object
 // ships e.g. avx512 still resolves cleanly.
 function fetchJson(url) {
     return new Promise((resolve, reject) => {
-        https.get(url, { headers: { 'User-Agent': 'open-generative-ai' } }, (res) => {
+        https.get(url, { headers: { 'User-Agent': 'devinedesk' } }, (res) => {
             if (res.statusCode !== 200) {
                 res.resume();
                 reject(new Error(`HTTP ${res.statusCode} from ${url}`));
@@ -82,7 +82,7 @@ function downloadFile(url, destPath, onProgress) {
         const mod = parsed.protocol === 'https:' ? https : http;
 
         const reqHeaders = {
-            'User-Agent': 'Mozilla/5.0 (compatible; open-generative-ai/1.0)',
+            'User-Agent': 'Mozilla/5.0 (compatible; devinedesk/1.0)',
             'Accept': '*/*',
             'Connection': 'keep-alive',
         };
@@ -227,7 +227,7 @@ async function getBinaryStatus() {
 // Metal-enabled binaries hosted on our own release (macOS arm64 only).
 // Other platforms fall back to the stock leejet release.
 const CUSTOM_BINARIES = {
-    'darwin-arm64': 'https://github.com/Anil-matcha/Open-Generative-AI/releases/download/v1.0.3-binaries/sd-cli-metal-macos-arm64.zip',
+    'darwin-arm64': 'https://github.com/devinedesk/devinedesk/releases/download/v1.0.3-binaries/sd-cli-metal-macos-arm64.zip',
 };
 
 async function downloadBinary(mainWindow) {

@@ -138,7 +138,7 @@ export default function WorkflowStudio({
   const router = useRouter();
   const idFromParams = params?.id;     // exists on /workflow/[id]/[tab] route
   const tabFromParams = params?.tab;   // string on /workflow/[id]/[tab]; array on the [[...tab]] catch-all
-  // Catch-all routes (/studio/[brandSlug]/[[...tab]], /open-generative-ai/[[...tab]]) expose the
+  // Catch-all routes (/studio/[brandSlug]/[[...tab]], /devinedesk/[[...tab]]) expose the
   // whole remaining path as params.tab (an array) — NOT params.slug, which doesn't exist on either
   // route and previously made this whole fallback branch permanently dead.
   const catchAllSegments = Array.isArray(tabFromParams) ? tabFromParams : [];
