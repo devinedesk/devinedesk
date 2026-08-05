@@ -41,7 +41,7 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
           </h1>
           <p className="text-white/60 text-[13px] leading-relaxed px-4">
             {subtitle || (
-              <>Enter your <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noreferrer" className="text-[#22d3ee] hover:text-[#e5ff33] transition-colors">fal.ai</a> API key to start creating</>
+              <>Enter your Platform API key to start creating</>
             )}
           </p>
         </div>
@@ -72,9 +72,9 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
 
           <p className="text-center text-[12px] text-white/60 pt-2">
             Need a key?{' '}
-            <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noreferrer" className="text-white/60 hover:text-[#22d3ee] transition-colors font-medium">
+            <span className="text-white/60 font-medium">
               Get one free →
-            </a>
+            </span>
           </p>
         </form>
       </div>
