@@ -513,6 +513,21 @@ npm run build
 npm run start
 ```
 
+### Docker Deployment (Recommended)
+
+You can deploy the entire platform (Next.js, Prisma SQLite database, and static assets) using Docker Compose.
+
+```bash
+# Make sure you are in the devinedesk subdirectory
+cd devinedesk
+
+# Build and start the container in detached mode
+docker-compose up -d --build
+```
+
+The app will be available at `http://localhost:3001` (to avoid conflicts with local dev servers on 3000).
+The SQLite database will be persisted in a local Docker volume automatically.
+
 ### Desktop App Build
 
 Build native desktop apps with Electron:

@@ -174,10 +174,10 @@ export async function generateAudio(apiKey, params) {
     return executeGeneration('generateAudio', params);
 }
 
-export function uploadFile(apiKey, file, onProgress) {
+export function uploadFile(apiKey, file, onProgress, customCloudName, customUploadPreset) {
     return new Promise((resolve, reject) => {
-        const cloudName = typeof window !== 'undefined' ? (window.__CLOUDINARY_CLOUD_NAME__ || localStorage.getItem('cloudinary_cloud_name')) : null;
-        const uploadPreset = typeof window !== 'undefined' ? (window.__CLOUDINARY_UPLOAD_PRESET__ || localStorage.getItem('cloudinary_upload_preset')) : null;
+        const cloudName = customCloudName || (typeof window !== 'undefined' ? (window.__CLOUDINARY_CLOUD_NAME__ || localStorage.getItem('cloudinary_cloud_name')) : null);
+        const uploadPreset = customUploadPreset || (typeof window !== 'undefined' ? (window.__CLOUDINARY_UPLOAD_PRESET__ || localStorage.getItem('cloudinary_upload_preset')) : null);
         
         if (!cloudName || !uploadPreset) {
             return reject(new Error('Cloudinary credentials missing. Please set Cloud Name and Upload Preset in Settings.'));

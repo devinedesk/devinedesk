@@ -1,11 +1,7 @@
 export const aimlapiAdapter = {
     getKey: (params) => {
-        const key = params?._apiKey
-            || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AIMLAPI_KEY) 
-            || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_AIMLAPI_KEY)
-            || (typeof window !== 'undefined' && window.__AIMLAPI_KEY__) 
-            || (typeof localStorage !== 'undefined' && localStorage.getItem('aimlapi_key'));
-        if (!key) throw new Error('AIMLAPI Key missing. Please set it in Settings.');
+        const key = params?._apiKey;
+        if (!key) throw new Error('AIMLAPI Key missing. Please set it in Settings or Environment.');
         return key;
     },
 

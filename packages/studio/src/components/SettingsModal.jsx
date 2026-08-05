@@ -98,10 +98,10 @@ export function SettingsModal({ onClose }) {
           )}
         </div>
 
-        {/* Footer (Absolute position to always be at bottom or fixed in the flex) */}
+        {/* Footer */}
         {activeTab === 'api' && (
-          <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-[#111] via-[#111] to-transparent pointer-events-none">
-            <div className="flex justify-end gap-3 pointer-events-auto mt-6">
+          <div className="p-5 border-t border-white/5 bg-[#0a0a0a] shrink-0">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={onClose}
                 className="px-5 py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-bold hover:bg-white/5 transition-all"

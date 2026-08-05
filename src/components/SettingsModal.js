@@ -157,7 +157,7 @@ export function SettingsModal(onClose) {
 
     apiPanel.querySelector('#settings-cancel-btn').onclick = close;
     apiPanel.querySelector('#settings-save-btn').onclick = () => {
-        const Local APIKey = apiPanel.querySelector('#settings-api-key').value.trim();
+        const platformApiKey = apiPanel.querySelector('#settings-api-key').value.trim();
         const openrouterKey = apiPanel.querySelector('#settings-openrouter-key').value.trim();
         const aimlapiKey = apiPanel.querySelector('#settings-aimlapi-key').value.trim();
         const goapiKey = apiPanel.querySelector('#settings-goapi-key').value.trim();
@@ -166,7 +166,7 @@ export function SettingsModal(onClose) {
         const cloudName = apiPanel.querySelector('#settings-cloudinary-cloud-name').value.trim();
         const uploadPreset = apiPanel.querySelector('#settings-cloudinary-upload-preset').value.trim();
         
-        if (Local APIKey) localStorage.setItem('platform_api_key', Local APIKey);
+        if (platformApiKey) localStorage.setItem('platform_api_key', platformApiKey);
         if (openrouterKey) localStorage.setItem('openrouter_key', openrouterKey);
         if (aimlapiKey) localStorage.setItem('aimlapi_key', aimlapiKey);
         if (goapiKey) localStorage.setItem('goapi_key', goapiKey);
@@ -176,7 +176,7 @@ export function SettingsModal(onClose) {
         if (uploadPreset) localStorage.setItem('cloudinary_upload_preset', uploadPreset);
         
         // Remove keys if they are cleared by user
-        if (!Local APIKey) localStorage.removeItem('platform_api_key');
+        if (!platformApiKey) localStorage.removeItem('platform_api_key');
         if (!openrouterKey) localStorage.removeItem('openrouter_key');
         if (!aimlapiKey) localStorage.removeItem('aimlapi_key');
         if (!goapiKey) localStorage.removeItem('goapi_key');

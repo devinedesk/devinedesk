@@ -1,9 +1,7 @@
 export const falaiAdapter = {
     getKey: (params) => {
-        const key = params?._apiKey
-            || (typeof window !== 'undefined' && window.__FAL_KEY__) 
-            || (typeof localStorage !== 'undefined' && localStorage.getItem('fal_key'));
-        if (!key) throw new Error('Fal.ai API Key missing. Please set it in Settings.');
+        const key = params?._apiKey;
+        if (!key) throw new Error('Fal.ai API Key missing. Please set it in Settings or Environment.');
         return key;
     },
 

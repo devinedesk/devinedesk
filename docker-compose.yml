@@ -6,4 +6,10 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=file:/app/prisma/data/dev.db
+    volumes:
+      - devinedesk_data:/app/prisma/data
     restart: unless-stopped
+
+volumes:
+  devinedesk_data:

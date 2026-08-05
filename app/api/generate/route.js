@@ -10,12 +10,12 @@ export async function POST(request) {
         let adapter;
         let result;
 
-        // Extract possible keys from headers
-        const openrouterKey = request.headers.get('x-openrouter-key');
-        const aimlapiKey = request.headers.get('x-aimlapi-key');
-        const goapiKey = request.headers.get('x-goapi-key');
-        const hfToken = request.headers.get('x-hf-token');
-        const falKey = request.headers.get('x-fal-key');
+        // Extract possible keys from headers, fallback to process.env
+        const openrouterKey = request.headers.get('x-openrouter-key') || process.env.OPENROUTER_API_KEY;
+        const aimlapiKey = request.headers.get('x-aimlapi-key') || process.env.AIMLAPI_KEY;
+        const goapiKey = request.headers.get('x-goapi-key') || process.env.GOAPI_KEY;
+        const hfToken = request.headers.get('x-hf-token') || process.env.HF_TOKEN;
+        const falKey = request.headers.get('x-fal-key') || process.env.FAL_KEY;
 
         switch (action) {
             case 'generateImage': {
