@@ -391,8 +391,8 @@ export const t2iModels = [
         "isEdit": true
       }
     },
-    "provider": "muapi",
-    "provider_name": "MuapiApp"
+    "provider": "Local API",
+    "provider_name": "Local APIApp"
   },
   {
     "id": "wan2.1-text-to-image",
@@ -788,7 +788,7 @@ export const t2iModels = [
     "inputs": {
       "prompt": {
         "examples": [
-          "A retro 80s style poster with the words 'MUAPI APP' glowing in pink and blue neon lights, cyberpunk city skyline in the background, cinematic design, highly detailed."
+          "A retro 80s style poster with the words 'Local API APP' glowing in pink and blue neon lights, cyberpunk city skyline in the background, cinematic design, highly detailed."
         ],
         "description": "Text prompt describing the image.",
         "type": "string",
@@ -4880,8 +4880,8 @@ export const t2vModels = [
         "default": "16:9"
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "grok-imagine-text-to-video",
@@ -7668,7 +7668,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7691,8 +7691,8 @@ export const i2iModels = [
         "step": 1
       }
     },
-    "provider": "muapi",
-    "provider_name": "MuapiApp"
+    "provider": "Local API",
+    "provider_name": "Local APIApp"
   },
   {
     "id": "ai-dress-change",
@@ -7702,7 +7702,7 @@ export const i2iModels = [
     "imageField": "model_image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7713,7 +7713,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7734,7 +7734,7 @@ export const i2iModels = [
         ]
       }
     },
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7745,7 +7745,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7756,7 +7756,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7827,7 +7827,7 @@ export const i2iModels = [
         ]
       }
     },
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7838,7 +7838,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7849,7 +7849,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -7860,7 +7860,7 @@ export const i2iModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "inputs": {},
-    "provider": "muapi",
+    "provider": "Local API",
     "provider_name": "Fal"
   },
   {
@@ -8537,8 +8537,8 @@ export const i2iModels = [
         "default": "Angel Figurine"
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "nano-banana-edit",
@@ -9005,8 +9005,8 @@ export const i2iModels = [
         "default": "4k"
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "qwen-image-edit-plus-lora",
@@ -9146,8 +9146,8 @@ export const i2iModels = [
         "default": true
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "kling-o1-edit-image",
@@ -9692,8 +9692,8 @@ export const i2iModels = [
         ]
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "flux-2-klein-4b-edit",
@@ -9808,8 +9808,8 @@ export const i2iModels = [
         "default": 0.2
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "nano-banana-2-edit",
@@ -10278,7 +10278,7 @@ export const i2iModels = [
         "description": "Upload a clear portrait photo.",
         "field": "image",
         "examples": [
-          "https://cdn.muapi.ai/outputs/d09a771a8b2a45f1b0b5e6aba5955f1b.jpg"
+          "https://cdn.api.ai/outputs/d09a771a8b2a45f1b0b5e6aba5955f1b.jpg"
         ]
       },
       "name": {
@@ -10732,7 +10732,7 @@ export const i2iModels = [
       },
       "images_list": {
         "examples": [
-          "https://cdn.muapi.ai/assets/nano-banana-2-lite-edit-in.jpg"
+          "https://cdn.api.ai/assets/nano-banana-2-lite-edit-in.jpg"
         ],
         "description": "Reference image URLs to edit. Up to 14 images.",
         "field": "images_list",
@@ -10966,8 +10966,8 @@ export const i2vModels = [
         "default": 5
       }
     },
-    "provider": "muapi",
-    "provider_name": "MuapiApp"
+    "provider": "Local API",
+    "provider_name": "Local APIApp"
   },
   {
     "id": "motion-controls",
@@ -11087,8 +11087,8 @@ export const i2vModels = [
         "default": 5
       }
     },
-    "provider": "muapi",
-    "provider_name": "MuapiApp"
+    "provider": "Local API",
+    "provider_name": "Local APIApp"
   },
   {
     "id": "vfx",
@@ -11170,8 +11170,8 @@ export const i2vModels = [
         "default": 5
       }
     },
-    "provider": "muapi",
-    "provider_name": "MuapiApp"
+    "provider": "Local API",
+    "provider_name": "Local APIApp"
   },
   {
     "id": "veo3-image-to-video",
@@ -11187,7 +11187,7 @@ export const i2vModels = [
         "name": "prompt",
         "description": "Text prompt describing the desired video content.",
         "examples": [
-          "On a neon-lit street corner, a hyped street performer with a mic shouts: 'Yo! Big drop today! VEO3 just launched on muapi!' A crowd cheers as holograms of videos burst into the air and the muapi logo spins above."
+          "On a neon-lit street corner, a hyped street performer with a mic shouts: 'Yo! Big drop today! VEO3 just launched on Local API!' A crowd cheers as holograms of videos burst into the air and the app logo spins above."
         ]
       },
       "aspect_ratio": {
@@ -11219,7 +11219,7 @@ export const i2vModels = [
         "name": "prompt",
         "description": "Text prompt describing the desired video content.",
         "examples": [
-          "A spaceship hovers over Earth. A digital billboard beams out: 'MuAPI is broadcasting creativity across the galaxy.' A robot host floats in zero gravity holding a prompt card: 'Let’s turn this into a story.' Suddenly, video panels fly around the ship with generated content."
+          "A spaceship hovers over Earth. A digital billboard beams out: 'Local API is broadcasting creativity across the galaxy.' A robot host floats in zero gravity holding a prompt card: 'Let’s turn this into a story.' Suddenly, video panels fly around the ship with generated content."
         ]
       },
       "aspect_ratio": {
@@ -12002,8 +12002,8 @@ export const i2vModels = [
         "default": "Balloon Flyaway"
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "seedance-lite-i2v",
@@ -12307,7 +12307,7 @@ export const i2vModels = [
         "name": "prompt",
         "description": "The prompt to generate the video",
         "examples": [
-          "Animate the scene: camera slowly dollies forward toward the robot, neon city lights begin to flicker, soft reflections shift across the dome glass, twilight deepens into night with subtle ambient glow. The robot raises its head and speaks in a clear futuristic voice: ‘WAN 2.5 is now available on the MuAPI app.’"
+          "Animate the scene: camera slowly dollies forward toward the robot, neon city lights begin to flicker, soft reflections shift across the dome glass, twilight deepens into night with subtle ambient glow. The robot raises its head and speaks in a clear futuristic voice: ‘WAN 2.5 is now available on the Local API app.’"
         ]
       },
       "resolution": {
@@ -12446,8 +12446,8 @@ export const i2vModels = [
         ]
       }
     },
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "openai-sora-2-pro-image-to-video",
@@ -12558,7 +12558,7 @@ export const i2vModels = [
         "name": "prompt",
         "description": "Text prompt describing the video.",
         "examples": [
-          "Scene: Giant floating library orbiting in zero-gravity space.\nCharacters: Astronaut-librarian flipping glowing pages suspended midair.\nAction: Camera rotates 360° around drifting books → zooms through a floating page into a nebula outside window.\nCamera: Orbit + push-through transition.\nLighting: Cool cosmic ambient with warm page glows; rim lighting on suit.\nMotion: Slow rotational drift; pages react with fluid inertia.\nAudio: Ethereal synth pads + book rustle in vacuum hush.\nMood: Awe, wonder, intellectual calm.\nLine: “Wow veo3.1 launched in Muapiapp. Let's go!”"
+          "Scene: Giant floating library orbiting in zero-gravity space.\nCharacters: Astronaut-librarian flipping glowing pages suspended midair.\nAction: Camera rotates 360° around drifting books → zooms through a floating page into a nebula outside window.\nCamera: Orbit + push-through transition.\nLighting: Cool cosmic ambient with warm page glows; rim lighting on suit.\nMotion: Slow rotational drift; pages react with fluid inertia.\nAudio: Ethereal synth pads + book rustle in vacuum hush.\nMood: Awe, wonder, intellectual calm.\nLine: “Wow veo3.1 launched in Local APIapp. Let's go!”"
         ]
       },
       "aspect_ratio": {
@@ -17225,7 +17225,7 @@ export const i2vModels = [
         "name": "image_urls",
         "description": "Upload 1–7 reference images for the video. Maximum 20 MB each.",
         "examples": [
-          "https://cdn.muapi.ai/assets/gemini-omni-image-to-video.jpg"
+          "https://cdn.api.ai/assets/gemini-omni-image-to-video.jpg"
         ],
         "maxItems": 7
       },
@@ -17317,7 +17317,7 @@ export const i2vModels = [
       },
       "images_list": {
         "examples": [
-          "https://cdn.muapi.ai/assets/grok-imagine-video-1-5-preview.jpg"
+          "https://cdn.api.ai/assets/grok-imagine-video-1-5-preview.jpg"
         ],
         "description": "Upload or provide image URLs to use as input for video generation.",
         "field": "images_list",
@@ -17395,7 +17395,7 @@ export const i2vModels = [
         "description": "URL of the input image used to generate video.",
         "field": "image",
         "examples": [
-          "https://cdn.muapi.ai/assets/kling-v3-turbo-standard-image-to-video.jpg"
+          "https://cdn.api.ai/assets/kling-v3-turbo-standard-image-to-video.jpg"
         ]
       },
       "duration": {
@@ -17436,7 +17436,7 @@ export const i2vModels = [
         "description": "URL of the input image used to generate video.",
         "field": "image",
         "examples": [
-          "https://cdn.muapi.ai/assets/kling-v3-turbo-pro-image-to-video.jpg"
+          "https://cdn.api.ai/assets/kling-v3-turbo-pro-image-to-video.jpg"
         ]
       },
       "duration": {
@@ -19023,8 +19023,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "Remove watermarks, logos, captions, and unwanted text from videos.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "kling-v2.6-std-motion-control",
@@ -19073,8 +19073,8 @@ export const v2vModels = [
     "imageField": "image_url",
     "hasPrompt": false,
     "description": "Replace faces in videos with stunning realism.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "mmaudio-v2-video-to-video",
@@ -19118,8 +19118,8 @@ export const v2vModels = [
     "imageField": "image_url",
     "hasPrompt": true,
     "description": "Bring your characters and worlds to life with AI Dance Effects — a creative video effect that adds playful, dynamic, and cinematic motion to your generations.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "ai-video-upscaler",
@@ -19129,8 +19129,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "The AI Video Upscaler is a powerful tool designed to enhance the resolution and quality of videos.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "wan2.2-edit-video",
@@ -19151,8 +19151,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "Convert any video into 175+ languages with synchronized voice translation, AI-voice cloning, and accurate lip sync.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "topaz-video-upscale",
@@ -19173,8 +19173,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "The AI Video Upscaler is a powerful tool designed to enhance the resolution and quality of videos.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "remix-video",
@@ -19184,8 +19184,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "Transform and resize your videos effortlessly with remix video tool.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "kling-o1-video-edit",
@@ -19262,8 +19262,8 @@ export const v2vModels = [
     "imageField": "watermark_image_url",
     "hasPrompt": false,
     "description": "Add custom watermark to videos with adjustable position, opacity, and size.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "seedance-2-watermark-remover",
@@ -19284,8 +19284,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "Add AI-generated animated captions to any video using Vadoo's caption engine.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "ltx-2.3-video-extend",
@@ -19405,8 +19405,8 @@ export const v2vModels = [
     "videoField": "video_url",
     "hasPrompt": false,
     "description": "Video Background Remover automatically removes the background from any video, producing a clean cutout of the subject with a transparent or solid-color backdrop.",
-    "provider": "muapi",
-    "provider_name": "Muapi"
+    "provider": "Local API",
+    "provider_name": "Local API"
   },
   {
     "id": "kling-v2.6-pro-motion-control",
@@ -20702,7 +20702,7 @@ export const audioModels = [
       },
       "prompt": {
         "examples": [
-          "Hello! Welcome to Muapiapp! This is a preview of your cloned voice. I hope you enjoy it!"
+          "Hello! Welcome to Local APIapp! This is a preview of your cloned voice. I hope you enjoy it!"
         ],
         "description": "Text for audio preview. Limited to 2000 characters.",
         "type": "string",
@@ -21206,7 +21206,7 @@ export const audioModels = [
           "Afrikaans_male_1_v1",
           "Afrikaans_female_1_v1"
         ],
-        "description": "Desired voice ID. Use a voice ID you have trained (https://muapi.ai/playground/minimax-voice-clone), or one of the following system voice IDs",
+        "description": "Desired voice ID. Use a voice ID you have trained (https://api.ai/playground/minimax-voice-clone), or one of the following system voice IDs",
         "type": "string",
         "typing": true,
         "title": "Voice ID",
@@ -21383,7 +21383,7 @@ export const audioModels = [
     "inputs": {
       "prompt": {
         "examples": [
-          "Welcome to Minimax-Speech 2.6 by Muapiapp! Get ready for an audio revolution! We are thrilled to introduce a model so realistic, it's virtually indistinguishable from a human voice. You're going to be amazed by its lifelike delivery!"
+          "Welcome to Minimax-Speech 2.6 by Local APIapp! Get ready for an audio revolution! We are thrilled to introduce a model so realistic, it's virtually indistinguishable from a human voice. You're going to be amazed by its lifelike delivery!"
         ],
         "description": "Text to convert to speech. Every character is 1 token. Maximum 10000 characters. Use <#x#> between words to control pause duration (0.01-99.99s).",
         "type": "string",
@@ -21865,7 +21865,7 @@ export const audioModels = [
           "Afrikaans_male_1_v1",
           "Afrikaans_female_1_v1"
         ],
-        "description": "Desired voice ID. Use a voice ID you have trained (https://muapi.ai/playground/minimax-voice-clone), or one of the following system voice IDs",
+        "description": "Desired voice ID. Use a voice ID you have trained (https://api.ai/playground/minimax-voice-clone), or one of the following system voice IDs",
         "type": "string",
         "typing": true,
         "title": "Voice ID",

@@ -83,7 +83,7 @@ export default function CreativeCanvas({
   isEmbed = false,
   // Platform customization props:
   // navLinks: array of { icon, label, path } to show in the user dropdown menu.
-  // If not provided, defaults to the muapiapp links (Explore, Top Up, etc.).
+  // If not provided, defaults to the Local APIapp links (Explore, Top Up, etc.).
   navLinks = null,
   // userBalanceLabel: string like "$ 5.00" or "1200 credits" to show in the dropdown.
   // If not provided, falls back to "$ {user.balance}".
@@ -96,7 +96,7 @@ export default function CreativeCanvas({
   const router = useRouter();
   const searchParams = useSearchParams();
   const inEmbedMode = isEmbed && !!embedCode;
-  const embedStorageKey = inEmbedMode ? `muapi_agent_session_${embedCode}` : null;
+  const embedStorageKey = inEmbedMode ? `Local API_agent_session_${embedCode}` : null;
   const notifiedGenerationEventsRef = useRef(new Set());
   const generationActivityEventIdsRef = useRef(new Set());
   const [embedSessionId, setEmbedSessionId] = useState(() => {
@@ -650,32 +650,28 @@ export default function CreativeCanvas({
       // 0. Make sure we have a session — uploaded assets must belong to one.
       const activeSessionId = await ensureSession();
 
-      // 1. Get signed URL
-      const { data: signData } = await axios.get("/api/v1/get_upload_url", {
-        params: { filename: file.name },
-        headers: getHeaders()
-      });
-
-      const { url, fields } = signData;
+      const cloudName = window.__CLOUDINARY_CLOUD_NAME__ || localStorage.getItem('cloudinary_cloud_name');
+      const uploadPreset = window.__CLOUDINARY_UPLOAD_PRESET__ || localStorage.getItem('cloudinary_upload_preset');
       
-      // Use the proxy for the actual binary upload to maintain consistency and avoid CORS issues
-      const formData = new FormData();
-      formData.append("x-proxy-target-url", url);
-      Object.entries(fields).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      formData.append("file", file);
+      if (!cloudName || !uploadPreset) {
+        toast.error("Cloudinary credentials missing. Set them in Settings.");
+        setUploading(false);
+        return;
+      }
 
-      // 2. Upload via local proxy
-      await axios.post("/api/v1/upload-binary", formData, {
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+
+      const response = await axios.post(url, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pe) => {
           setUploadProgress(Math.round((pe.loaded * 100) / pe.total));
         }
       });
 
-      // 3. Final URL
-      const uploadedUrl = `https://cdn.muapi.ai/${fields.key}`;
+      const uploadedUrl = response.data.secure_url;
 
       // 4. Register as a real session asset so the agent can address it as asset_N.
       const kind = file.type?.startsWith("video/") ? "video"
@@ -1328,7 +1324,7 @@ export default function CreativeCanvas({
             </div>
             <div className="flex items-center gap-1">
               <Link 
-                href="https://muapi.ai/docs/design-agent-api" 
+                href="https://api.ai/docs/design-agent-api" 
                 target="_blank"
                 className="p-1.5 hover:bg-bg-page hover:text-primary-text transition-colors rounded text-secondary-text"
                 title="API Docs"
@@ -1691,7 +1687,7 @@ export default function CreativeCanvas({
                             <h3 className="text-[12px] font-bold text-primary-text uppercase tracking-tight">Expert Skills</h3>
                           </div>
                           <Link 
-                            href="https://muapi.ai/docs/design-agent-api"
+                            href="https://api.ai/docs/design-agent-api"
                             target="_blank" 
                             className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1"
                           >

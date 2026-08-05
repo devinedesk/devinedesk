@@ -9,13 +9,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MU_API_KEY = os.getenv("MU_API_KEY")
-API_SUFFIX = os.getenv("API_SUFFIX", "https://api.muapi.ai").rstrip("/")
+LOCAL_API_KEY = os.getenv("LOCAL_API_KEY")
+API_SUFFIX = os.getenv("API_SUFFIX", "http://localhost:3000").rstrip("/")
 
 async def get_api_key():
-    api_key = os.getenv("MU_API_KEY")
+    api_key = os.getenv("LOCAL_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=400, detail="Setup MU_API_KEY in server/.env to be able to use the Creative Agent")
+        raise HTTPException(status_code=400, detail="Setup LOCAL_API_KEY in server/.env to be able to use the Creative Agent")
     return api_key
 
 async def proxy_request_helper(method: str, url: str, payload: Optional[dict] = None):

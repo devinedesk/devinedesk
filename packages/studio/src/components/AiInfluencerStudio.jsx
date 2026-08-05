@@ -2,13 +2,13 @@
 
 import { useState, useCallback } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { generateImage } from "../muapi.js";
+import { generateImage } from "../api.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import MobileGenerationActions, {
   GenerationCopyButtons,
 } from "./MobileGenerationActions.jsx";
 
-const CDN = "https://cdn.muapi.ai/influencer";
+const CDN = "https://cdn.api.ai/influencer";
 
 // ── Default image generation model ──────────────────────────────────────────
 const INFLUENCER_MODEL = "nano-banana-pro";

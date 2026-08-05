@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CreativeCanvas } from 'design-agent';
 
-import { getUserBalance } from '../muapi';
+import { getUserBalance } from '../Local API';
 
 export default function DesignAgentStudio({
   apiKey,

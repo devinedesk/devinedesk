@@ -19,7 +19,7 @@ export default function AgentProfileRoute() {
 
   return (
     <div className="w-full h-dvh bg-white">
-      <AgentProfile agent_id={agent_id} useUser={mockUseUser} usedIn="muapiapp" />
+      <AgentProfile agent_id={agent_id} useUser={mockUseUser} usedIn="Local APIapp" />
     </div>
   );
 }

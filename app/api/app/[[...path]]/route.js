@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const MUAPI_BASE = 'https://api.muapi.ai';
+const Local API_BASE = process.env.BACKEND_API_URL || 'https://api.Local API.ai';
 
 function getApiKey(request) {
     // Only accept x-api-key header. Cookie-based auth is removed for security:
@@ -13,7 +13,7 @@ function cleanHeaders(request) {
     const headers = new Headers(request.headers);
     headers.delete('host');
     headers.delete('connection');
-    headers.delete('cookie'); // CRITICAL: Stop forwarding browser cookies to MuAPI to avoid auth conflicts
+    headers.delete('cookie'); // CRITICAL: Stop forwarding browser cookies to Local API to avoid auth conflicts
     return headers;
 }
 
@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
     const effectivePath = path === 'get_upload_file' ? 'get_file_upload_url' : path;
     
     const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/app/${effectivePath}${search}`;
+    const targetUrl = `${Local API_BASE}/app/${effectivePath}${search}`;
 
     const headers = cleanHeaders(request);
 
@@ -67,7 +67,7 @@ export async function POST(request, { params }) {
     const path = pathSegments.join('/');
     
     const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/app/${path}${search}`;
+    const targetUrl = `${Local API_BASE}/app/${path}${search}`;
 
     const headers = cleanHeaders(request);
 
@@ -95,7 +95,7 @@ export async function DELETE(request, { params }) {
     const path = pathSegments.join('/');
     
     const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/app/${path}${search}`;
+    const targetUrl = `${Local API_BASE}/app/${path}${search}`;
 
     const headers = cleanHeaders(request);
 
@@ -120,7 +120,7 @@ export async function PUT(request, { params }) {
     const path = pathSegments.join('/');
     
     const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/app/${path}${search}`;
+    const targetUrl = `${Local API_BASE}/app/${path}${search}`;
 
     const headers = cleanHeaders(request);
 

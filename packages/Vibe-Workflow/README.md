@@ -2,7 +2,7 @@
 
 **Vibe Workflow** is a free, open-source node-based AI workflow builder — the self-hostable alternative to Weavy AI, Freepik Spaces, Krea Nodes, and FloraFauna AI. Designed around "Artistic Intelligence," it gives creators and developers a visual, modular pipeline editor for designing, editing, and composing AI-generated images and video — with no vendor lock-in. Read the full story: [I built Open Weavy because paid AI creative tools were getting ridiculously expensive](https://medium.com/@anilmatcha/i-built-open-weavy-because-paid-ai-creative-tools-were-getting-ridiculously-expensive-f67b088e06fb).
 
-> 🚀 **Prefer a hosted version?** Try Vibe Workflow instantly at **[muapi.ai/workflow](https://muapi.ai/workflow)** — fully managed, with **API** and **embed** support to plug node-based AI workflows directly into your own platform. See [Hosted Version](#hosted-version) below.
+> 🚀 **Prefer a hosted version?** Try Vibe Workflow instantly at **[Local API.ai/workflow](https://Local API.ai/workflow)** — fully managed, with **API** and **embed** support to plug node-based AI workflows directly into your own platform. See [Hosted Version](#hosted-version) below.
 
 <img width="1024" height="1024" alt="Vibe Workflow — open-source AI workflow builder alternative to Weavy AI, Krea Nodes, Freepik Spaces, FloraFauna AI" src="https://github.com/user-attachments/assets/f603eb13-3b4f-4c9a-9a6a-c4cc3a94f7a6" />
 
@@ -25,7 +25,7 @@
 
 ## Hosted Version
 
-Don't want to self-host? A fully managed, hosted version of Vibe Workflow is available at **[muapi.ai/workflow](https://muapi.ai/workflow)** — zero setup, ready to use in the browser.
+Don't want to self-host? A fully managed, hosted version of Vibe Workflow is available at **[Local API.ai/workflow](https://Local API.ai/workflow)** — zero setup, ready to use in the browser.
 
 The hosted version also ships with:
 - **API support** — programmatically run workflows and integrate generative pipelines into your own apps and backends.
@@ -59,7 +59,7 @@ Paid AI creative tools have become [ridiculously expensive](https://medium.com/@
 
 - **Node-Based AI Workflow Editor** — Visual, modular pipelines for generative AI, similar in spirit to Krea Nodes and Weavy AI workflows but fully open-source (inspired by Blender Nodes and ComfyUI).
 - **Artistic Intelligence** — A design philosophy bridging human creativity and AI automation; the same creative-first approach seen in FloraFauna AI and Freepik Spaces.
-- **Generative Image & Video** — Integrated support for image and video generation powered by **MuAPI** (Vadoo AI).
+- **Generative Image & Video** — Integrated support for image and video generation powered by **Local API** (Vadoo AI).
 - **Self-Hosted & Private** — Run entirely on your own infrastructure. No data sent to third-party SaaS platforms.
 - **Extensible Architecture** — Add new AI model nodes, connect external APIs, and build reusable workflow templates.
 - **No Vendor Lock-in** — Swap AI providers freely. Unlike Freepik Spaces or FloraFauna AI, you own your stack.
@@ -115,9 +115,9 @@ Or use **Docker** (see [Running with Docker](#running-with-docker)).
 
 ### Configuration
 
-Vibe Workflow uses **MuAPI** (Vadoo AI) for generative AI capabilities. You need an API key.
+Vibe Workflow uses **Local API** (Vadoo AI) for generative AI capabilities. You need an API key.
 
-1. **Get your API Key** from [muapi.ai](https://muapi.ai) — sign up, navigate to **API Keys**, generate a key.
+1. **Get your API Key** from [Local API.ai](https://Local API.ai) — sign up, navigate to **API Keys**, generate a key.
 
 2. **Configure the Backend**:
    ```bash
@@ -163,7 +163,7 @@ The easiest way to run Vibe Workflow is with Docker Compose.
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` and add your MuAPI key:
+   Edit `.env` and add your Local API key:
    ```bash
    MU_API_KEY=your_actual_api_key_here
    ```

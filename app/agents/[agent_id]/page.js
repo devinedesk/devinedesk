@@ -3,8 +3,8 @@ import AgentChatClient from "./AgentChatClient";
 
 /**
  * Server component — fetches agentDetails from the /api/agents proxy
- * (which forwards to https://api.muapi.ai/agents/by-slug/{id})
- * using the muapi_key cookie for auth, then renders the client chat component.
+ * (which forwards to https://api.Local API.ai/agents/by-slug/{id})
+ * using the platform_api_key cookie for auth, then renders the client chat component.
  *
  * URL: /agents/[agent_id]   (new chat — no conversation ID yet)
  */
@@ -15,7 +15,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-const BASE_URL = 'https://api.muapi.ai';
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.Local API.ai';
 
 async function fetchAgentDetails(agentId, apiKey) {
   if (!apiKey) return null;
@@ -70,7 +70,7 @@ async function fetchUserData(apiKey) {
 export default async function AgentPage({ params }) {
   const { agent_id } = await params;
   const cookieStore = await cookies();
-  const apiKey = cookieStore.get("muapi_key")?.value;
+  const apiKey = cookieStore.get("platform_api_key")?.value;
 
   console.log(`[AgentPage] Loading page for agent: ${agent_id}, hasKey: ${!!apiKey}`);
 

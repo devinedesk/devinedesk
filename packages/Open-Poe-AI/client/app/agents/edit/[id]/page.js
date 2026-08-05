@@ -19,7 +19,7 @@ export default function EditAgentRoute() {
 
   return (
     <div className="h-dvh bg-white">
-      <EditAgentPage id={id} useUser={mockUseUser} usedIn="muapiapp" />
+      <EditAgentPage id={id} useUser={mockUseUser} usedIn="Local APIapp" />
     </div>
   );
 }

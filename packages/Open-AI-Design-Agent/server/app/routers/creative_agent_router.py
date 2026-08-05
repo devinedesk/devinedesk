@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Form, UploadFile, File
-from app.utils.muapi_helper import proxy_request_helper, proxy_s3_upload, API_SUFFIX
+from app.utils.api_helper import proxy_request_helper, proxy_s3_upload, API_SUFFIX
 from typing import Any
 
 router = APIRouter()

@@ -62,46 +62,50 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
     };
 
     setUploading(true);
-    axios.get("/api/app/get_file_upload_url", {
-      params: { filename: file.name }
+    setUploading(true);
+    
+    const cloudName = window.__CLOUDINARY_CLOUD_NAME__ || localStorage.getItem('cloudinary_cloud_name');
+    const uploadPreset = window.__CLOUDINARY_UPLOAD_PRESET__ || localStorage.getItem('cloudinary_upload_preset');
+    
+    if (!cloudName || !uploadPreset) {
+      toast.error("Cloudinary credentials missing. Set them in Settings.");
+      setUploading(false);
+      return;
+    }
+
+    const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+
+    axios.post(url, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgress(percentCompleted);
+      }
     })
     .then((response) => {
-      const { url, fields } = response.data;
+      const uploadedUrl = response.data.secure_url;
+      setFormValues((prev) => { 
+        const current = prev[field];
+        const updatedValue = fieldSchema.type === 'array'
+          ? [...(current || []), uploadedUrl]
+          : uploadedUrl
 
-      const formData = new FormData();
-      Object.entries(fields).forEach(([key, value]) => {
-        formData.append(key, value);
+          return { ...prev, [field]: updatedValue };
       });
-      formData.append("file", file);
-      axios.post(url, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percentCompleted);
-        }
-      })
-      .then(() => {
-        const uploadedUrl = `https://cdn.muapi.ai/${fields.key}`;
-        setFormValues((prev) => { 
-          const current = prev[field];
-          const updatedValue = fieldSchema.type === 'array'
-            ? [...(current || []), uploadedUrl]
-            : uploadedUrl
-
-            return { ...prev, [field]: updatedValue };
-        });
-        setTimeout(() => {
-          setUploading(false);
-          setUploadProgress(0);
-        }, 500);
-      })
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+      }, 500);
     })
     .catch((error) => {
       console.error("Upload failed", error);
-      toast.error("Upload failed.", error?.response?.data);
+      toast.error("Upload failed.");
       setUploading(false);
       setUploadProgress(0);
-    })
+    });
   };
 
   const isInputModel = modelName.includes("passthrough");

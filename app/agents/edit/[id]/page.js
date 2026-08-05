@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import AgentEditClient from "./AgentEditClient";
 
-const BASE_URL = 'https://api.muapi.ai';
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
 async function fetchUserData(apiKey) {
   if (!apiKey) return null;
@@ -20,7 +20,7 @@ async function fetchUserData(apiKey) {
 export default async function EditAgentPage({ params }) {
   const { id } = await params; // although we don't use id on server here, it's used by useParams in client
   const cookieStore = await cookies();
-  const apiKey = cookieStore.get("muapi_key")?.value;
+  const apiKey = cookieStore.get("platform_api_key")?.value;
 
   const userData = await fetchUserData(apiKey);
 

@@ -15,7 +15,7 @@ const mockUseUser = () => ({
 export default function CreateAgentRoute() {
   return (
     <div className="w-full h-dvh bg-white">
-      <CreateAgentPage useUser={mockUseUser} usedIn="muapiapp" />
+      <CreateAgentPage useUser={mockUseUser} usedIn="Local APIapp" />
     </div>
   );
 }

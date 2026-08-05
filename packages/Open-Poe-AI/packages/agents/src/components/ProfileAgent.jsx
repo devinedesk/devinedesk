@@ -44,14 +44,14 @@ function formatCount(n) {
 
 /**
  * ProfileAgent — Agent profile content component.
- * Supports light (muapiapp default) and dark (vadoo / dark-mode) themes via
+ * Supports light (Local APIapp default) and dark (vadoo / dark-mode) themes via
  * Tailwind's `dark:` prefix + CSS variables set by the host app.
  *
  * Props:
  *   useUser  {function} — hook to get the current logged-in user
- *   usedIn   {string}   — "muapiapp" | "vadoo"
+ *   usedIn   {string}   — "Local APIapp" | "vadoo"
  */
-export default function ProfileAgent({ useUser, usedIn = "muapiapp" }) {
+export default function ProfileAgent({ useUser, usedIn = "Local APIapp" }) {
   const { agent_id } = useParams();
 
   const [profile, setProfile] = useState(null);

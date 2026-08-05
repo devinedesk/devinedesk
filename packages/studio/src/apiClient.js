@@ -1,17 +1,17 @@
 import { getModelById, getVideoModelById, getI2IModelById, getI2VModelById, getV2VModelById, getRecastModelById, getLipSyncModelById, getAudioModelById } from './models.js';
-
+import { getAdapterForModel } from '../../../src/lib/providerRouter.js';
 // In an http(s) browser we route through the host app's proxy (Next.js routes
-// under /api/* re-issue the call server-side) so api.muapi.ai CORS is bypassed.
+// under /api/* re-issue the call server-side) so api.api.ai CORS is bypassed.
 // SSR (no window) and Electron's file:// renderer call the upstream directly.
 const BASE_URL = (typeof window !== 'undefined' && window.location?.protocol?.startsWith('http'))
-    ? '/api'
-    : 'https://api.muapi.ai';
+    ? process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.api.ai'
+    : process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.api.ai';
 const PROXY_WF_BASE = '/api/workflow';
 
 function notifyAuthRequired(status, detail) {
     if (typeof window === 'undefined') return;
     if (status !== 401 && status !== 403) return;
-    window.dispatchEvent(new CustomEvent('muapi:auth-required', { detail: { status, message: detail } }));
+    window.dispatchEvent(new CustomEvent('platform:auth-required', { detail: { status, message: detail } }));
 }
 
 async function pollForResult(requestId, key, maxAttempts = 900, interval = 2000) {
@@ -62,180 +62,78 @@ async function submitAndPoll(endpoint, payload, key, onRequestId, maxAttempts = 
 
 export async function generateImage(apiKey, params) {
     const modelInfo = getModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const payload = { prompt: params.prompt };
-    if (params.aspect_ratio) payload.aspect_ratio = params.aspect_ratio;
-    if (params.resolution) payload.resolution = params.resolution;
-    if (params.quality) payload.quality = params.quality;
-    if (params.image_url) { 
-        payload.image_url = params.image_url; 
-        payload.strength = params.strength || 0.6; 
-    } else if (params.images_list) {
-        payload.images_list = params.images_list;
-    } else {
-        payload.image_url = null;
-    }
-    if (params.seed && params.seed !== -1) payload.seed = params.seed;
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 60);
+    const adapter = getAdapterForModel(modelInfo, 't2i');
+    return adapter.generateImage(params);
 }
 
 export async function generateI2I(apiKey, params) {
     const modelInfo = getI2IModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const payload = {};
-    if (params.prompt) payload.prompt = params.prompt;
-    const imageField = modelInfo?.imageField || 'image_url';
-    const imagesList = params.images_list?.length > 0 ? params.images_list : (params.image_url ? [params.image_url] : null);
-    if (imagesList) {
-        if (imageField === 'images_list') payload.images_list = imagesList;
-        else payload[imageField] = imagesList[0];
-    }
-    if (modelInfo?.swapField && params.swap_url) {
-        payload[modelInfo.swapField] = params.swap_url;
-    }
-    if (params.aspect_ratio) payload.aspect_ratio = params.aspect_ratio;
-    if (params.resolution) payload.resolution = params.resolution;
-    if (params.quality) payload.quality = params.quality;
-    if (modelInfo?.inputs?.name) {
-        payload.name = params.name || modelInfo.inputs.name.default;
-    }
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 60);
+    const adapter = getAdapterForModel(modelInfo, 'i2i');
+    if (!adapter.generateI2I) throw new Error("Adapter does not support I2I");
+    return adapter.generateI2I(params);
 }
 
 export async function generateVideo(apiKey, params) {
     const modelInfo = getVideoModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const payload = {};
-    if (params.prompt) payload.prompt = params.prompt;
-    if (params.request_id) payload.request_id = params.request_id;
-    if (params.aspect_ratio) payload.aspect_ratio = params.aspect_ratio;
-    if (params.duration) payload.duration = params.duration;
-    if (params.resolution) payload.resolution = params.resolution;
-    if (params.quality) payload.quality = params.quality;
-    if (params.mode) payload.mode = params.mode;
-    if (params.image_url) payload.image_url = params.image_url;
-    if (params.images_list?.length > 0) payload.images_list = params.images_list;
-    if (params.videos_list?.length > 0) payload.videos_list = params.videos_list;
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel(modelInfo, 'video');
+    return adapter.generateVideo(params);
 }
 
 export async function generateI2V(apiKey, params) {
     const modelInfo = getI2VModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const payload = {};
-    if (params.prompt) payload.prompt = params.prompt;
-    const imageField = modelInfo?.imageField || 'image_url';
-    if (params.images_list && params.images_list.length > 0) {
-        if (imageField === 'images_list') payload.images_list = params.images_list;
-        else payload[imageField] = params.images_list[0];
-    } else if (params.image_url) {
-        if (imageField === 'images_list') payload.images_list = [params.image_url];
-        else payload[imageField] = params.image_url;
-    }
-    const lastImageField = modelInfo?.lastImageField;
-    if (lastImageField && params.last_image) {
-        if (lastImageField === 'images_list') {
-            if (!payload.images_list) payload.images_list = [];
-            if (payload.images_list.indexOf(params.last_image) === -1) {
-                payload.images_list.push(params.last_image);
-            }
-        } else {
-            payload[lastImageField] = params.last_image;
-        }
-    }
-    if (params.aspect_ratio) payload.aspect_ratio = params.aspect_ratio;
-    if (params.duration) payload.duration = params.duration;
-    if (params.resolution) payload.resolution = params.resolution;
-    if (params.quality) payload.quality = params.quality;
-    if (params.mode) payload.mode = params.mode;
-    if (modelInfo?.inputs?.name) {
-        payload.name = params.name || modelInfo.inputs.name.default;
-    }
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel(modelInfo, 'i2v');
+    if (!adapter.generateI2V) throw new Error("Adapter does not support I2V");
+    return adapter.generateI2V(params);
 }
 
 export async function generateMarketingStudioAd(apiKey, params) {
-    const endpoint = params.resolution === '1080p' ? 'sd-2-vip-omni-reference-1080p' : 'seedance-2-vip-omni-reference';
-    const payload = {
-        prompt: params.prompt,
-        aspect_ratio: params.aspect_ratio || '16:9',
-        duration: params.duration || 5,
-        images_list: params.images_list || [],
-        video_files: params.video_files || []
-    };
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+    return adapter.generateMarketingStudioAd(params);
 }
 
 export async function processV2V(apiKey, params) {
     const modelInfo = getV2VModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const videoField = modelInfo?.videoField || 'video_url';
-    const payload = { [videoField]: params.video_url };
-    if (modelInfo?.imageField && params.image_url) {
-        payload[modelInfo.imageField] = params.image_url;
-    }
-    if (modelInfo?.hasPrompt && params.prompt) {
-        payload.prompt = params.prompt;
-    }
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel(modelInfo, 'v2v');
+    if (!adapter.processV2V) throw new Error("Adapter does not support V2V");
+    return adapter.processV2V(params);
 }
 
 export async function processRecast(apiKey, params) {
-    const modelInfo = getRecastModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const videoField = modelInfo?.videoField || 'video_url';
-    const payload = { [videoField]: params.video_url };
-    if (modelInfo?.imageField && params.image_url) {
-        payload[modelInfo.imageField] = params.image_url;
-    }
-    if (modelInfo?.hasPrompt && params.prompt) {
-        payload.prompt = params.prompt;
-    }
-    if (params.aspect_ratio) {
-        payload.aspect_ratio = params.aspect_ratio;
-    }
-    if (params.character_orientation) {
-        payload.character_orientation = params.character_orientation;
-    }
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+    return adapter.processRecast(params);
 }
 
 export async function processLipSync(apiKey, params) {
     const modelInfo = getLipSyncModelById(params.model);
-    const endpoint = modelInfo?.endpoint || params.model;
-    const payload = {};
-    if (params.audio_url) payload.audio_url = params.audio_url;
-    if (params.image_url) payload.image_url = params.image_url;
-    if (params.video_url) payload.video_url = params.video_url;
-    if (modelInfo?.hasPrompt) payload.prompt = params.prompt || '';
-    if (params.resolution) payload.resolution = params.resolution;
-    if (params.seed !== undefined && params.seed !== -1) payload.seed = params.seed;
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel(modelInfo, 'lipsync');
+    if (!adapter.processLipSync) throw new Error("Adapter does not support LipSync");
+    return adapter.processLipSync(params);
 }
 
 export async function generateAudio(apiKey, params) {
     const modelId = params._modelId || params.model;
     const modelInfo = getAudioModelById(modelId);
-    const endpoint = modelInfo?.endpoint || modelId;
-    const payload = {};
-    const skipKeys = ['_modelId', 'onRequestId'];
-    for (const key in params) {
-        if (!skipKeys.includes(key) && params[key] !== undefined && params[key] !== null) {
-            payload[key] = params[key];
-        }
-    }
-    return submitAndPoll(endpoint, payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel(modelInfo, 'audio');
+    if (!adapter.generateAudio) throw new Error("Adapter does not support Audio");
+    return adapter.generateAudio(params);
 }
 
 export function uploadFile(apiKey, file, onProgress) {
     return new Promise((resolve, reject) => {
-        const url = `${BASE_URL}/api/v1/upload_file`;
+        const cloudName = typeof window !== 'undefined' ? (window.__CLOUDINARY_CLOUD_NAME__ || localStorage.getItem('cloudinary_cloud_name')) : null;
+        const uploadPreset = typeof window !== 'undefined' ? (window.__CLOUDINARY_UPLOAD_PRESET__ || localStorage.getItem('cloudinary_upload_preset')) : null;
+        
+        if (!cloudName || !uploadPreset) {
+            return reject(new Error('Cloudinary credentials missing. Please set Cloud Name and Upload Preset in Settings.'));
+        }
+
+        const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('upload_preset', uploadPreset);
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', url);
-        xhr.setRequestHeader('x-api-key', apiKey);
 
         if (onProgress) {
             xhr.upload.onprogress = (event) => {
@@ -250,9 +148,9 @@ export function uploadFile(apiKey, file, onProgress) {
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const data = JSON.parse(xhr.responseText);
-                    const fileUrl = data.url || data.file_url || data.data?.url;
+                    const fileUrl = data.secure_url || data.url;
                     if (!fileUrl) {
-                        reject(new Error('No URL returned from file upload'));
+                        reject(new Error('No URL returned from Cloudinary upload'));
                     } else {
                         resolve(fileUrl);
                     }
@@ -260,15 +158,7 @@ export function uploadFile(apiKey, file, onProgress) {
                     reject(new Error('Failed to parse upload response'));
                 }
             } else {
-                let detail = xhr.statusText;
-                try {
-                    const errObj = JSON.parse(xhr.responseText);
-                    detail = errObj.detail || detail;
-                } catch (e) {
-                    // fallback to statusText
-                }
-                notifyAuthRequired(xhr.status, detail);
-                reject(new Error(`File upload failed: ${xhr.status} - ${detail}`));
+                reject(new Error(`File upload failed: ${xhr.status}`));
             }
         };
 
@@ -334,7 +224,7 @@ export async function getPublishedWorkflows(apiKey) {
     return await response.json();
 };
 
-// Agents — uses direct URL → https://api.muapi.ai/agents/...
+// Agents — uses direct URL → https://api.api.ai/agents/...
 export async function getTemplateAgents(apiKey) {
     const response = await fetch(`${BASE_URL}/agents/templates/agents`, {
         headers: {
@@ -366,7 +256,7 @@ export async function getUserAgents(apiKey) {
 };
 
 export async function getPublishedAgents(apiKey) {
-    // MuAPI: GET /agents/featured/agents
+    // Local API: GET /agents/featured/agents
     const response = await fetch(`${BASE_URL}/agents/featured/agents`, {
         headers: {
             'Content-Type': 'application/json',
@@ -693,7 +583,7 @@ export async function getNodeStatus(apiKey, runId) {
 }
 
 /**
- * Handle proxy requests centralizing communication logic with MuAPI.
+ * Handle proxy requests centralizing communication logic with Local API.
  * This is used by the server-side entry points.
  */
 export async function handleProxyRequest(prefix, path, method, headers, body, apiKey) {
@@ -725,7 +615,7 @@ export async function handleProxyRequest(prefix, path, method, headers, body, ap
             data: buffer
         };
     } catch (error) {
-        console.error(`MuAPI Proxy error for ${url}:`, error);
+        console.error(`Local API Proxy error for ${url}:`, error);
         throw error;
     }
 }
@@ -828,30 +718,16 @@ export async function getHistory(apiKey, { cursor, limit = 50 } = {}) {
 }
 
 export async function runClipping(apiKey, params) {
-    const payload = {
-        video_url: params.video_url,
-        num_highlights: params.num_highlights || 3,
-        aspect_ratio: params.aspect_ratio || "9:16",
-        return_coordinates_only: !!params.return_coordinates_only
-    };
-    return submitAndPoll("ai-clipping", payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+    return adapter.runClipping(params);
 }
 
 export async function runMotionGraphics(apiKey, params) {
-    const payload = {
-        prompt: params.prompt,
-        aspect_ratio: params.aspect_ratio || "16:9",
-        duration_seconds: params.duration_seconds || 6,
-    };
-    return submitAndPoll("motion-graphics", payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+    return adapter.runMotionGraphics(params);
 }
 
 export async function runMotionGraphicsEdit(apiKey, params) {
-    const payload = {
-        request_id: params.request_id,
-        edit_prompt: params.edit_prompt,
-        aspect_ratio: params.aspect_ratio || "16:9",
-        duration_seconds: params.duration_seconds || 6,
-    };
-    return submitAndPoll("motion-graphics-edit", payload, apiKey, params.onRequestId, 900);
+    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+    return adapter.runMotionGraphicsEdit(params);
 }

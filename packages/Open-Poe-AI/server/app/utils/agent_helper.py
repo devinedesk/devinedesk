@@ -7,17 +7,17 @@ from typing import Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MUAPI_BASE_URL = os.getenv("MUAPI_BASE_URL", "https://api.muapi.ai")
+Local API_BASE_URL = os.getenv("Local API_BASE_URL", "http://localhost:3000")
 
 async def get_api_key():
-    api_key = os.getenv("MU_API_KEY")
+    api_key = os.getenv("LOCAL_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=400, detail="Setup MU_API_KEY in .env to be able to use the agent library")
+        raise HTTPException(status_code=400, detail="Setup LOCAL_API_KEY in .env to be able to use the agent library")
     return api_key
 
 async def proxy_request(method: str, path: str, payload: Optional[dict] = None, params: Optional[dict] = None):
     api_key = await get_api_key()
-    url = f"{MUAPI_BASE_URL}/{path.lstrip('/')}"
+    url = f"{Local API_BASE_URL}/{path.lstrip('/')}"
     
     headers = {
         "Content-Type": "application/json",
@@ -44,7 +44,7 @@ async def proxy_request(method: str, path: str, payload: Optional[dict] = None, 
                 
         except httpx.RequestError as e:
             logger.error(f"Request error: {e}")
-            raise HTTPException(status_code=500, detail=f"Error contacting MuAPI: {e}")
+            raise HTTPException(status_code=500, detail=f"Error contacting Local API: {e}")
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             raise HTTPException(status_code=500, detail=str(e))

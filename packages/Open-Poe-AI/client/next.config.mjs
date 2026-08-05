@@ -5,7 +5,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cdn.muapi.ai',
+        hostname: 'cdn.Local API.ai',
         port: '',
         pathname: '/**',
       },

@@ -13,7 +13,7 @@ test.describe('devinedesk Crawler', () => {
     // Navigate to a blank page on the domain to set localStorage
     await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => {
-      localStorage.setItem('muapi_key', 'test_key');
+      localStorage.setItem('platform_api_key', 'test_key');
       localStorage.setItem('vadoo_banner_dismissed', '1');
     });
   });

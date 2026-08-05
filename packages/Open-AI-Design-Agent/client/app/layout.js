@@ -6,8 +6,8 @@ import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Open Muapi Assistant",
-  description: "Open source AI creative assistant powered by Muapi API",
+  title: "Open Local API Assistant",
+  description: "Open source AI creative assistant powered by Local API API",
 };
 
 export default function RootLayout({ children }) {

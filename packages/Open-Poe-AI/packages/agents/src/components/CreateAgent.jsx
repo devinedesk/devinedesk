@@ -19,7 +19,7 @@ const CreateAgent = ({ useUser, usedIn }) => {
       ? { email: serverDetails.user_details.email, name: serverDetails.user_details.name }
       : null;
   } else {
-    // muapiapp
+    // Local APIapp
     user = userContext.user || null;
   }
   const router = useRouter();

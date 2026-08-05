@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { generateVideo, generateI2V, processV2V, uploadFile } from "../muapi.js";
+import { generateVideo, generateI2V, processV2V, uploadFile } from "../api.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
 import DrawModal from "./DrawModal.jsx";
@@ -117,31 +117,31 @@ const VideoReadySvg = () => (
 // ── Dropdown components ───────────────────────────────────────────────────────
 
 const PROVIDER_LOGOS = {
-  openai: "https://cdn.muapi.ai/models/openai.png",
-  google: "https://cdn.muapi.ai/models/gemini.png",
-  kling: "https://cdn.muapi.ai/models/kling.png",
-  alibaba: "https://cdn.muapi.ai/models/alibaba.png",
-  bytedance: "https://cdn.muapi.ai/models/bytedance.png",
-  blackforest: "https://cdn.muapi.ai/models/bfl.png",
-  minimax: "https://cdn.muapi.ai/models/minimax.png",
-  suno: "https://cdn.muapi.ai/models/suno.png",
-  anthropic: "https://cdn.muapi.ai/models/claude.png",
-  meshy: "https://cdn.muapi.ai/models/meshy-3.png",
-  tripo3d: "https://cdn.muapi.ai/models/tripo3d.png",
-  grok: "https://cdn.muapi.ai/models/xai.png",
-  muapi: "https://cdn.muapi.ai/models/muapi.png",
-  midjourney: "https://cdn.muapi.ai/models/midjourney.png",
-  vidu: "https://cdn.muapi.ai/models/vidu.png",
-  runway: "https://cdn.muapi.ai/models/runway.png",
-  luma: "https://cdn.muapi.ai/models/luma.png",
-  ideogram: "https://cdn.muapi.ai/models/ideogram.png",
-  leonardoai: "https://cdn.muapi.ai/models/leonardoai.png",
-  hunyuan: "https://cdn.muapi.ai/models/hunyuan.png",
-  hidream: "https://cdn.muapi.ai/models/hidream.png",
-  lightricks: "https://cdn.muapi.ai/models/lightricks.png",
-  pixverse: "https://cdn.muapi.ai/models/pixverse.png",
-  reve: "https://cdn.muapi.ai/models/reve.png",
-  stability: "https://cdn.muapi.ai/models/stability.png"
+  openai: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  google: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  kling: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  alibaba: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  bytedance: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  blackforest: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  minimax: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  suno: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  anthropic: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  meshy: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  tripo3d: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  grok: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  platform: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  midjourney: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  vidu: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  runway: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  luma: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  ideogram: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  leonardoai: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  hunyuan: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  hidream: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  lightricks: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  pixverse: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  reve: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80",
+  stability: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80"
 };
 
 const invertLogos = ['openai', 'blackforest', 'runway', 'ideogram', 'lightricks', 'grok'];
@@ -206,8 +206,8 @@ function ModelDropdown({ imageMode, selectedModel, onSelect, onClose }) {
   const seenProviders = new Set();
   
   allCurrentModels.forEach(m => {
-    const pId = m.provider || 'muapi';
-    const pName = m.provider_name || 'Muapi';
+    const pId = m.provider || 'Local API';
+    const pName = m.provider_name || 'Local API';
     if (!seenProviders.has(pId)) {
       seenProviders.add(pId);
       availableProviders.push({ id: pId, name: pName });
@@ -219,7 +219,7 @@ function ModelDropdown({ imageMode, selectedModel, onSelect, onClose }) {
   const filterFn = (m) => {
     // 1. Filter by provider tab
     if (selectedProvider !== "all") {
-      const pId = m.provider || 'muapi';
+      const pId = m.provider || 'Local API';
       if (pId !== selectedProvider) return false;
     }
     // 2. Filter by search query
@@ -1857,7 +1857,7 @@ export default function VideoStudio({
                     {(() => {
                       const allCurrentModels = [...t2vModels, ...i2vModels, ...v2vModels];
                       const selectedModelObj = allCurrentModels.find(m => m.id === selectedModel);
-                      const selectedModelProvider = selectedModelObj?.provider || 'muapi';
+                      const selectedModelProvider = selectedModelObj?.provider || 'Local API';
                       return PROVIDER_LOGOS[selectedModelProvider] ? (
                         <img 
                           src={PROVIDER_LOGOS[selectedModelProvider]} 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const MUAPI_BASE = 'https://api.muapi.ai';
+const Local API_BASE = process.env.BACKEND_API_URL || 'https://api.Local API.ai';
 
 function getApiKey(request) {
     const headerKey = request.headers.get('x-api-key');
@@ -19,7 +19,7 @@ function cleanHeaders(request) {
 
 export async function GET(request) {
     const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/app/get_file_upload_url${search}`;
+    const targetUrl = `${Local API_BASE}/app/get_file_upload_url${search}`;
 
     const headers = cleanHeaders(request);
     const apiKey = getApiKey(request);

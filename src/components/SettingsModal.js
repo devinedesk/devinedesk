@@ -50,18 +50,74 @@ export function SettingsModal(onClose) {
     // ── Tab: API Key ──────────────────────────────────────────────────────────
     const apiPanel = document.createElement('div');
     apiPanel.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <div style="display:flex;flex-direction:column;gap:0.75rem;max-height:60vh;overflow-y:auto;padding-right:0.5rem;">
+            <!-- OpenRouter -->
             <div>
-                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">${t('settings.muapiKeyLabel')}</label>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">OpenRouter API Key (Text & Image)</label>
+                <input id="settings-openrouter-key" type="password"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="sk-or-v1-..."
+                    value="${localStorage.getItem('openrouter_key') || ''}">
+            </div>
+            <!-- AIMLAPI -->
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">AI/ML API Key (Video & Audio)</label>
+                <input id="settings-aimlapi-key" type="password"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="Enter AIMLAPI Key"
+                    value="${localStorage.getItem('aimlapi_key') || ''}">
+            </div>
+            <!-- GoAPI -->
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">GoAPI Key (Midjourney)</label>
+                <input id="settings-goapi-key" type="password"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="Enter GoAPI Key"
+                    value="${localStorage.getItem('goapi_key') || ''}">
+            </div>
+            <!-- Hugging Face -->
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">Hugging Face Token (3D & Niche)</label>
+                <input id="settings-hf-token" type="password"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="hf_..."
+                    value="${localStorage.getItem('hf_token') || ''}">
+            </div>
+            <!-- Fal.ai -->
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">Fal.ai Key (Lip-sync)</label>
+                <input id="settings-fal-key" type="password"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="Enter Fal.ai Key"
+                    value="${localStorage.getItem('fal_key') || ''}">
+            </div>
+            <!-- Cloudinary -->
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">Cloudinary Cloud Name (File Uploads)</label>
+                <input id="settings-cloudinary-cloud-name" type="text"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="Enter Cloud Name"
+                    value="${localStorage.getItem('cloudinary_cloud_name') || ''}">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">Cloudinary Upload Preset</label>
+                <input id="settings-cloudinary-upload-preset" type="text"
+                    style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
+                    placeholder="Enter Upload Preset"
+                    value="${localStorage.getItem('cloudinary_upload_preset') || ''}">
+            </div>
+            <!-- Legacy Local API Fallback -->
+            <div>
+                <label style="display:block;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem;font-weight:600;">${t('settings.Local APIKeyLabel')} (Legacy)</label>
                 <input id="settings-api-key" type="password"
                     style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:0.75rem;padding:0.6rem 0.9rem;color:#fff;font-size:0.875rem;outline:none;"
                     placeholder="${t('settings.keyPlaceholder')}"
-                    value="${localStorage.getItem('muapi_key') || ''}">
+                    value="${localStorage.getItem('platform_api_key') || ''}">
             </div>
             <p style="font-size:0.7rem;color:rgba(255,255,255,0.3);margin:0;">
-                ${t('settings.keyNote')}
+                Configure multiple API keys for the Multi-Provider routing model.
             </p>
-            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.5rem;">
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:0.5rem;padding-bottom:1rem;">
                 <button id="settings-cancel-btn" style="padding:0.5rem 1rem;border-radius:0.5rem;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:0.75rem;font-weight:700;cursor:pointer;">${t('common.cancel')}</button>
                 <button id="settings-save-btn" style="padding:0.5rem 1rem;border-radius:0.5rem;background:var(--color-primary,#22d3ee);color:#000;font-size:0.75rem;font-weight:700;cursor:pointer;border:none;">${t('common.save')}</button>
             </div>
@@ -101,13 +157,35 @@ export function SettingsModal(onClose) {
 
     apiPanel.querySelector('#settings-cancel-btn').onclick = close;
     apiPanel.querySelector('#settings-save-btn').onclick = () => {
-        const key = apiPanel.querySelector('#settings-api-key').value.trim();
-        if (key) {
-            localStorage.setItem('muapi_key', key);
-            close();
-        } else {
-            alert(t('settings.invalidKey'));
-        }
+        const Local APIKey = apiPanel.querySelector('#settings-api-key').value.trim();
+        const openrouterKey = apiPanel.querySelector('#settings-openrouter-key').value.trim();
+        const aimlapiKey = apiPanel.querySelector('#settings-aimlapi-key').value.trim();
+        const goapiKey = apiPanel.querySelector('#settings-goapi-key').value.trim();
+        const hfToken = apiPanel.querySelector('#settings-hf-token').value.trim();
+        const falKey = apiPanel.querySelector('#settings-fal-key').value.trim();
+        const cloudName = apiPanel.querySelector('#settings-cloudinary-cloud-name').value.trim();
+        const uploadPreset = apiPanel.querySelector('#settings-cloudinary-upload-preset').value.trim();
+        
+        if (Local APIKey) localStorage.setItem('platform_api_key', Local APIKey);
+        if (openrouterKey) localStorage.setItem('openrouter_key', openrouterKey);
+        if (aimlapiKey) localStorage.setItem('aimlapi_key', aimlapiKey);
+        if (goapiKey) localStorage.setItem('goapi_key', goapiKey);
+        if (hfToken) localStorage.setItem('hf_token', hfToken);
+        if (falKey) localStorage.setItem('fal_key', falKey);
+        if (cloudName) localStorage.setItem('cloudinary_cloud_name', cloudName);
+        if (uploadPreset) localStorage.setItem('cloudinary_upload_preset', uploadPreset);
+        
+        // Remove keys if they are cleared by user
+        if (!Local APIKey) localStorage.removeItem('platform_api_key');
+        if (!openrouterKey) localStorage.removeItem('openrouter_key');
+        if (!aimlapiKey) localStorage.removeItem('aimlapi_key');
+        if (!goapiKey) localStorage.removeItem('goapi_key');
+        if (!hfToken) localStorage.removeItem('hf_token');
+        if (!falKey) localStorage.removeItem('fal_key');
+        if (!cloudName) localStorage.removeItem('cloudinary_cloud_name');
+        if (!uploadPreset) localStorage.removeItem('cloudinary_upload_preset');
+        
+        close();
     };
 
     header.querySelector('#settings-close-btn').onclick = close;

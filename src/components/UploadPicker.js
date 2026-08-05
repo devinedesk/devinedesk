@@ -1,4 +1,4 @@
-import { muapi } from '../lib/muapi.js';
+import { api } from '../lib/apiClient.js';
 import { AuthModal } from './AuthModal.js';
 import { getUploadHistory, saveUpload, removeUpload, generateThumbnail } from '../lib/uploadHistory.js';
 
@@ -14,10 +14,10 @@ import { getUploadHistory, saveUpload, removeUpload, generateThumbnail } from '.
  * @returns {{ trigger: HTMLElement, panel: HTMLElement, reset: function, setMaxImages: function }}
  */
 export function createUploadPicker({ anchorContainer, onSelect, onClear, maxImages: initialMaxImages = 1, uploadFn, requireApiKey }) {
-    // uploadFn(file) → Promise<string url>. Defaults to Muapi-hosted upload.
+    // uploadFn(file) → Promise<string url>. Defaults to Local API-hosted upload.
     // requireApiKey() → boolean. Lets the caller suppress the AuthModal when
-    // the active provider doesn't need a Muapi key (e.g. local Wan2GP).
-    const doUpload = uploadFn || ((file) => muapi.uploadFile(file));
+    // the active provider doesn't need a Local API key (e.g. local Wan2GP).
+    const doUpload = uploadFn || ((file) => api.uploadFile(file));
     const needsKey = typeof requireApiKey === 'function' ? requireApiKey : () => true;
     let panelOpen = false;
     let maxImages = initialMaxImages;
@@ -324,7 +324,7 @@ export function createUploadPicker({ anchorContainer, onSelect, onClear, maxImag
         if (!files.length) return;
 
         if (needsKey()) {
-            const apiKey = localStorage.getItem('muapi_key');
+            const apiKey = localStorage.getItem('platform_api_key');
             if (!apiKey) {
                 AuthModal(() => fileInput.click());
                 return;

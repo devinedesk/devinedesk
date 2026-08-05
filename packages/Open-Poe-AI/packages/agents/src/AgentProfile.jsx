@@ -3,7 +3,7 @@
 import { Toaster } from "react-hot-toast";
 import ProfileAgent from "./components/ProfileAgent";
 
-const AgentProfile = ({ useUser, usedIn = "muapiapp" }) => {
+const AgentProfile = ({ useUser, usedIn = "Local APIapp" }) => {
   return (
     <div className="h-screen w-full flex flex-col bg-blue-50/50 transition-all duration-300 ease-in-out">
       <Toaster position="top-center" reverseOrder={false} />

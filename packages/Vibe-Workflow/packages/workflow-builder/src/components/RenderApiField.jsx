@@ -19,7 +19,7 @@ const RenderApiField = ({ fieldName, meta, idx, formValues, setFormValues, handl
 
   const isImageUrl = (url) => {
     if (typeof url !== 'string') return false;
-    return url.match(/\.(jpeg|jpg|gif|png|webp|avif|HEIC)(\?.*)?$/i) !== null || url.startsWith('https://cdn.muapi.ai/');
+    return url.match(/\.(jpeg|jpg|gif|png|webp|avif|HEIC)(\?.*)?$/i) !== null || url.startsWith('https://cdn.api.ai/');
   };
 
   const isImageField = ['image', 'last_image', 'image_url'].includes(meta.field) || 
@@ -99,7 +99,7 @@ const RenderApiField = ({ fieldName, meta, idx, formValues, setFormValues, handl
         }
       })
       .then(() => {
-        const uploadedUrl = `https://cdn.muapi.ai/${fields.key}`;
+        const uploadedUrl = `https://cdn.api.ai/${fields.key}`;
         setFormValues((prev) => { 
           const current = prev[field];
           const updatedValue = fieldSchema.type === 'array'

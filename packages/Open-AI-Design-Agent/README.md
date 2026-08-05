@@ -1,11 +1,11 @@
 # Open AI Design Agent — Open-Source Alternative to Lovart AI, Runway Agent, Luma Labs Agent, Krea Agent
 
-[![Powered by MuAPI](https://img.shields.io/badge/Powered%20by-MuAPI-6366f1?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0tMSAxNHYtNGgtMnYtMmg0djZoLTJ6bTAtOFY2aDJ2MmgtMnoiLz48L3N2Zz4=)](https://muapi.ai?utm_source=github&utm_medium=badge&utm_campaign=open-ai-design-agent)
+[![Powered by Local API](https://img.shields.io/badge/Powered%20by-Local API-6366f1?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0tMSAxNHYtNGgtMnYtMmg0djZoLTJ6bTAtOFY2aDJ2MmgtMnoiLz48L3N2Zz4=)](https://Local API.ai?utm_source=github&utm_medium=badge&utm_campaign=open-ai-design-agent)
 
 
 > **The free, open-source AI design agent.** Plan, generate, and assemble full creative deliverables — posters, social campaigns, brand kits, ad creatives, motion ads, and video cutdowns — through an autonomous agent that orchestrates 200+ image and video models. No subscription, no credit caps, no creative restrictions.
 
-**Community:** Join [Reddit](https://reddit.com/r/muapi) & [Discord](https://discord.gg/s7KW4fsqXK) for discussions and support
+**Community:** Join [Reddit](https://reddit.com/r/Local API) & [Discord](https://discord.gg/s7KW4fsqXK) for discussions and support
 
 > 🤖 **Automate Lovart, Runway, Luma Labs, Krea, Pika & more with AI coding agents:** [Generative-Media-Skills](https://github.com/SamurAIGPT/Generative-Media-Skills) — a library of skills that let agents like **Claude Code**, **Codex**, and other coding assistants drive 200+ image/video models end-to-end (brief → plan → generate → edit → assemble) directly from your terminal. Build automated creative pipelines without touching a UI.
 
@@ -33,7 +33,7 @@ https://github.com/user-attachments/assets/fee3857c-887d-4c27-b3dc-a1fe9ad8f438
 
 ## 🌐 Try it Online — No Install Required
 
-**Hosted version:** [https://muapi.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent](https://muapi.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent)
+**Hosted version:** [https://Local API.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent](https://Local API.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent)
 
 Run the design agent directly in your browser — no Node.js, no setup. Sign up for a free account to start designing. The hosted version is always up to date with the latest models, planners, and templates.
 
@@ -41,7 +41,7 @@ Run the design agent directly in your browser — no Node.js, no setup. Sign up 
 
 ---
 
-Open AI Design Agent is a free, open-source AI design agent that turns natural-language briefs into full creative deliverables. Instead of picking one model and generating one asset, you describe a campaign, brand, or scene and the agent plans the deliverable list, picks the best model per asset (typography, vector, photoreal, motion), generates them in dependency order, threads brand references forward, and hands back the assembled kit. Powered by [Muapi.ai](https://muapi.ai?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent), it orchestrates 200+ image and video models — Nano Banana 2, Flux 2 Pro, Ideogram v3, Seedream 5, GPT-Image, Recraft v3, Midjourney v7, Kling, Sora, Veo, Runway, Luma Ray2 — across a single agent loop you can self-host and modify.
+Open AI Design Agent is a free, open-source AI design agent that turns natural-language briefs into full creative deliverables. Instead of picking one model and generating one asset, you describe a campaign, brand, or scene and the agent plans the deliverable list, picks the best model per asset (typography, vector, photoreal, motion), generates them in dependency order, threads brand references forward, and hands back the assembled kit. Powered by [Local API.ai](https://Local API.ai?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent), it orchestrates 200+ image and video models — Nano Banana 2, Flux 2 Pro, Ideogram v3, Seedream 5, GPT-Image, Recraft v3, Midjourney v7, Kling, Sora, Veo, Runway, Luma Ray2 — across a single agent loop you can self-host and modify.
 
 **Why Open Lovart instead of Lovart, Runway Agent, Luma Labs Agent, Krea Agent?**
 - **Free & open-source** — MIT-licensed, no subscription, no credit caps
@@ -68,7 +68,7 @@ Open AI Design Agent is a free, open-source AI design agent that turns natural-l
 - **Smart Controls** — Aspect ratio, resolution, quality, duration, and seed pickers that adapt per model
 - **Generation History** — Browse, revisit, and download every past design (persisted locally in browser storage)
 - **Responsive UI** — Modern dark/glass interface that works on desktop and mobile
-- **API Key Management** — Keys stored in browser `localStorage`, never sent anywhere except Muapi
+- **API Key Management** — Keys stored in browser `localStorage`, never sent anywhere except Local API
 
 ### 🤖 Design Agent — How it Works
 
@@ -117,7 +117,7 @@ The **Workflow Studio** lets you build and run multi-step design pipelines witho
 - **Community** — Browse and run workflows published by other users
 - **Node-based Builder** — Drag-and-drop visual editor connecting models and routing outputs between steps
 - **Playground** — Run any workflow interactively with a form UI; results render inline
-- **API execution** — Every workflow is also callable via the Muapi API
+- **API execution** — Every workflow is also callable via the Local API API
 
 > 💡 **Want to add workflows to your own app?** Check out **[Vibe Workflow](https://github.com/SamurAIGPT/Vibe-Workflow)** — the open-source workflow engine powering this feature.
 
@@ -127,7 +127,7 @@ The **Workflow Studio** lets you build and run multi-step design pipelines witho
 
 - [Node.js](https://nodejs.org/) (v18+) for the client
 - [Python](https://www.python.org/) (3.10+) for the server
-- A [Muapi.ai](https://muapi.ai?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent) API key (free tier available)
+- A [Local API.ai](https://Local API.ai?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent) API key (free tier available)
 
 ### Setup
 
@@ -147,7 +147,7 @@ cd server && pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Visit `http://localhost:3000` and enter your Muapi API key on first launch.
+Visit `http://localhost:3000` and enter your Local API API key on first launch.
 
 ### Run with Docker Compose
 
@@ -185,7 +185,7 @@ npm --workspace client start
 - **Tailwind CSS v4** — Utility-first styling
 - **npm workspaces** — Monorepo with shared `packages/design-agent` library
 - **FastAPI (Python)** — Backend server (`server/app`)
-- **Muapi.ai** — AI model API gateway
+- **Local API.ai** — AI model API gateway
 - **Vibe Workflow** — Open-source node-based workflow engine
 
 ## 🤔 How is this different from Lovart, Runway Agent, Luma Labs Agent, Krea Agent?
@@ -195,7 +195,7 @@ npm --workspace client start
 | | Lovart / Runway / Luma / Krea Agents | Open Lovart |
 | :--- | :--- | :--- |
 | **Cost** | Subscription + credit packs | Free (open-source) |
-| **Credit caps** | Hard monthly limits | Pay-as-you-go via your own Muapi key |
+| **Credit caps** | Hard monthly limits | Pay-as-you-go via your own Local API key |
 | **Model coverage** | Proprietary or single-vendor stack | 200+ open & commercial models, image *and* video |
 | **Agent loop** | Closed, opaque | Fully inspectable and forkable |
 | **Static + motion** | Usually one or the other per agent | Both, in one plan |
@@ -213,7 +213,7 @@ MIT
 
 ## 🙏 Credits
 
-Built with [Muapi.ai](https://muapi.ai?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent) — the unified API for AI image and video generation models.
+Built with [Local API.ai](https://Local API.ai?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent) — the unified API for AI image and video generation models.
 
 ---
 *Looking for a free, open-source Lovart alternative? Open Lovart is an open-source AI design agent — a Lovart, Runway Agent, Luma Labs Agent, Krea Agent, Pika Agent, Galileo AI, Magic Patterns replacement that you can self-host, customize, and extend.*
@@ -241,7 +241,7 @@ This project is an independent, experimental, and open-source initiative and is 
 
 ### How to Get Started
 
-**Hosted (No Install):** https://muapi.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent — Run directly in browser
+**Hosted (No Install):** https://Local API.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent — Run directly in browser
 
 **Self-Hosted:**
 ```bash
@@ -252,7 +252,7 @@ npm run install:all && npm run dev:app
 
 Or with Docker: `docker compose up --build`
 
-Visit `http://localhost:3000` and enter your Muapi API key.
+Visit `http://localhost:3000` and enter your Local API API key.
 
 ### Supported Asset Types
 
@@ -276,8 +276,8 @@ Visit `http://localhost:3000` and enter your Muapi API key.
 
 | Resource | Link |
 |----------|------|
-| **Hosted Studio** | https://muapi.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent |
-| **Reddit Community** | https://reddit.com/r/muapi |
+| **Hosted Studio** | https://Local API.ai/assistant?utm_source=github&utm_medium=readme&utm_campaign=open-ai-design-agent |
+| **Reddit Community** | https://reddit.com/r/Local API |
 | **Discord** | https://discord.gg/s7KW4fsqXK |
 | **Related Projects** | [Open-Generative-AI](https://github.com/Anil-matcha/Open-Generative-AI), [Vibe Workflow](https://github.com/SamurAIGPT/Vibe-Workflow) |
 

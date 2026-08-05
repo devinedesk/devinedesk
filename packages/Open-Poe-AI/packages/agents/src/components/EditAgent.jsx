@@ -24,7 +24,7 @@ const EditAgent = ({ useUser, usedIn }) => {
       ? { email: serverDetails.user_details.email, name: serverDetails.user_details.name }
       : null;
   } else {
-    // muapiapp
+    // Local APIapp
     user = userContext.user || null;
   }
   const { id } = useParams();
@@ -176,7 +176,7 @@ const EditAgent = ({ useUser, usedIn }) => {
           setUploadProgress(percent);
         }
       });
-      const prefix = usedIn === "vadoo" ? "https://d3adwkbyhxyrtq.cloudfront.net/": "https://cdn.muapi.ai/";
+      const prefix = usedIn === "vadoo" ? "https://d3adwkbyhxyrtq.cloudfront.net/": "https://cdn.api.ai/";
       const uploadedUrl = `${prefix}${fields.key}`;
       setFormData(prev => ({ ...prev, icon_url: uploadedUrl }));
       toast.success("Profile image updated");

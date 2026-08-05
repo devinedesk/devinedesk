@@ -126,6 +126,7 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.4.1",
     "studio": "*",
+    "uuid": "^14.0.1",
     "workflow-builder": "*"
   },
   "devDependencies": {

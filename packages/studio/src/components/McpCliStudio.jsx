@@ -6,26 +6,26 @@ import { FaGithub, FaTerminal, FaPlug, FaStar, FaExternalLinkAlt } from 'react-i
 const FEATURES = [
   {
     tag: 'CLI',
-    title: 'muapi-cli',
+    title: 'app-cli',
     icon: FaTerminal,
     description:
       'Generate images, videos, and audio from the terminal across 14+ AI models. Dual interface — colored human output plus JSON for agents (--output-json, --jq filtering). Async workflows, file uploads, credit tracking.',
-    code: `npm install -g muapi-cli
-muapi auth login
-muapi image generate "a cyberpunk city" \\
+    code: `npm install -g app-cli
+app auth login
+app image generate "a cyberpunk city" \\
   --model flux-dev`,
-    href: 'https://github.com/SamurAIGPT/muapi-cli',
+    href: 'https://github.com/SamurAIGPT/app-cli',
   },
   {
     tag: 'MCP',
-    title: 'muapi-mcp-server',
+    title: 'app-mcp-server',
     icon: FaPlug,
     description:
       'Connect Claude, Cursor, Windsurf, and any MCP-compatible assistant to 100+ generative models. Hosted endpoint — no install. 19 structured tools with input/output schemas, async polling, and account management.',
-    code: `claude mcp add --transport http muapi \\
-  https://api.muapi.ai/mcp \\
+    code: `claude mcp add --transport http app \\
+  https://api.api.ai/mcp \\
   --header "Authorization: Bearer YOUR_KEY"`,
-    href: 'https://github.com/SamurAIGPT/muapi-mcp-server',
+    href: 'https://github.com/SamurAIGPT/app-mcp-server',
   },
   {
     tag: 'Skills',
@@ -33,21 +33,21 @@ muapi image generate "a cyberpunk city" \\
     icon: FaStar,
     description:
       'Multimodal toolkit for Claude Code, Cursor, and Gemini CLI. Cinema Director, Nano-Banana, UI Designer, Logo Creator, Seedance 2, AI Clipping, and YouTube Shorts presets. Agent-native with JSON outputs and semantic exit codes.',
-    code: `npx skills add SamurAIGPT/Generative-Media-Skills --all`,
-    href: 'https://github.com/SamurAIGPT/Generative-Media-Skills',
+    code: `npx skills add your-org/Generative-Media-Skills --all`,
+    href: 'https://github.com/your-org/Generative-Media-Skills',
   },
 ];
 
 const QUICK_STEPS = [
-  { num: '1', title: 'Install the CLI', code: 'npm install -g muapi-cli' },
-  { num: '2', title: 'Sign in', code: 'muapi auth login' },
-  { num: '3', title: 'Add the skills', code: 'npx skills add SamurAIGPT/Generative-Media-Skills' },
+  { num: '1', title: 'Install the CLI', code: 'npm install -g app-cli' },
+  { num: '2', title: 'Sign in', code: 'app auth login' },
+  { num: '3', title: 'Add the skills', code: 'npx skills add your-org/Generative-Media-Skills' },
 ];
 
 const EXAMPLES = [
-  { title: 'Image generation', code: 'muapi image generate "a serene mountain lake at sunrise" \\\n  --model flux-dev --download ./outputs' },
-  { title: 'Text-to-video', code: 'muapi video generate "a dog running on a beach" \\\n  --model kling-master' },
-  { title: 'Audio creation', code: 'muapi audio create "upbeat lo-fi hip hop for studying"' },
+  { title: 'Image generation', code: 'app image generate "a serene mountain lake at sunrise" \\\n  --model flux-dev --download ./outputs' },
+  { title: 'Text-to-video', code: 'app video generate "a dog running on a beach" \\\n  --model kling-master' },
+  { title: 'Audio creation', code: 'app audio create "upbeat lo-fi hip hop for studying"' },
   { title: 'Run a skill', code: 'bash library/visual/nano-banana/scripts/\\\n  generate-nano-art.sh --file image.jpg --view' },
 ];
 

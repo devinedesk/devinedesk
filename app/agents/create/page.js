@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import AgentCreateClient from "./AgentCreateClient";
 
-const BASE_URL = 'https://api.muapi.ai';
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.Local API.ai';
 
 async function fetchUserData(apiKey) {
   if (!apiKey) return null;
@@ -19,7 +19,7 @@ async function fetchUserData(apiKey) {
 
 export default async function CreateAgentPage() {
   const cookieStore = await cookies();
-  const apiKey = cookieStore.get("muapi_key")?.value;
+  const apiKey = cookieStore.get("platform_api_key")?.value;
 
   const userData = await fetchUserData(apiKey);
 

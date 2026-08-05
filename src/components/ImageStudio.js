@@ -1,4 +1,4 @@
-import { muapi } from '../lib/muapi.js';
+import { api } from '../lib/apiClient.js';
 import {
     t2iModels, getAspectRatiosForModel, getResolutionsForModel, getQualityFieldForModel,
     i2iModels, getAspectRatiosForI2IModel, getResolutionsForI2IModel, getQualityFieldForI2IModel,
@@ -113,7 +113,7 @@ export function ImageStudio() {
     // --- Image Upload Picker (Image-to-Image) ---
     const picker = createUploadPicker({
         anchorContainer: container,
-        uploadFn: (file) => useLocalModel ? URL.createObjectURL(file) : muapi.uploadFile(file),
+        uploadFn: (file) => useLocalModel ? URL.createObjectURL(file) : api.uploadFile(file),
         requireApiKey: () => !useLocalModel,
         onSelect: ({ url, urls }) => {
             uploadedImageUrls = urls || [url];
@@ -1004,7 +1004,7 @@ export function ImageStudio() {
         generationHistory.unshift(entry);
 
         // Save to localStorage
-        localStorage.setItem('muapi_history', JSON.stringify(generationHistory.slice(0, 50)));
+        localStorage.setItem('generation_history', JSON.stringify(generationHistory.slice(0, 50)));
 
         // Show sidebar
         historySidebar.classList.remove('translate-x-full', 'opacity-0');
@@ -1030,7 +1030,7 @@ export function ImageStudio() {
 
             thumb.onclick = (e) => {
                 if (e.target.closest('.hist-download')) {
-                    downloadImage(entry.url, `muapi-${entry.id || idx}.jpg`);
+                    downloadImage(entry.url, `Local API-${entry.id || idx}.jpg`);
                     return;
                 }
                 showImageInCanvas(entry.url);
@@ -1068,7 +1068,7 @@ export function ImageStudio() {
 
     // --- Load history from localStorage ---
     try {
-        const saved = JSON.parse(localStorage.getItem('muapi_history') || '[]');
+        const saved = JSON.parse(localStorage.getItem('generation_history') || '[]');
         if (saved.length > 0) {
             saved.forEach(e => generationHistory.push(e));
             historySidebar.classList.remove('translate-x-full', 'opacity-0');
@@ -1082,7 +1082,7 @@ export function ImageStudio() {
         const pending = getPendingJobs('image');
         if (!pending.length) return;
 
-        const apiKey = localStorage.getItem('muapi_key');
+        const apiKey = localStorage.getItem('platform_api_key');
         if (!apiKey) return; // can't poll without key; jobs remain for next time
 
         const banner = document.createElement('div');
@@ -1095,7 +1095,7 @@ export function ImageStudio() {
             const elapsedAttempts = Math.floor((Date.now() - job.submittedAt) / job.interval);
             const attemptsLeft = Math.max(1, job.maxAttempts - elapsedAttempts);
             try {
-                const result = await muapi.pollForResult(job.requestId, apiKey, attemptsLeft, job.interval);
+                const result = await api.pollForResult(job.requestId, apiKey, attemptsLeft, job.interval);
                 const url = result.outputs?.[0] || result.url || result.output?.url;
                 if (url) {
                     addToHistory({ id: job.requestId, url, ...job.historyMeta, timestamp: new Date().toISOString() });
@@ -1116,7 +1116,7 @@ export function ImageStudio() {
         const current = resultImg.src;
         if (current) {
             const entry = generationHistory.find(e => e.url === current);
-            downloadImage(current, `muapi-${entry?.id || 'image'}.jpg`);
+            downloadImage(current, `Local API-${entry?.id || 'image'}.jpg`);
         }
     };
 
@@ -1237,7 +1237,7 @@ export function ImageStudio() {
         }
 
         // ── Remote API path ───────────────────────────────────────────────────
-        const apiKey = localStorage.getItem('muapi_key');
+        const apiKey = localStorage.getItem('platform_api_key');
         if (!apiKey) {
             AuthModal(() => generateBtn.click());
             return;
@@ -1268,7 +1268,7 @@ export function ImageStudio() {
                 if (prompt) genParams.prompt = prompt;
                 const qualityField = getCurrentQualityField(selectedModel);
                 if (qualityField && qualityLabel) genParams[qualityField] = qualityLabel;
-                res = await muapi.generateI2I(genParams);
+                res = await api.generateI2I(genParams);
             } else {
                 const genParams = {
                     model: selectedModel,
@@ -1281,7 +1281,7 @@ export function ImageStudio() {
                 };
                 const qualityField = getCurrentQualityField(selectedModel);
                 if (qualityField && qualityLabel) genParams[qualityField] = qualityLabel;
-                res = await muapi.generateImage(genParams);
+                res = await api.generateImage(genParams);
             }
 
             console.debug('[] Full response:', res);

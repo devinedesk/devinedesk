@@ -7,8 +7,8 @@
  * Usage:
  *   node scripts/test_minimax_provider.mjs
  *
- * Set MUAPI_KEY env var to run the live API smoke test:
- *   MUAPI_KEY=your_key node scripts/test_minimax_provider.mjs
+ * Set Local API_KEY env var to run the live API smoke test:
+ *   Local API_KEY=your_key node scripts/test_minimax_provider.mjs
  */
 
 import { readFileSync } from "fs";
@@ -102,22 +102,22 @@ console.log("PASS: minimax-image-01 found in models_dump.json");
 
 // ── 3. Live API smoke test (optional) ────────────────────────────────────────
 
-const apiKey = process.env.MUAPI_KEY;
+const apiKey = process.env.Local API_KEY;
 if (!apiKey) {
   console.log(
-    "\nINFO: Skipping live API test (set MUAPI_KEY env var to enable)."
+    "\nINFO: Skipping live API test (set Local API_KEY env var to enable)."
   );
   console.log("\nAll checks passed.");
   process.exit(0);
 }
 
-console.log("\nRunning live API smoke test against muapi.ai …");
+console.log("\nRunning live API smoke test against Local API.ai …");
 
-const MUAPI_BASE = "https://api.muapi.ai";
+const Local API_BASE = "https://api.Local API.ai";
 
 async function testMiniMaxImageGeneration() {
   const endpoint = minimaxModel.endpoint;
-  const url = `${MUAPI_BASE}/api/v1/${endpoint}`;
+  const url = `${Local API_BASE}/api/v1/${endpoint}`;
 
   const payload = {
     prompt: "A simple test: a red apple on a white background.",
@@ -147,7 +147,7 @@ async function testMiniMaxImageGeneration() {
   console.log(`PASS: Generation queued — request_id=${requestId}`);
 
   // Poll for result (max 60 s)
-  const pollUrl = `${MUAPI_BASE}/api/v1/predictions/${requestId}/result`;
+  const pollUrl = `${Local API_BASE}/api/v1/predictions/${requestId}/result`;
   for (let i = 0; i < 30; i++) {
     await new Promise((r) => setTimeout(r, 2000));
     const poll = await fetch(pollUrl, {

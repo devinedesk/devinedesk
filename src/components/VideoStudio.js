@@ -1,4 +1,4 @@
-import { muapi } from '../lib/muapi.js';
+import { api } from '../lib/apiClient.js';
 import { t2vModels, getAspectRatiosForVideoModel, getDurationsForModel, getResolutionsForVideoModel, i2vModels, getAspectRatiosForI2VModel, getDurationsForI2VModel, getResolutionsForI2VModel, v2vModels, getModesForModel } from '../lib/models.js';
 import { AuthModal } from './AuthModal.js';
 import { t } from '../lib/i18n.js';
@@ -52,7 +52,7 @@ export function VideoStudio() {
     let uploadedVideoUrl = null;
 
     const getCurrentModels = () => v2vMode ? v2vModels : (imageMode ? allI2V : allT2V);
-    // Local Wan2GP entries don't live in the Muapi-derived helpers, so we
+    // Local Wan2GP entries don't live in the Platform-derived helpers, so we
     // resolve aspect ratios off the catalog when the selected id is local.
     const getCurrentAspectRatios = (id) => {
         const local = getLocalModelById(id);
@@ -169,8 +169,8 @@ export function VideoStudio() {
             textarea.disabled = false;
         },
         // Route the upload through the configured Wan2GP server when the active
-        // model is local; otherwise fall back to the Muapi-hosted upload.
-        uploadFn: (file) => isWan2gpModelId(selectedModel) ? localAI.uploadFileToWan2gp(file) : muapi.uploadFile(file),
+        // model is local; otherwise fall back to the Platform-hosted upload.
+        uploadFn: (file) => isWan2gpModelId(selectedModel) ? localAI.uploadFileToWan2gp(file) : api.uploadFile(file),
         requireApiKey: () => !isWan2gpModelId(selectedModel),
     });
     topRow.appendChild(picker.trigger);
@@ -184,7 +184,7 @@ export function VideoStudio() {
         anchorContainer: container,
         onSelect: ({ url }) => { uploadedEndImageUrl = url; },
         onClear: () => { uploadedEndImageUrl = null; },
-        uploadFn: (file) => isWan2gpModelId(selectedModel) ? localAI.uploadFileToWan2gp(file) : muapi.uploadFile(file),
+        uploadFn: (file) => isWan2gpModelId(selectedModel) ? localAI.uploadFileToWan2gp(file) : api.uploadFile(file),
         requireApiKey: () => !isWan2gpModelId(selectedModel),
     });
     endPicker.trigger.title = 'End frame (optional)';
@@ -298,7 +298,7 @@ export function VideoStudio() {
         const file = e.target.files[0];
         if (!file) return;
 
-        const apiKey = localStorage.getItem('muapi_key');
+        const apiKey = localStorage.getItem('platform_api_key');
         if (!apiKey) {
             AuthModal(() => videoFileInput.click());
             return;
@@ -306,7 +306,7 @@ export function VideoStudio() {
 
         showVideoSpinner();
         try {
-            const url = await muapi.uploadFile(file);
+            const url = await api.uploadFile(file);
             uploadedVideoUrl = url;
             showVideoReady(file.name);
 
@@ -995,7 +995,7 @@ export function VideoStudio() {
         const pending = getPendingJobs('video');
         if (!pending.length) return;
 
-        const apiKey = localStorage.getItem('muapi_key');
+        const apiKey = localStorage.getItem('platform_api_key');
         if (!apiKey) return; // can't poll without key; jobs remain for next time
 
         const banner = document.createElement('div');
@@ -1008,7 +1008,7 @@ export function VideoStudio() {
             const elapsedAttempts = Math.floor((Date.now() - job.submittedAt) / job.interval);
             const attemptsLeft = Math.max(1, job.maxAttempts - elapsedAttempts);
             try {
-                const result = await muapi.pollForResult(job.requestId, apiKey, attemptsLeft, job.interval);
+                const result = await api.pollForResult(job.requestId, apiKey, attemptsLeft, job.interval);
                 const url = result.outputs?.[0] || result.url || result.output?.url;
                 if (url) {
                     addToHistory({ id: job.requestId, url, ...job.historyMeta, timestamp: new Date().toISOString() });
@@ -1117,9 +1117,9 @@ export function VideoStudio() {
 
         const isLocal = isWan2gpModelId(selectedModel);
 
-        // Local Wan2GP generations don't go through Muapi — skip the auth gate.
+        // Local Wan2GP generations don't go through Platform — skip the auth gate.
         if (!isLocal) {
-            const apiKey = localStorage.getItem('muapi_key');
+            const apiKey = localStorage.getItem('platform_api_key');
             if (!apiKey) {
                 AuthModal(() => generateBtn.click());
                 return;
@@ -1180,7 +1180,7 @@ export function VideoStudio() {
                 const v2vParams = { model: selectedModel, video_url: uploadedVideoUrl, onRequestId };
                 if (model?.imageField && uploadedImageUrl) v2vParams.image_url = uploadedImageUrl;
                 if (model?.hasPrompt && prompt) v2vParams.prompt = prompt;
-                const res = await muapi.processV2V(v2vParams);
+                const res = await api.processV2V(v2vParams);
                 console.debug('[] V2V response:', res);
                 if (res && res.url) {
                     if (capturedRequestId) removePendingJob(capturedRequestId);
@@ -1216,7 +1216,7 @@ export function VideoStudio() {
                 if (selectedMode) i2vParams.mode = selectedMode;
                 if (selectedEffectName) i2vParams.name = selectedEffectName;
 
-                const res = await muapi.generateI2V(i2vParams);
+                const res = await api.generateI2V(i2vParams);
                 console.debug('[] I2V response:', res);
 
                 if (res && res.url) {
@@ -1259,7 +1259,7 @@ export function VideoStudio() {
             if (selectedQuality) params.quality = selectedQuality;
             if (selectedMode) params.mode = selectedMode;
 
-            const res = await muapi.generateVideo(params);
+            const res = await api.generateVideo(params);
 
             console.debug('[] Full response:', res);
 

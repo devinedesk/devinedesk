@@ -19,7 +19,7 @@ export default function AgentClientWrapper({ initialAgentDetails, initialHistory
         initialAgentDetails={initialAgentDetails} 
         initialHistory={initialHistory} 
         useUser={mockUseUser}
-        usedIn="muapiapp"
+        usedIn="Local APIapp"
       />
     </div>
   );

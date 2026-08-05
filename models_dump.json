@@ -389,7 +389,7 @@
           "isEdit": true
         }
       },
-      "provider": "muapi",
+      "provider": "platform",
       "provider_name": "Wavespeed"
     },
     {
@@ -785,7 +785,7 @@
       "inputs": {
         "prompt": {
           "examples": [
-            "A retro 80s style poster with the words 'MUAPI APP' glowing in pink and blue neon lights, cyberpunk city skyline in the background, cinematic design, highly detailed."
+            "A retro 80s style poster with the words 'LOCAL APP' glowing in pink and blue neon lights, cyberpunk city skyline in the background, cinematic design, highly detailed."
           ],
           "description": "Text prompt describing the image.",
           "type": "string",

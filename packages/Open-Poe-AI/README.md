@@ -69,7 +69,7 @@ Early work in progress. Contributions welcome — see the routers and client `ag
 ```bash
 cd server
 pip install -r requirements.txt
-cp .env .env.local   # set MUAPI_BASE_URL and your API key
+cp .env .env.local   # set API_BASE_URL and your API key
 uvicorn app.main:app --reload
 ```
 
@@ -84,7 +84,7 @@ Then open http://localhost:3000. The API runs on port 8000 by default; the clien
 
 ## Related Projects
 
-- [MuAPI](https://muapi.ai) — Unified API for image, video, and audio generation across hundreds of AI models. Explore [AI agents](https://muapi.ai/agents) and the [model playground](https://muapi.ai/playground).
+- [Local API](https://Local API.ai) — Unified API for image, video, and audio generation across hundreds of AI models. Explore [AI agents](https://Local API.ai/agents) and the [model playground](https://Local API.ai/playground).
 - [Open-Pomelli](https://github.com/SamurAIGPT/Open-Pomelli) — Open-source Pomelli alternative — self-hosted AI marketing assistant
 - [open-character-ai](https://github.com/Anil-matcha/open-character-ai) — Open-source Character.AI alternative with custom AI personas
 

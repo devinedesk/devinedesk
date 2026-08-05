@@ -15,7 +15,7 @@ import { VscDebugAlt } from "react-icons/vsc";
 import { themes } from "./components/themes";
 import { FaAngleRight } from "react-icons/fa6";
 
-const BASE_URL = "/api/agents"; // "https://api.muapi.ai/agents";
+const BASE_URL = "/api/agents";
 
 const formatMessageTime = (date) => {
   if (!date) return "";
@@ -121,7 +121,7 @@ const CopyButton = ({ text }) => {
 const ChatPage = ({ 
   initialAgentDetails, 
   useUser, 
-  usedIn = "muapiapp",
+  usedIn = "Local APIapp",
   useSidebar,
   searchQuery = "",
   setSearchQuery = () => {},
@@ -144,8 +144,8 @@ const ChatPage = ({
     const { serverDetails } = userContext;
     userName = serverDetails?.user_details?.name || "User";
     userProfile = serverDetails?.user_details?.profile;
-  } else if (usedIn === "muapiapp") {
-    // muapiapp
+  } else if (usedIn === "Local APIapp") {
+    // Local APIapp
     const { user } = userContext;
     userName = user?.username || user?.name || "User";
     userProfile = user?.profile_photo;
@@ -400,7 +400,7 @@ const ChatPage = ({
     } catch (err) {
       setAgentDetails({
         name: "Autonomous Agent",
-        description: "MuAPI Powered Intelligence.",
+        description: "Local API Powered Intelligence.",
       });
     }
   };
@@ -435,7 +435,7 @@ const ChatPage = ({
           setUploadProgress(percent);
         }
       });
-      const prefix = "https://cdn.muapi.ai/";
+      const prefix = "https://cdn.api.ai/";
       const uploadedUrl = prefix + fields.key;
       setAttachments(prev => [...prev, uploadedUrl]);
     } catch (err) {

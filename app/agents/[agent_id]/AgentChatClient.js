@@ -5,10 +5,10 @@ import "ai-agent/dist/tailwind.css";
 import { useCallback, useEffect, useRef } from "react";
 import axios from "axios";
 
-const STORAGE_KEY = "muapi_key";
+const STORAGE_KEY = "platform_api_key";
 
 /**
- * AgentChatClient — mirrors muapiapp's AgentClient.js.
+ * AgentChatClient — mirrors Local APIapp's AgentClient.js.
  * Renders the AiAgent library component with server-fetched agent details
  * and optional initial history.
  *
@@ -30,7 +30,7 @@ export default function AgentChatClient({ agentDetails, initialHistory, userData
       if (typeof window === "undefined") return null;
       const fromStorage = localStorage.getItem(STORAGE_KEY);
       if (fromStorage) return fromStorage;
-      const match = document.cookie.match(/muapi_key=([^;]+)/);
+      const match = document.cookie.match(/platform_api_key=([^;]+)/);
       return match ? match[1] : null;
     };
 
@@ -76,7 +76,7 @@ export default function AgentChatClient({ agentDetails, initialHistory, userData
         initialAgentDetails={agentDetails}
         initialHistory={initialHistory}
         useUser={useUser}
-        usedIn="muapiapp"
+        usedIn="Local APIapp"
       />
     </div>
   );

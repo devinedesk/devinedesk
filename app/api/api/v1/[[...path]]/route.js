@@ -1,65 +1,41 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs/promises';
+import path from 'path';
 
-const MUAPI_BASE = 'https://api.muapi.ai';
+const DATA_DIR = path.join(process.cwd(), 'data');
+const REQUESTS_FILE = path.join(DATA_DIR, 'requests.json');
 
-function getApiKey(request) {
-    const headerKey = request.headers.get('x-api-key');
-    if (headerKey) return headerKey;
-    // Cookie-based auth removed for security (CWE-522)
-    return null;
+async function readJsonObj(file) {
+    try {
+        const data = await fs.readFile(file, 'utf-8');
+        return JSON.parse(data);
+    } catch {
+        return {};
+    }
 }
 
-function cleanHeaders(request) {
-    const headers = new Headers(request.headers);
-    headers.delete('host');
-    headers.delete('connection');
-    headers.delete('cookie');
-    return headers;
-}
-
-// Proxies /api/api/v1/* -> https://api.muapi.ai/api/v1/*
-// This is required because the AiAgent library hardcodes a double /api/api
 export async function GET(request, { params }) {
     const slug = await params;
     const pathSegments = slug.path || [];
-    const path = pathSegments.join('/');
-    
-    const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/api/v1/${path}${search}`;
+    const pathUrl = pathSegments.join('/');
 
-    const headers = cleanHeaders(request);
-    const apiKey = getApiKey(request);
-
-    // NOTE: credential logging removed for security (CWE-200)
-    if (apiKey) headers.set('x-api-key', apiKey);
-
-    try {
-        const response = await fetch(targetUrl, { headers, method: 'GET' });
-        const data = await response.json();
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    if (pathSegments[0] === 'predictions' && pathSegments[2] === 'result') {
+        const requestId = pathSegments[1];
+        
+        // This is a local request for our custom MVP Engine
+        const requests = await readJsonObj(REQUESTS_FILE);
+        const req = requests[requestId];
+        
+        if (req) {
+            if (!req.is_complete) {
+                return NextResponse.json({ is_complete: false, status: 'processing' });
+            }
+            if (req.error) {
+                return NextResponse.json({ detail: { error: req.error } }, { status: 400 });
+            }
+            return NextResponse.json(req);
+        }
     }
-}
 
-export async function POST(request, { params }) {
-    const slug = await params;
-    const pathSegments = slug.path || [];
-    const path = pathSegments.join('/');
-    
-    const { search } = new URL(request.url);
-    const targetUrl = `${MUAPI_BASE}/api/v1/${path}${search}`;
-
-    const headers = cleanHeaders(request);
-    const apiKey = getApiKey(request);
-    if (apiKey) headers.set('x-api-key', apiKey);
-
-    try {
-        const body = await request.arrayBuffer();
-        const response = await fetch(targetUrl, { method: 'POST', headers, body });
-        const data = await response.json();
-        return NextResponse.json(data, { status: response.status });
-    } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    return NextResponse.json({ error: 'Endpoint not found or not handled by local engine' }, { status: 404 });
 }

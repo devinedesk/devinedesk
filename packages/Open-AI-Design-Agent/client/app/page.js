@@ -180,7 +180,7 @@ export default function AssistantDashboard() {
       });
 
       // 3. Final URL
-      const uploadedUrl = `https://cdn.muapi.ai/${fields.key}`;
+      const uploadedUrl = `https://cdn.api.ai/${fields.key}`;
       const kind = file.type?.startsWith("video/") ? "video"
                  : file.type?.startsWith("audio/") ? "audio"
                  : "image";

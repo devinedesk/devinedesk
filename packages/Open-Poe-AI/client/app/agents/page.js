@@ -20,7 +20,7 @@ const AgentCard = ({ agent, category }) => (
     href={`/agents/${agent.agent_id}`}
     className="group flex flex-col bg-white border border-slate-200 rounded-2xl p-2 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm hover:shadow-md"
   >
-    {/* Large Image Top (muapiapp style) */}
+    {/* Large Image Top (Local APIapp style) */}
     <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center mb-4">
       {agent.icon_url ? (
         <Image

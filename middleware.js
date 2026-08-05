@@ -9,13 +9,11 @@ function addSecurityHeaders(response) {
     response.headers.set('X-XSS-Protection', '1; mode=block');
     // Referrer policy
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    // Content Security Policy - restricts script sources to prevent XSS (CWE-79).
-    // connect-src covers *.muapi.ai (not just api.muapi.ai) because generated
-    // media, model thumbnails, and other assets are served from cdn.muapi.ai
-    // and other muapi subdomains that the renderer fetches directly.
+    // Media can come from various providers now (e.g., Cloudinary, AIMLAPI, HuggingFace).
+    // We allow all https/http connections for connect-src to support the multi-provider routing.
     response.headers.set(
         'Content-Security-Policy',
-        "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https://muapi.ai https://*.muapi.ai; font-src 'self' data:;"
+        "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: http: wss: ws:; font-src 'self' data:;"
     );
     return response;
 }
@@ -24,18 +22,19 @@ export function middleware(request) {
     const url = request.nextUrl;
 
     // Catch requests to /api/workflow, /api/app, and /api/v1
-    const isMuApi = url.pathname.startsWith('/api/workflow') ||
+    const isApiRoute = url.pathname.startsWith('/api/workflow') ||
                     url.pathname.startsWith('/api/app') ||
                     url.pathname.startsWith('/api/v1');
 
-    if (isMuApi) {
+    if (isApiRoute) {
         // Exclude paths that have their own dedicated route handlers with custom logic
         const isHandledByRoute = url.pathname.startsWith('/api/v1/creative-agent') ||
                                 url.pathname.startsWith('/api/v1/get_upload_url') ||
                                 url.pathname.startsWith('/api/v1/upload-binary');
 
         if (url.pathname.startsWith('/api/v1') && !isHandledByRoute) {
-            const targetUrl = new URL(url.pathname + url.search, 'https://api.muapi.ai');
+            const targetBase = process.env.BACKEND_API_URL || 'http://localhost:3000';
+            const targetUrl = new URL(url.pathname + url.search, targetBase);
             const rewriteResponse = NextResponse.rewrite(targetUrl);
             return addSecurityHeaders(rewriteResponse);
         }

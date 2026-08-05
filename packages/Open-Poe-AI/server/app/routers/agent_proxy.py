@@ -4,7 +4,7 @@ from typing import Optional
 import os
 
 router = APIRouter()
-MUAPI_BASE_URL = os.getenv("MUAPI_BASE_URL", "https://api.muapi.ai")
+Local API_BASE_URL = os.getenv("Local API_BASE_URL", "https://api.Local API.ai")
 # --- Agent Library Endpoints ---
 
 @router.get("/agents/user/agents")
