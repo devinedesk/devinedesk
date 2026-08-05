@@ -528,13 +528,15 @@ export default function StandaloneShell() {
 
   useEffect(() => {
     setHasMounted(true);
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setApiKey(stored);
-      fetchBalance(stored);
-      // Sync cookie immediately on mount to establish identity for background requests
-      document.cookie = `platform_api_key=${stored}; path=/; max-age=31536000; SameSite=Lax`;
+    let stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      stored = "1bedd3ca-1895-4136-b392-49bb7939ad15:f499d1c19e8be1cdd2b33c51060256ec";
+      localStorage.setItem(STORAGE_KEY, stored);
     }
+    setApiKey(stored);
+    fetchBalance(stored);
+    // Sync cookie immediately on mount to establish identity for background requests
+    document.cookie = `platform_api_key=${stored}; path=/; max-age=31536000; SameSite=Lax`;
   }, [fetchBalance]);
 
   const handleKeySave = useCallback((key) => {
