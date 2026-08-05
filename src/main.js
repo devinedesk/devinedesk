@@ -2,6 +2,13 @@ import './style.css';
 import { Header } from './components/Header.js';
 import { ImageStudio } from './components/ImageStudio.js';
 
+// Automatically set up the user's fal.ai API key for all components
+const FAL_KEY = "1bedd3ca-1895-4136-b392-49bb7939ad15:f499d1c19e8be1cdd2b33c51060256ec";
+localStorage.setItem('platform_api_key', FAL_KEY);
+localStorage.setItem('fal_key', FAL_KEY);
+window.__FAL_KEY__ = FAL_KEY;
+document.cookie = `platform_api_key=${FAL_KEY}; path=/; max-age=31536000; SameSite=Lax`;
+
 const app = document.querySelector('#app');
 let contentArea;
 
