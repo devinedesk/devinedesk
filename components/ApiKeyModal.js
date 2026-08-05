@@ -33,10 +33,8 @@ export default function ApiKeyModal({ onSave, onClose, overlay = false, title, s
           </button>
         )}
         <div className="flex flex-col items-center text-center mb-10">
-          <div className="w-14 h-14 bg-[#22d3ee]/5 rounded-2xl flex items-center justify-center border border-[#22d3ee]/10 mb-6 group hover:border-[#22d3ee]/30 transition-colors">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="1.5" className="group-hover:scale-110 transition-transform">
-              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L12 17.25l-4.5-4.5L15.5 7.5z" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group transition-colors">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight mb-2">
             {title || 'devinedesk'}
