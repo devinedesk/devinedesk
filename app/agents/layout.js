@@ -1,15 +1,19 @@
-/**
- * Layout for /agents/* pages.
- * These pages host the AiAgent component full-screen — no studio chrome needed.
- * The api key is available via the platform_api_key cookie which StandaloneShell sets.
- */
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { redirect } from 'next/navigation';
+
 export const metadata = {
   title: "Agent Chat — devinedesk",
 };
 
-export default function AgentsLayout({ children }) {
+export default async function AgentsLayout({ children }) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect('/auth/login');
+  }
+
   return (
-    <div className="h-screen w-full overflow-hidden bg-black">
+    <div className="h-screen w-full overflow-hidden bg-app-bg">
       {children}
     </div>
   );

@@ -1,15 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-const getDeviceId = () => {
-    if (typeof window === 'undefined') return 'unknown';
-    let id = localStorage.getItem('device_id');
-    if (!id) {
-        id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
-        localStorage.setItem('device_id', id);
-    }
-    return id;
-};
-
 export function useDatabasePersistence(key, initialState) {
     const [state, setState] = useState(initialState);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -33,9 +23,7 @@ export function useDatabasePersistence(key, initialState) {
 
             // Authoritative load from DB
             try {
-                const res = await fetch(`/api/state?key=${encodeURIComponent(key)}`, {
-                    headers: { 'x-user-id': getDeviceId() }
-                });
+                const res = await fetch(`/api/state?key=${encodeURIComponent(key)}`);
                 if (res.ok && isMounted) {
                     const dbData = await res.json();
                     if (dbData && dbData.value) {
@@ -69,8 +57,7 @@ export function useDatabasePersistence(key, initialState) {
             fetch('/api/state', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'x-user-id': getDeviceId()
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ key, value: serialized })
             }).catch(err => console.error('Failed to save state to DB for', key, err));

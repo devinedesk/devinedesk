@@ -591,7 +591,7 @@ const ChatPage = ({
 
       while (!isComplete && errors < 5) {
         try {
-          const pollRes = await axios.get(`/api/api/v1/predictions/${request_id}/result`);
+          const pollRes = await axios.get(`/api/v1/predictions/${request_id}/result`);
           const data = pollRes.data;
 
           // data format from backend execute_agent_chat_background:

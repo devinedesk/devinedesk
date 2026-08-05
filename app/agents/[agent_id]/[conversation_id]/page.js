@@ -1,105 +1,61 @@
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../../api/auth/[...nextauth]/route";
 import AgentChatClient from "../AgentChatClient";
+import { PrismaClient } from "@prisma/client";
+import { redirect } from "next/navigation";
 
-/**
- * Server component — fetches both agentDetails and initialHistory
- * from the /api/agents proxy using the platform_api_key cookie, then renders
- * the client chat component with existing conversation messages pre-loaded.
- *
- * URL: /agents/[agent_id]/[conversation_id]
- */
+const prisma = new PrismaClient();
+
 export async function generateMetadata({ params }) {
   return {
     title: `Agent Chat — devinedesk`,
   };
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.Local API.ai';
-
-async function fetchAgentDetails(agentId, apiKey) {
-  if (!apiKey) return null;
-  try {
-    const res = await fetch(
-      `${BASE_URL}/agents/by-slug/${agentId}`,
-      {
-        cache: "no-store",
-        headers: { "x-api-key": apiKey },
-      }
-    );
-    if (res.ok) return await res.json();
-    
-    if (agentId.length > 20) {
-      const resId = await fetch(
-        `${BASE_URL}/agents/${agentId}`,
-        {
-          cache: "no-store",
-          headers: { "x-api-key": apiKey },
-        }
-      );
-      if (resId.ok) return await resId.json();
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchHistory(agentId, conversationId, apiKey) {
-  if (!apiKey) return null;
-  try {
-    // Try by slug first
-    const res = await fetch(
-      `${BASE_URL}/agents/by-slug/${agentId}/${conversationId}`,
-      {
-        cache: "no-store",
-        headers: { "x-api-key": apiKey },
-      }
-    );
-    if (res.ok) return await res.json();
-    
-    // Fallback to direct agent ID if needed
-    if (agentId.length > 20) {
-      const resId = await fetch(
-        `${BASE_URL}/agents/${agentId}/${conversationId}`,
-        {
-          cache: "no-store",
-          headers: { "x-api-key": apiKey },
-        }
-      );
-      if (resId.ok) return await resId.json();
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchUserData(apiKey) {
-  if (!apiKey) return null;
-  try {
-    const res = await fetch(`${BASE_URL}/api/v1/account/balance`, {
-      cache: "no-store",
-      headers: { "x-api-key": apiKey },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
 export default async function AgentConversationPage({ params }) {
   const { agent_id, conversation_id } = await params;
-  const cookieStore = await cookies();
-  const apiKey = cookieStore.get("platform_api_key")?.value;
+  const session = await getServerSession(authOptions);
 
-  console.log(`[ConvPage] Loading for agent: ${agent_id}, conv: ${conversation_id}, hasKey: ${!!apiKey}`);
+  if (!session || !session.user) {
+    redirect("/auth/login");
+  }
 
-  const [agentDetails, initialHistory, userData] = await Promise.all([
-    fetchAgentDetails(agent_id, apiKey),
-    fetchHistory(agent_id, conversation_id, apiKey),
-    fetchUserData(apiKey)
-  ]);
+  console.log(`[ConvPage] Loading for agent: ${agent_id}, conv: ${conversation_id}, user: ${session.user.id}`);
+
+  const agent = await prisma.agent.findUnique({
+    where: { slug: agent_id }
+  });
+
+  if (!agent) {
+    return <div className="p-8">Agent not found.</div>;
+  }
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversation_id },
+    include: { messages: { orderBy: { createdAt: 'asc' } } }
+  });
+
+  let initialHistory = null;
+  if (conversation && conversation.userId === session.user.id) {
+    initialHistory = conversation.messages.map(m => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      created_at: m.createdAt.toISOString()
+    }));
+  }
+
+  const agentDetails = {
+    ...agent,
+    system_prompt: agent.systemPrompt,
+    agent_id: agent.id
+  };
+
+  const userData = {
+    balance: session.user.credits || 0,
+    email: session.user.email,
+    name: session.user.name
+  };
 
   return (
     <AgentChatClient 

@@ -16,15 +16,6 @@ export function SettingsProvider({ children }) {
 
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const getDeviceId = () => {
-    let id = localStorage.getItem('device_id');
-    if (!id) {
-      id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('device_id', id);
-    }
-    return id;
-  };
-
   useEffect(() => {
     // 1. Initial load from localStorage (fast sync)
     const localKeys = {
@@ -42,9 +33,7 @@ export function SettingsProvider({ children }) {
     // 2. Fetch from DB (authoritative)
     const fetchDbSettings = async () => {
       try {
-        const res = await fetch('/api/settings', {
-          headers: { 'x-user-id': getDeviceId() }
-        });
+        const res = await fetch('/api/settings');
         if (res.ok) {
           const dbKeys = await res.json();
           // Merge and save to localStorage
@@ -76,7 +65,7 @@ export function SettingsProvider({ children }) {
     // Sync to DB
     fetch('/api/settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-user-id': getDeviceId() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ [keyName]: trimmed })
     }).catch(err => console.error('Failed to save setting to DB', err));
   };
@@ -99,7 +88,7 @@ export function SettingsProvider({ children }) {
     // Sync to DB
     fetch('/api/settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-user-id': getDeviceId() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(err => console.error('Failed to save settings to DB', err));
   };

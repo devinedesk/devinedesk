@@ -21,19 +21,29 @@ RUN npm run build
 # Production runner
 FROM base AS runner
 ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
 # Copy necessary files for production
-COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/prisma ./prisma
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 # Make sure sqlite db folder exists and is writable
-RUN mkdir -p /app/prisma/data && chown -R node:node /app/prisma
+RUN mkdir -p /app/prisma/data && chown -R nextjs:nodejs /app/prisma
 
 # Run as non-root user
-USER node
+USER nextjs
 
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

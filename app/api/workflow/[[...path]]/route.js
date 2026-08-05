@@ -1,49 +1,38 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const WORKFLOWS_FILE = path.join(DATA_DIR, 'workflows.json');
-const RUNS_FILE = path.join(DATA_DIR, 'workflow_runs.json');
-
-async function readJson(file) {
-    try {
-        const data = await fs.readFile(file, 'utf-8');
-        return JSON.parse(data);
-    } catch {
-        return [];
-    }
-}
-
-async function readJsonObj(file) {
-    try {
-        const data = await fs.readFile(file, 'utf-8');
-        return JSON.parse(data);
-    } catch {
-        return {};
-    }
-}
-
-async function writeJson(file, data) {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(file, JSON.stringify(data, null, 2));
-}
+import { validateRequest } from '../../auth-check';
+import prisma from '@/src/lib/prisma';
 
 export async function GET(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const segments = slug.path || [];
 
     if (segments[0] === 'get-workflow-defs') {
-        const workflows = await readJson(WORKFLOWS_FILE);
-        return NextResponse.json(workflows);
+        const workflows = await prisma.workflow.findMany({
+            where: { userId: auth.user.id },
+            orderBy: { createdAt: 'desc' }
+        });
+        return NextResponse.json(workflows.map(w => ({
+            ...w,
+            nodes: JSON.parse(w.nodes || '[]'),
+            edges: JSON.parse(w.edges || '[]'),
+            viewport: w.viewport ? JSON.parse(w.viewport) : { x: 0, y: 0, zoom: 1 }
+        })));
     }
 
     if (segments[0] === 'get-workflow-def' && segments[1]) {
-        const workflows = await readJson(WORKFLOWS_FILE);
-        const wf = workflows.find(w => w.id === segments[1]);
+        const wf = await prisma.workflow.findUnique({
+            where: { id: segments[1], userId: auth.user.id }
+        });
         if (!wf) return NextResponse.json({ detail: "Not found" }, { status: 404 });
-        return NextResponse.json(wf);
+        return NextResponse.json({
+            ...wf,
+            nodes: JSON.parse(wf.nodes || '[]'),
+            edges: JSON.parse(wf.edges || '[]'),
+            viewport: wf.viewport ? JSON.parse(wf.viewport) : { x: 0, y: 0, zoom: 1 }
+        });
     }
 
     if (segments.length === 2 && segments[1] === 'node-schemas') {
@@ -56,10 +45,18 @@ export async function GET(request, { params }) {
 
     if (segments[0] === 'run' && segments[2] === 'api-outputs') {
         const runId = segments[1];
-        const runs = await readJsonObj(RUNS_FILE);
-        const run = runs[runId];
+        const run = await prisma.workflowRun.findUnique({
+            where: { id: runId, userId: auth.user.id }
+        });
+        
         if (run) {
-            return NextResponse.json(run);
+            return NextResponse.json({
+                run_id: run.id,
+                status: run.status,
+                outputs: JSON.parse(run.outputs || '{}'),
+                node_outputs: JSON.parse(run.nodeOutputs || '{}'),
+                error: run.error
+            });
         }
         return NextResponse.json({ detail: "Run not found" }, { status: 404 });
     }
@@ -68,91 +65,128 @@ export async function GET(request, { params }) {
 }
 
 export async function POST(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const segments = slug.path || [];
 
     if (segments[0] === 'create') {
         const payload = await request.json();
-        const workflows = await readJson(WORKFLOWS_FILE);
         
-        const newWf = {
-            id: `wf_${uuidv4()}`,
-            name: payload.name || "Untitled Workflow",
-            description: payload.description || "",
+        const newWf = await prisma.workflow.create({
+            data: {
+                userId: auth.user.id,
+                name: payload.name || "Untitled Workflow",
+                description: payload.description || "",
+                nodes: JSON.stringify([]),
+                edges: JSON.stringify([]),
+                viewport: JSON.stringify({ x: 0, y: 0, zoom: 1 })
+            }
+        });
+        
+        return NextResponse.json({
+            ...newWf,
             nodes: [],
             edges: [],
             viewport: { x: 0, y: 0, zoom: 1 }
-        };
-        
-        workflows.push(newWf);
-        await writeJson(WORKFLOWS_FILE, workflows);
-        return NextResponse.json(newWf);
+        });
     }
 
     if (segments[0] === 'update-name' && segments[1]) {
         const payload = await request.json();
-        const workflows = await readJson(WORKFLOWS_FILE);
-        const idx = workflows.findIndex(w => w.id === segments[1]);
-        if (idx !== -1) {
-            workflows[idx].name = payload.name;
-            await writeJson(WORKFLOWS_FILE, workflows);
-            return NextResponse.json(workflows[idx]);
+        try {
+            const updated = await prisma.workflow.update({
+                where: { id: segments[1], userId: auth.user.id },
+                data: { name: payload.name }
+            });
+            return NextResponse.json({
+                ...updated,
+                nodes: JSON.parse(updated.nodes || '[]'),
+                edges: JSON.parse(updated.edges || '[]'),
+                viewport: updated.viewport ? JSON.parse(updated.viewport) : { x: 0, y: 0, zoom: 1 }
+            });
+        } catch (error) {
+            return NextResponse.json({ detail: "Not found" }, { status: 404 });
         }
-        return NextResponse.json({ detail: "Not found" }, { status: 404 });
     }
     
     if (segments.length === 2 && segments[1] === 'publish') {
         const workflowId = segments[0];
         const payload = await request.json();
-        const workflows = await readJson(WORKFLOWS_FILE);
-        const idx = workflows.findIndex(w => w.id === workflowId);
-        if (idx !== -1) {
-            workflows[idx].nodes = payload.nodes || workflows[idx].nodes;
-            workflows[idx].edges = payload.edges || workflows[idx].edges;
-            workflows[idx].viewport = payload.viewport || workflows[idx].viewport;
-            await writeJson(WORKFLOWS_FILE, workflows);
-            return NextResponse.json(workflows[idx]);
+        try {
+            const updateData = {};
+            if (payload.nodes) updateData.nodes = JSON.stringify(payload.nodes);
+            if (payload.edges) updateData.edges = JSON.stringify(payload.edges);
+            if (payload.viewport) updateData.viewport = JSON.stringify(payload.viewport);
+
+            const updated = await prisma.workflow.update({
+                where: { id: workflowId, userId: auth.user.id },
+                data: updateData
+            });
+            
+            return NextResponse.json({
+                ...updated,
+                nodes: JSON.parse(updated.nodes || '[]'),
+                edges: JSON.parse(updated.edges || '[]'),
+                viewport: updated.viewport ? JSON.parse(updated.viewport) : { x: 0, y: 0, zoom: 1 }
+            });
+        } catch (error) {
+            return NextResponse.json({ detail: "Not found" }, { status: 404 });
         }
-        return NextResponse.json({ detail: "Not found" }, { status: 404 });
     }
 
     if (segments.length === 2 && segments[1] === 'api-execute') {
         const workflowId = segments[0];
         const payload = await request.json();
-        const workflows = await readJson(WORKFLOWS_FILE);
-        const wf = workflows.find(w => w.id === workflowId);
+        
+        const wf = await prisma.workflow.findUnique({
+            where: { id: workflowId, userId: auth.user.id }
+        });
+        
         if (!wf) return NextResponse.json({ detail: "Workflow not found" }, { status: 404 });
 
-        const runId = `run_${uuidv4()}`;
-        const runs = await readJsonObj(RUNS_FILE);
-        
-        // Initialize state
-        runs[runId] = {
-            run_id: runId,
-            status: "PROCESSING",
-            node_outputs: {},
-            outputs: {}
-        };
-        await writeJson(RUNS_FILE, runs);
+        const run = await prisma.workflowRun.create({
+            data: {
+                userId: auth.user.id,
+                workflowId: workflowId,
+                status: "PROCESSING",
+                nodeOutputs: "{}",
+                outputs: "{}"
+            }
+        });
         
         // Execute DAG asynchronously
-        executeDAG(runId, wf, payload.inputs).catch(console.error);
+        const parsedWorkflow = {
+            ...wf,
+            nodes: JSON.parse(wf.nodes || '[]'),
+            edges: JSON.parse(wf.edges || '[]')
+        };
         
-        return NextResponse.json({ run_id: runId, status: "processing" });
+        executeDAG(run.id, parsedWorkflow, payload.inputs, auth.user.id).catch(console.error);
+        
+        return NextResponse.json({ run_id: run.id, status: "processing" });
     }
 
     return NextResponse.json({ detail: "Not implemented in custom backend" }, { status: 404 });
 }
 
 export async function DELETE(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const segments = slug.path || [];
     
     if (segments[0] === 'delete-workflow-def' && segments[1]) {
-        const workflows = await readJson(WORKFLOWS_FILE);
-        const newWf = workflows.filter(w => w.id !== segments[1]);
-        await writeJson(WORKFLOWS_FILE, newWf);
-        return NextResponse.json({ success: true });
+        try {
+            await prisma.workflow.delete({
+                where: { id: segments[1], userId: auth.user.id }
+            });
+            return NextResponse.json({ success: true });
+        } catch (e) {
+            return NextResponse.json({ detail: "Not implemented or missing" }, { status: 404 });
+        }
     }
     return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
 }
@@ -160,8 +194,7 @@ export async function DELETE(request, { params }) {
 // ----------------------------------------------------------------------------
 // DAG EXECUTION ENGINE
 // ----------------------------------------------------------------------------
-async function executeDAG(runId, workflow, userInputs) {
-    let runs = await readJsonObj(RUNS_FILE);
+async function executeDAG(runId, workflow, userInputs, userId) {
     const nodes = workflow.nodes || [];
     const edges = workflow.edges || [];
     
@@ -209,7 +242,7 @@ async function executeDAG(runId, workflow, userInputs) {
                     });
 
                     // Execute based on node type
-                    const output = await executeNode(node, incomingData, userInputs);
+                    const output = await executeNode(node, incomingData, userInputs, userId);
                     nodeOutputs[node.id] = output;
                     nodeStatus[node.id] = 'completed';
 
@@ -227,26 +260,32 @@ async function executeDAG(runId, workflow, userInputs) {
             finalOutputs[`output_${i}`] = nodeOutputs[n.id]?.value || "No output";
         });
 
-        runs = await readJsonObj(RUNS_FILE);
-        runs[runId].status = "COMPLETED";
-        runs[runId].outputs = finalOutputs;
-        runs[runId].node_outputs = nodeOutputs;
-        await writeJson(RUNS_FILE, runs);
+        await prisma.workflowRun.update({
+            where: { id: runId },
+            data: {
+                status: "COMPLETED",
+                outputs: JSON.stringify(finalOutputs),
+                nodeOutputs: JSON.stringify(nodeOutputs)
+            }
+        });
 
     } catch (e) {
         console.error("Workflow Execution Failed:", e);
-        runs = await readJsonObj(RUNS_FILE);
-        runs[runId].status = "FAILED";
-        runs[runId].error = e.message;
-        runs[runId].node_outputs = nodeOutputs;
-        await writeJson(RUNS_FILE, runs);
+        await prisma.workflowRun.update({
+            where: { id: runId },
+            data: {
+                status: "FAILED",
+                error: e.message,
+                nodeOutputs: JSON.stringify(nodeOutputs)
+            }
+        });
     }
 }
 
 // ----------------------------------------------------------------------------
 // NODE EXECUTION LOGIC
 // ----------------------------------------------------------------------------
-async function executeNode(node, incomingData, userInputs) {
+async function executeNode(node, incomingData, userInputs, userId) {
     const formValues = node.data?.formValues || {};
     
     // Abstract text concatenation helper
@@ -266,6 +305,41 @@ async function executeNode(node, incomingData, userInputs) {
         return imageInputs.length > 0 ? imageInputs[0] : baseImage;
     };
 
+    // Helper to deduct credits and record generation history
+    const recordBillingAndHistory = async (type, prompt, model, parameters, resultUrlStr) => {
+        if (!userId) return;
+        const cost = 5; // Standard cost per node execution
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user || user.credits < cost) {
+            throw new Error(`Insufficient credits for node ${node.id}`);
+        }
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: userId },
+                data: { credits: { decrement: cost } }
+            }),
+            prisma.transaction.create({
+                data: {
+                    userId: userId,
+                    amount: -cost,
+                    type: 'usage',
+                    description: `Workflow node: ${type}`,
+                }
+            }),
+            prisma.generation.create({
+                data: {
+                    userId: userId,
+                    type: type,
+                    prompt: prompt,
+                    model: model,
+                    parameters: JSON.stringify(parameters),
+                    resultUrl: resultUrlStr,
+                    status: 'completed'
+                }
+            })
+        ]);
+    };
+
     if (node.type === 'textNode' || node.type === 'text-passthrough') {
         const prompt = getResolvedText(formValues.prompt || formValues.text_prompt || formValues.text || "");
         if (!prompt) return { type: 'text', value: "Empty input" };
@@ -273,16 +347,20 @@ async function executeNode(node, incomingData, userInputs) {
         const apiKey = process.env.OPENROUTER_API_KEY;
         if (!apiKey) return { type: 'text', value: "[Error: Missing OPENROUTER_API_KEY in .env]" };
 
+        const modelUsed = formValues.model || 'meta-llama/llama-3.1-8b-instruct:free';
         const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: formValues.model || 'meta-llama/llama-3.1-8b-instruct:free',
+                model: modelUsed,
                 messages: [{ role: 'user', content: prompt }]
             })
         });
         const data = await resp.json();
-        return { type: 'text', value: data?.choices?.[0]?.message?.content || "No output from LLM" };
+        const resultText = data?.choices?.[0]?.message?.content || "No output from LLM";
+        
+        await recordBillingAndHistory('workflow_text', prompt, modelUsed, formValues, resultText);
+        return { type: 'text', value: resultText };
     }
 
     if (node.type === 'imageNode') {
@@ -292,16 +370,20 @@ async function executeNode(node, incomingData, userInputs) {
         const apiKey = process.env.AIMLAPI_KEY;
         if (!apiKey) return { type: 'image_url', value: "Missing AIMLAPI_KEY in .env" };
 
+        const modelUsed = formValues.model || 'stabilityai/stable-diffusion-xl-base-1.0';
         const resp = await fetch('https://api.aimlapi.com/images/generations', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: formValues.model || 'stabilityai/stable-diffusion-xl-base-1.0',
+                model: modelUsed,
                 prompt: prompt
             })
         });
         const data = await resp.json();
-        return { type: 'image_url', value: data?.data?.[0]?.url || "" };
+        const resultUrl = data?.data?.[0]?.url || "";
+        
+        await recordBillingAndHistory('workflow_image', prompt, modelUsed, formValues, resultUrl);
+        return { type: 'image_url', value: resultUrl };
     }
     
     if (node.type === 'videoNode') {
@@ -312,17 +394,21 @@ async function executeNode(node, incomingData, userInputs) {
         if (!apiKey) return { type: 'video_url', value: "Missing AIMLAPI_KEY in .env" };
 
         // Simple video fallback request
+        const modelUsed = formValues.model || 'minimax/video-01';
         const resp = await fetch('https://api.aimlapi.com/v2/generate/video', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: formValues.model || 'minimax/video-01',
+                model: modelUsed,
                 prompt: prompt,
                 image: image || undefined
             })
         });
         const data = await resp.json();
-        return { type: 'video_url', value: data?.url || data?.data?.[0]?.url || "" };
+        const resultUrl = data?.url || data?.data?.[0]?.url || "";
+        
+        await recordBillingAndHistory('workflow_video', prompt, modelUsed, formValues, resultUrl);
+        return { type: 'video_url', value: resultUrl };
     }
 
     if (node.type === 'audioNode') {
@@ -330,17 +416,20 @@ async function executeNode(node, incomingData, userInputs) {
         const apiKey = process.env.AIMLAPI_KEY;
         if (!apiKey) return { type: 'audio_url', value: "Missing AIMLAPI_KEY in .env" };
 
+        const modelUsed = formValues.model || 'suno/suno-v3.5';
         const resp = await fetch('https://api.aimlapi.com/v2/generate/audio/suno-ai/suno-v3_5', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: formValues.model || 'suno/suno-v3.5',
+                model: modelUsed,
                 prompt: prompt,
                 make_instrumental: false
             })
         });
         const data = await resp.json();
         const clipUrl = data?.clips?.[0]?.audio_url || data?.audio_url || data?.url || "";
+        
+        await recordBillingAndHistory('workflow_audio', prompt, modelUsed, formValues, clipUrl);
         return { type: 'audio_url', value: clipUrl };
     }
 

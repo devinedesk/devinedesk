@@ -1,114 +1,99 @@
 import { NextResponse } from 'next/server';
-import { getAdapterForModel } from '@/src/lib/providerRouter.js';
-import { getModelById, getVideoModelById, getI2IModelById, getI2VModelById, getV2VModelById, getLipSyncModelById, getAudioModelById } from '@/packages/studio/src/models.js';
+import { processGenerationRequest } from '@/src/services/generationService.js';
+import { validateRequest } from '../auth-check';
+import prisma from '@/src/lib/prisma';
+
+// Define cost per generation action
+const COST_MAP = {
+    'flux-schnell': 5,
+    'flux-pro': 15,
+    'video-gen': 50,
+    'default': 10
+};
 
 export async function POST(request) {
     try {
+        const auth = await validateRequest(request);
+        if (!auth.authorized) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await request.json();
         const { action, params } = body;
         
-        let adapter;
-        let result;
+        let cost = COST_MAP[action] || COST_MAP['default'];
+
+        // If it's a web user, verify credits
+        if (auth.method === 'session') {
+            const user = await prisma.user.findUnique({ where: { id: auth.user.id } });
+            if (!user) {
+                return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            }
+            if (user.credits < cost) {
+                return NextResponse.json({ error: 'Insufficient credits. Please top up.' }, { status: 402 });
+            }
+        }
 
         // Extract possible keys from headers, fallback to process.env
-        const openrouterKey = request.headers.get('x-openrouter-key') || process.env.OPENROUTER_API_KEY;
-        const aimlapiKey = request.headers.get('x-aimlapi-key') || process.env.AIMLAPI_KEY;
-        const goapiKey = request.headers.get('x-goapi-key') || process.env.GOAPI_KEY;
-        const hfToken = request.headers.get('x-hf-token') || process.env.HF_TOKEN;
-        const falKey = request.headers.get('x-fal-key') || process.env.FAL_KEY;
+        const keys = {
+            openrouterKey: request.headers.get('x-openrouter-key') || process.env.OPENROUTER_API_KEY,
+            aimlapiKey: request.headers.get('x-aimlapi-key') || process.env.AIMLAPI_KEY,
+            goapiKey: request.headers.get('x-goapi-key') || process.env.GOAPI_KEY,
+            hfToken: request.headers.get('x-hf-token') || process.env.HF_TOKEN,
+            falKey: request.headers.get('x-fal-key') || process.env.FAL_KEY,
+        };
 
-        switch (action) {
-            case 'generateImage': {
-                const modelInfo = getModelById(params.model);
-                adapter = getAdapterForModel(modelInfo, 't2i');
-                // Pass appropriate key depending on provider
-                if (adapter === (await import('@/src/lib/providers/openrouter.js')).openRouterAdapter) params._apiKey = openrouterKey;
-                if (adapter === (await import('@/src/lib/providers/aimlapi.js')).aimlapiAdapter) params._apiKey = aimlapiKey;
-                if (adapter === (await import('@/src/lib/providers/goapi.js')).goapiAdapter) params._apiKey = goapiKey;
-                if (adapter === (await import('@/src/lib/providers/huggingface.js')).huggingfaceAdapter) params._apiKey = hfToken;
-                result = await adapter.generateImage(params);
-                break;
+        const result = await processGenerationRequest(action, params, keys);
+
+        // Extract result URL if possible
+        let resultUrlStr = '';
+        if (result) {
+            if (typeof result === 'string') {
+                resultUrlStr = result;
+            } else if (result.url) {
+                resultUrlStr = result.url;
+            } else if (result.outputs && result.outputs.length > 0) {
+                resultUrlStr = result.outputs[0];
+            } else if (result.output && result.output.length > 0) {
+                resultUrlStr = result.output[0];
             }
-            case 'generateI2I': {
-                const modelInfo = getI2IModelById(params.model);
-                adapter = getAdapterForModel(modelInfo, 'i2i');
-                if (!adapter.generateI2I) throw new Error("Adapter does not support I2I");
-                params._apiKey = adapter.provider === 'goapi' ? goapiKey : aimlapiKey; // Simplified assignment
-                result = await adapter.generateI2I(params);
-                break;
-            }
-            case 'generateVideo': {
-                const modelInfo = getVideoModelById(params.model);
-                adapter = getAdapterForModel(modelInfo, 'video');
-                params._apiKey = aimlapiKey;
-                result = await adapter.generateVideo(params);
-                break;
-            }
-            case 'generateI2V': {
-                const modelInfo = getI2VModelById(params.model);
-                adapter = getAdapterForModel(modelInfo, 'i2v');
-                if (!adapter.generateI2V) throw new Error("Adapter does not support I2V");
-                params._apiKey = aimlapiKey;
-                result = await adapter.generateI2V(params);
-                break;
-            }
-            case 'generateMarketingStudioAd': {
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                params._apiKey = aimlapiKey;
-                result = await adapter.generateMarketingStudioAd(params);
-                break;
-            }
-            case 'processV2V': {
-                const modelInfo = getV2VModelById(params.model);
-                adapter = getAdapterForModel(modelInfo, 'v2v');
-                if (!adapter.processV2V) throw new Error("Adapter does not support V2V");
-                params._apiKey = aimlapiKey;
-                result = await adapter.processV2V(params);
-                break;
-            }
-            case 'processRecast': {
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                params._apiKey = aimlapiKey;
-                result = await adapter.processRecast(params);
-                break;
-            }
-            case 'processLipSync': {
-                const modelInfo = getLipSyncModelById(params.model);
-                adapter = getAdapterForModel(modelInfo, 'lipsync');
-                if (!adapter.processLipSync) throw new Error("Adapter does not support LipSync");
-                params._apiKey = falKey;
-                result = await adapter.processLipSync(params);
-                break;
-            }
-            case 'generateAudio': {
-                const modelId = params._modelId || params.model;
-                const modelInfo = getAudioModelById(modelId);
-                adapter = getAdapterForModel(modelInfo, 'audio');
-                if (!adapter.generateAudio) throw new Error("Adapter does not support Audio");
-                params._apiKey = aimlapiKey;
-                result = await adapter.generateAudio(params);
-                break;
-            }
-            case 'runClipping': {
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                params._apiKey = aimlapiKey;
-                result = await adapter.runClipping(params);
-                break;
-            }
-            case 'runMotionGraphics': {
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                params._apiKey = aimlapiKey;
-                result = await adapter.runMotionGraphics(params);
-                break;
-            }
-            case 'runMotionGraphicsEdit': {
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                params._apiKey = aimlapiKey;
-                result = await adapter.runMotionGraphicsEdit(params);
-                break;
-            }
-            default:
-                return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });
+        }
+
+        // Decrement credits on success
+        if (auth.method === 'session') {
+            await prisma.$transaction([
+                prisma.user.update({
+                    where: { id: auth.user.id },
+                    data: { credits: { decrement: cost } }
+                }),
+                prisma.transaction.create({
+                    data: {
+                        userId: auth.user.id,
+                        amount: -cost,
+                        type: 'usage',
+                        description: `Generation usage: ${action}`,
+                    }
+                }),
+                prisma.notification.create({
+                    data: {
+                        userId: auth.user.id,
+                        title: 'Generation Complete',
+                        message: `Your ${action} request has finished. (-${cost} credits)`,
+                        type: 'success'
+                    }
+                }),
+                prisma.generation.create({
+                    data: {
+                        userId: auth.user.id,
+                        type: action,
+                        prompt: params?.prompt || '',
+                        model: params?.model || action,
+                        parameters: JSON.stringify(params),
+                        resultUrl: resultUrlStr,
+                        status: 'completed'
+                    }
+                })
+            ]);
         }
 
         return NextResponse.json(result);

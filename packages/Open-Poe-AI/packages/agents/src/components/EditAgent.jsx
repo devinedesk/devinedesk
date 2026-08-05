@@ -199,7 +199,7 @@ const EditAgent = ({ useUser, usedIn }) => {
       setGeneratingIcon(true);
       const prompt = customPrompt || `A professional, clean profile icon for an AI agent named "${formData.name}". Description: ${formData.description || "An AI assistant"}. Minimalist, high-quality, circular composition.`;
       
-      const response = await axios.post("/api/api/v1/flux-schnell-image", {
+      const response = await axios.post("/api/v1/flux-schnell-image", {
         prompt,
         width: 1024,
         height: 1024,

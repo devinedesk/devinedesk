@@ -1,42 +1,19 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../../api/auth/[...nextauth]/route";
+import { PrismaClient } from '@prisma/client';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const AGENTS_FILE = path.join(DATA_DIR, 'agents.json');
-const CONVERSATIONS_FILE = path.join(DATA_DIR, 'conversations.json');
-const REQUESTS_FILE = path.join(DATA_DIR, 'requests.json');
-
-async function readJson(file) {
-    try {
-        const data = await fs.readFile(file, 'utf-8');
-        return JSON.parse(data);
-    } catch {
-        return [];
-    }
-}
-
-async function readJsonObj(file) {
-    try {
-        const data = await fs.readFile(file, 'utf-8');
-        return JSON.parse(data);
-    } catch {
-        return {};
-    }
-}
-
-async function writeJson(file, data) {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(file, JSON.stringify(data, null, 2));
-}
+const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+    }
+
     const segments = params.path || [];
     const url = new URL(request.url);
     const searchParams = url.searchParams;
-
-    const agents = await readJson(AGENTS_FILE);
 
     if (segments.length === 0) {
         // GET /api/agents
@@ -44,47 +21,75 @@ export async function GET(request, { params }) {
         if (isTemplate) {
             return NextResponse.json({ agents: [] }); // No templates for now
         }
+        const agents = await prisma.agent.findMany({
+            where: { userId: session.user.id },
+            orderBy: { createdAt: 'desc' }
+        });
         return NextResponse.json({ agents });
     }
 
     if (segments[0] === 'by-slug' && segments[1]) {
         // GET /api/agents/by-slug/:slug
         const slug = segments[1];
-        const agent = agents.find(a => a.slug === slug);
+        const agent = await prisma.agent.findUnique({
+            where: { slug }
+        });
         if (!agent) return NextResponse.json({ detail: "Not found" }, { status: 404 });
-        return NextResponse.json(agent);
+        
+        // Also fetch conversations for this agent/user
+        const conversations = await prisma.conversation.findMany({
+            where: { agentId: agent.id, userId: session.user.id },
+            include: { messages: true },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return NextResponse.json({ ...agent, conversations });
     }
 
     if (segments[0] === 'templates') {
         return NextResponse.json({ agents: [] });
     }
 
+    // Return request status if asked
+    if (segments[0] === 'requests' && segments[1]) {
+        const reqId = segments[1];
+        const req = global.requests ? global.requests[reqId] : null;
+        if (!req) return NextResponse.json({ detail: "Not found" }, { status: 404 });
+        return NextResponse.json(req);
+    }
+
     return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
 }
 
 export async function POST(request, { params }) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+    }
+
     const segments = params.path || [];
     
     if (segments[0] === 'create') {
         // POST /api/agents/create
         const body = await request.json();
-        const agents = await readJson(AGENTS_FILE);
         
-        const newAgent = {
-            id: `agent_${uuidv4()}`,
-            agent_id: `agent_${uuidv4()}`,
-            slug: body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-            name: body.name,
-            description: body.description || "",
-            system_prompt: body.system_prompt || "",
-            welcome_message: body.welcome_message || "Hello!",
-            created_at: new Date().toISOString()
-        };
+        const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        // Ensure slug is unique
+        const existing = await prisma.agent.findUnique({ where: { slug } });
+        const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
+
+        const newAgent = await prisma.agent.create({
+            data: {
+                userId: session.user.id,
+                slug: finalSlug,
+                name: body.name,
+                description: body.description || "",
+                systemPrompt: body.system_prompt || "",
+                model: "meta-llama/llama-3.1-8b-instruct:free"
+            }
+        });
         
-        agents.push(newAgent);
-        await writeJson(AGENTS_FILE, agents);
-        
-        return NextResponse.json(newAgent);
+        return NextResponse.json({ ...newAgent, system_prompt: newAgent.systemPrompt });
     }
 
     if (segments[0] === 'by-slug' && segments[2] === 'chat') {
@@ -92,91 +97,150 @@ export async function POST(request, { params }) {
         const slug = segments[1];
         const body = await request.json();
         
-        const agents = await readJson(AGENTS_FILE);
-        const agent = agents.find(a => a.slug === slug);
+        const agent = await prisma.agent.findUnique({ where: { slug } });
         if (!agent) return NextResponse.json({ detail: "Agent not found" }, { status: 404 });
 
-        const requestId = `req_${uuidv4()}`;
-        const conversationId = body.conversation_id || `conv_${uuidv4()}`;
+        let conversationId = body.conversation_id;
         
-        // Save initial request state
-        const requests = await readJsonObj(REQUESTS_FILE);
-        requests[requestId] = {
-            is_complete: false,
-            conversation_id: conversationId,
-            agent_slug: slug
-        };
-        await writeJson(REQUESTS_FILE, requests);
-        
-        // Execute LLM asynchronously
-        const apiKey = request.headers.get('x-api-key') || process.env.OPENROUTER_API_KEY;
-        executeChatAsync(requestId, agent, conversationId, body.message, apiKey).catch(console.error);
-        
-        return NextResponse.json({ request_id: requestId, status: "processing" });
-    }
-
-    return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
-}
-
-async function executeChatAsync(requestId, agent, conversationId, userMessage, apiKey) {
-    try {
-        const convs = await readJsonObj(CONVERSATIONS_FILE);
-        if (!convs[conversationId]) {
-            convs[conversationId] = {
-                id: conversationId,
-                messages: []
-            };
-        }
-        
-        // Add user message
-        const userMsg = { id: uuidv4(), role: 'user', content: userMessage, created_at: new Date().toISOString() };
-        convs[conversationId].messages.push(userMsg);
-        await writeJson(CONVERSATIONS_FILE, convs);
-
-        // Build OpenRouter prompt
-        const messagesForLLM = [
-            { role: 'system', content: agent.system_prompt },
-            ...convs[conversationId].messages.map(m => ({ role: m.role, content: m.content }))
-        ];
-
-        let aiContent = "I am a custom local agent! You have not configured your OpenRouter API key yet in Settings.";
-        if (apiKey) {
-            const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'meta-llama/llama-3.1-8b-instruct:free',
-                    messages: messagesForLLM
-                })
+        let conversation;
+        if (!conversationId) {
+            conversation = await prisma.conversation.create({
+                data: {
+                    userId: session.user.id,
+                    agentId: agent.id
+                }
             });
-            const data = await resp.json();
-            if (data.choices && data.choices[0]) {
-                aiContent = data.choices[0].message.content;
+            conversationId = conversation.id;
+        } else {
+            conversation = await prisma.conversation.findUnique({
+                where: { id: conversationId }
+            });
+            if (!conversation) {
+                conversation = await prisma.conversation.create({
+                    data: {
+                        id: conversationId,
+                        userId: session.user.id,
+                        agentId: agent.id
+                    }
+                });
             }
         }
 
-        // Add assistant message
-        const aiMsg = { id: uuidv4(), role: 'assistant', content: aiContent, created_at: new Date().toISOString() };
-        convs[conversationId].messages.push(aiMsg);
-        await writeJson(CONVERSATIONS_FILE, convs);
+        // Add user message
+        await prisma.message.create({
+            data: {
+                conversationId: conversation.id,
+                role: 'user',
+                content: body.message
+            }
+        });
 
-        // Mark request as complete
-        const requests = await readJsonObj(REQUESTS_FILE);
-        requests[requestId] = {
+        // Get all messages
+        const allMessages = await prisma.message.findMany({
+            where: { conversationId: conversation.id },
+            orderBy: { createdAt: 'asc' }
+        });
+
+        const messagesForLLM = [
+            { role: 'system', content: agent.systemPrompt || "You are a helpful AI assistant." },
+            ...allMessages.map(m => ({ role: m.role, content: m.content }))
+        ];
+
+        const cost = 5; // Standard cost per agent message
+        const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+        if (!user || user.credits < cost) {
+            return NextResponse.json({ detail: "Insufficient credits to chat with agent." }, { status: 402 });
+        }
+
+        let aiContent = "I am a custom local agent! You have not configured your OpenRouter API key yet in Settings.";
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        const modelUsed = agent.model || 'meta-llama/llama-3.1-8b-instruct:free';
+        
+        if (apiKey) {
+            try {
+                const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: modelUsed,
+                        messages: messagesForLLM
+                    })
+                });
+                const data = await resp.json();
+                if (data.choices && data.choices[0]) {
+                    aiContent = data.choices[0].message.content;
+                } else {
+                    console.error("OpenRouter error:", data);
+                }
+            } catch (e) {
+                console.error("Fetch error:", e);
+                aiContent = "Error reaching AI provider.";
+            }
+        }
+
+        // Save AI message, deduct credits, and record history atomically
+        let aiMsg;
+        await prisma.$transaction(async (tx) => {
+            aiMsg = await tx.message.create({
+                data: {
+                    conversationId: conversation.id,
+                    role: 'assistant',
+                    content: aiContent
+                }
+            });
+
+            if (apiKey) {
+                await tx.user.update({
+                    where: { id: session.user.id },
+                    data: { credits: { decrement: cost } }
+                });
+
+                await tx.transaction.create({
+                    data: {
+                        userId: session.user.id,
+                        amount: -cost,
+                        type: 'usage',
+                        description: `Agent chat response: ${agent.slug}`,
+                    }
+                });
+
+                await tx.generation.create({
+                    data: {
+                        userId: session.user.id,
+                        type: 'agent_chat',
+                        prompt: body.message,
+                        model: modelUsed,
+                        parameters: JSON.stringify({ agentId: agent.id, conversationId: conversation.id }),
+                        resultUrl: aiContent,
+                        status: 'completed'
+                    }
+                });
+            }
+        });
+
+        // For simplicity, we just return the full messages to act as the completed request response.
+        // Wait, the client polls /api/agents/requests/:id ? 
+        // If the client expects `{ request_id: ..., status: "processing" }` and then polls, 
+        // we can just return it. 
+        // BUT, what if we just emulate the poll right here? 
+        // Let's check how ai-agent works. ai-agent usually POSTs to `/chat` and gets a request_id, 
+        // then GETs `/requests/:request_id`.
+        // Let's create a temporary in-memory store for requests to satisfy polling if we must.
+        const reqId = `req_${Date.now()}`;
+        
+        global.requests = global.requests || {};
+        global.requests[reqId] = {
             is_complete: true,
-            conversation_id: conversationId,
-            messages: convs[conversationId].messages,
+            conversation_id: conversation.id,
+            messages: [...allMessages, aiMsg].map(m => ({ role: m.role, content: m.content })),
             suggestions: []
         };
-        await writeJson(REQUESTS_FILE, requests);
 
-    } catch (e) {
-        console.error("Agent execution failed:", e);
-        const requests = await readJsonObj(REQUESTS_FILE);
-        requests[requestId] = { is_complete: true, error: e.message };
-        await writeJson(REQUESTS_FILE, requests);
+        return NextResponse.json({ request_id: reqId, status: "processing" });
     }
+
+    return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
 }

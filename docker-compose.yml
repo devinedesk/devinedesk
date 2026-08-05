@@ -9,7 +9,13 @@ services:
       - DATABASE_URL=file:/app/prisma/data/dev.db
     volumes:
       - devinedesk_data:/app/prisma/data
-    restart: unless-stopped
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   devinedesk_data:

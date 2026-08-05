@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
+import { validateRequest } from '../auth-check';
 import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ error: 'Missing x-user-id' }, { status: 400 });
+    const auth = await validateRequest(request);
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
         const { searchParams } = new URL(request.url);
@@ -12,7 +15,7 @@ export async function GET(request) {
 
         const setting = await prisma.setting.findUnique({
             where: {
-                userId_key: { userId, key }
+                userId_key: { userId: auth.user.id, key }
             }
         });
 
@@ -24,25 +27,20 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ error: 'Missing x-user-id' }, { status: 400 });
+    const auth = await validateRequest(request);
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
         const { key, value } = await request.json();
-        
-        // Ensure user exists
-        await prisma.user.upsert({
-            where: { id: userId },
-            update: {},
-            create: { id: userId, name: 'Local User' }
-        });
 
         await prisma.setting.upsert({
             where: {
-                userId_key: { userId, key }
+                userId_key: { userId: auth.user.id, key }
             },
             update: { value },
-            create: { userId, key, value }
+            create: { userId: auth.user.id, key, value }
         });
 
         return NextResponse.json({ success: true });

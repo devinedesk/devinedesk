@@ -25,37 +25,6 @@ export default function AgentChatClient({ agentDetails, initialHistory, userData
     hasUserData: !!userData 
   });
 
-  useEffect(() => {
-    const getKey = () => {
-      if (typeof window === "undefined") return null;
-      const fromStorage = localStorage.getItem(STORAGE_KEY);
-      if (fromStorage) return fromStorage;
-      const match = document.cookie.match(/platform_api_key=([^;]+)/);
-      return match ? match[1] : null;
-    };
-
-    const apiKey = getKey();
-    if (!apiKey) return;
-
-    interceptorRef.current = axios.interceptors.request.use((config) => {
-      const isRelative =
-        config.url.startsWith("/") || !config.url.startsWith("http");
-      // Include specific proxy paths to be sure
-      const isInternalProxy = config.url.includes('/api/app') || config.url.includes('/api/workflow') || config.url.includes('/api/agents') || config.url.includes('/api/api') || config.url.includes('/api/v1');
-      
-      if (isRelative || isInternalProxy) {
-        config.headers["x-api-key"] = apiKey;
-      }
-      return config;
-    });
-
-    return () => {
-      if (interceptorRef.current !== null) {
-        axios.interceptors.request.eject(interceptorRef.current);
-      }
-    };
-  }, []);
-
   const useUser = useCallback(
     () => ({
       user: {
@@ -71,7 +40,7 @@ export default function AgentChatClient({ agentDetails, initialHistory, userData
   );
 
   return (
-    <div className="h-screen w-full bg-black">
+    <div className="h-screen w-full bg-app-bg">
       <AiAgent
         initialAgentDetails={agentDetails}
         initialHistory={initialHistory}

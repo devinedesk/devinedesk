@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
+import { validateRequest } from '../auth-check';
 import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-        return NextResponse.json({ error: 'Missing x-user-id header' }, { status: 400 });
+    const auth = await validateRequest(request);
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
         const settings = await prisma.setting.findMany({
-            where: { userId }
+            where: { userId: auth.user.id }
         });
 
         const settingsMap = settings.reduce((acc, curr) => {
@@ -25,35 +26,28 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-        return NextResponse.json({ error: 'Missing x-user-id header' }, { status: 400 });
+    const auth = await validateRequest(request);
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
         const body = await request.json();
         
-        // Ensure user exists
-        await prisma.user.upsert({
-            where: { id: userId },
-            update: {},
-            create: { id: userId, name: 'Local User' }
-        });
-
         // Upsert all settings in a transaction
         const updates = Object.entries(body).map(([key, value]) => {
             if (value === null || value === undefined || value.trim() === '') {
                 // Delete if empty
                 return prisma.setting.deleteMany({
-                    where: { userId, key }
+                    where: { userId: auth.user.id, key }
                 });
             }
             return prisma.setting.upsert({
                 where: {
-                    userId_key: { userId, key }
+                    userId_key: { userId: auth.user.id, key }
                 },
                 update: { value: value.trim() },
-                create: { userId, key, value: value.trim() }
+                create: { userId: auth.user.id, key, value: value.trim() }
             });
         });
 

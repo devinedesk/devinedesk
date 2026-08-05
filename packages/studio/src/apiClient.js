@@ -4,8 +4,8 @@ import { getAdapterForModel } from '../../../src/lib/providerRouter.js';
 // under /api/* re-issue the call server-side) so api.api.ai CORS is bypassed.
 // SSR (no window) and Electron's file:// renderer call the upstream directly.
 const BASE_URL = (typeof window !== 'undefined' && window.location?.protocol?.startsWith('http'))
-    ? process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.api.ai'
-    : process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.api.ai';
+    ? process.env.NEXT_PUBLIC_BACKEND_URL || '/api'
+    : process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000/api';
 const PROXY_WF_BASE = '/api/workflow';
 
 function notifyAuthRequired(status, detail) {
@@ -93,7 +93,7 @@ async function executeGeneration(action, params) {
 }
 
 async function pollForResult(requestId, key, maxAttempts = 900, interval = 2000) {
-    const pollUrl = `${BASE_URL}/api/v1/predictions/${requestId}/result`;
+    const pollUrl = `${BASE_URL}/v1/predictions/${requestId}/result`;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         await new Promise(resolve => setTimeout(resolve, interval));
         try {
@@ -118,7 +118,7 @@ async function pollForResult(requestId, key, maxAttempts = 900, interval = 2000)
 }
 
 async function submitAndPoll(endpoint, payload, key, onRequestId, maxAttempts = 60) {
-    const url = `${BASE_URL}/api/v1/${endpoint}`;
+    const url = `${BASE_URL}/v1/${endpoint}`;
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': key },
@@ -224,7 +224,7 @@ export function uploadFile(apiKey, file, onProgress, customCloudName, customUplo
 }
 
 export async function getUserBalance(apiKey) {
-    const response = await fetch(`${BASE_URL}/api/v1/account/balance`, {
+    const response = await fetch(`${BASE_URL}/v1/account/balance`, {
         headers: {
             'Content-Type': 'application/json',
             'x-api-key': apiKey
@@ -404,7 +404,7 @@ export async function sendAgentChatMessage(apiKey, agentSlug, { message, convers
 // text (get_result_url_from_output only returns output_data once COMPLETED), so
 // this just waits until is_complete rather than showing incremental progress.
 export async function pollAgentChatResult(apiKey, requestId, { maxAttempts = 150, interval = 2000 } = {}) {
-    const url = `${BASE_URL}/api/v1/predictions/${requestId}/result`;
+    const url = `${BASE_URL}/agents/requests/${requestId}`;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         await new Promise(resolve => setTimeout(resolve, interval));
         const response = await fetch(url, {
@@ -709,7 +709,7 @@ export async function handleServerSideProxy(prefix, request, params, apiKey) {
 }
 
 export async function calculateDynamicCost(apiKey, taskName, payload) {
-    const response = await fetch(`${BASE_URL}/api/v1/app/calculate_dynamic_cost`, {
+    const response = await fetch(`${BASE_URL}/v1/app/calculate_dynamic_cost`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -760,7 +760,7 @@ export async function getHistory(apiKey, { cursor, limit = 50 } = {}) {
     const params = new URLSearchParams();
     if (cursor) params.set('cursor', cursor);
     if (limit) params.set('limit', String(limit));
-    const response = await fetch(`${BASE_URL}/api/v1/history?${params.toString()}`, {
+    const response = await fetch(`${BASE_URL}/v1/history?${params.toString()}`, {
         headers: {
             'Content-Type': 'application/json',
             'x-api-key': apiKey

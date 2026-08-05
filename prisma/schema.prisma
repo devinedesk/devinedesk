@@ -13,13 +13,77 @@ datasource db {
 }
 
 model User {
-  id        String       @id @default(uuid())
-  email     String?      @unique
-  name      String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  settings  Setting[]
-  history   Generation[]
+  id               String    @id @default(uuid())
+  email            String?   @unique
+  emailVerified    DateTime?
+  password         String?
+  name             String?
+  image            String?
+  role             String    @default("USER")
+  credits          Int       @default(50)
+  stripeCustomerId String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  settings      Setting[]
+  history       Generation[]
+  workflows     Workflow[]
+  workflowRuns  WorkflowRun[]
+  agents        Agent[]
+  assets        Asset[]
+  transactions  Transaction[]
+  notifications Notification[]
+  conversations Conversation[]
+  appInterests  AppInterest[]
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String
+  amount          Int // Number of credits
+  type            String // 'purchase', 'usage', 'bonus'
+  description     String?
+  stripePaymentId String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model Setting {
@@ -38,11 +102,106 @@ model Generation {
   id         String   @id @default(uuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type       String   // e.g., 't2i', 'video', 'lipsync'
+  type       String // e.g., 't2i', 'video', 'lipsync'
   prompt     String?
   model      String?
-  parameters String?  // JSON serialized string of parameters
+  parameters String? // JSON serialized string of parameters
   resultUrl  String?
   status     String   @default("completed")
   createdAt  DateTime @default(now())
+}
+
+model Workflow {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  nodes       String // JSON string of nodes
+  edges       String // JSON string of edges
+  viewport    String? // JSON string of viewport
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  runs        WorkflowRun[]
+}
+
+model WorkflowRun {
+  id          String   @id @default(uuid())
+  workflowId  String
+  userId      String
+  status      String   @default("PROCESSING") // PROCESSING, COMPLETED, FAILED
+  nodeOutputs String?  // JSON string
+  outputs     String?  // JSON string
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agent {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug         String   @unique
+  name         String
+  description  String?
+  systemPrompt String?
+  model        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  conversations Conversation[]
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  userId    String
+  agentId   String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent     Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // 'user' or 'assistant'
+  content        String
+  createdAt      DateTime     @default(now())
+}
+
+model Asset {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // 'image', 'video', 'audio', etc.
+  url       String
+  metadata  String? // JSON string
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("info") // info, success, warning, error
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AppInterest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appName   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, appName])
 }

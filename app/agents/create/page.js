@@ -1,27 +1,20 @@
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../api/auth/[...nextauth]/route";
 import AgentCreateClient from "./AgentCreateClient";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.Local API.ai';
-
-async function fetchUserData(apiKey) {
-  if (!apiKey) return null;
-  try {
-    const res = await fetch(`${BASE_URL}/api/v1/account/balance`, {
-      cache: "no-store",
-      headers: { "x-api-key": apiKey },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
+import { redirect } from "next/navigation";
 
 export default async function CreateAgentPage() {
-  const cookieStore = await cookies();
-  const apiKey = cookieStore.get("platform_api_key")?.value;
+  const session = await getServerSession(authOptions);
 
-  const userData = await fetchUserData(apiKey);
+  if (!session || !session.user) {
+    redirect("/auth/login");
+  }
+
+  const userData = {
+    balance: session.user.credits || 0,
+    email: session.user.email,
+    name: session.user.name
+  };
 
   return (
     <AgentCreateClient userData={userData} />

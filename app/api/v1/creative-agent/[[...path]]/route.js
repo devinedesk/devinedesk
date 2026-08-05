@@ -1,17 +1,8 @@
 import { NextResponse } from 'next/server';
+import { validateRequest } from '../../../auth-check';
 
 const LOCAL_API_BASE = process.env.BACKEND_API_URL || 'http://localhost:3000';
-
-function getApiKey(request) {
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        return authHeader.substring(7);
-    }
-    const headerKey = request.headers.get('x-api-key');
-    if (headerKey) return headerKey;
-    // Cookie-based auth removed for security: no HttpOnly flag exposes key to XSS (CWE-522)
-    return null;
-}
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || process.env.LOCAL_API_KEY || process.env.OPENROUTER_API_KEY || '';
 
 function cleanHeaders(request) {
     const headers = new Headers(request.headers);
@@ -19,11 +10,14 @@ function cleanHeaders(request) {
     headers.delete('connection');
     headers.delete('cookie');
     headers.delete('Authorization');
-    headers.delete('x-api-key');
+    headers.delete('x-api-key'); // Prevent client injection
     return headers;
 }
 
 export async function GET(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const pathSegments = slug.path || [];
     const path = pathSegments.join('/');
@@ -32,10 +26,7 @@ export async function GET(request, { params }) {
     const targetUrl = `${LOCAL_API_BASE}/api/v1/creative-agent/${path}${search}`;
 
     const headers = cleanHeaders(request);
-    const apiKey = getApiKey(request);
-    // NOTE: credential logging removed for security (CWE-200)
-
-    if (apiKey) headers.set('x-api-key', apiKey);
+    if (INTERNAL_API_KEY) headers.set('x-api-key', INTERNAL_API_KEY);
 
     try {
         const response = await fetch(targetUrl, { headers, method: 'GET' });
@@ -48,6 +39,9 @@ export async function GET(request, { params }) {
 }
 
 export async function POST(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const pathSegments = slug.path || [];
     const path = pathSegments.join('/');
@@ -56,10 +50,7 @@ export async function POST(request, { params }) {
     const targetUrl = `${LOCAL_API_BASE}/api/v1/creative-agent/${path}${search}`;
 
     const headers = cleanHeaders(request);
-    const apiKey = getApiKey(request);
-    // NOTE: credential logging removed for security (CWE-200)
-
-    if (apiKey) headers.set('x-api-key', apiKey);
+    if (INTERNAL_API_KEY) headers.set('x-api-key', INTERNAL_API_KEY);
 
     try {
         const body = await request.arrayBuffer();
@@ -73,6 +64,9 @@ export async function POST(request, { params }) {
 }
 
 export async function PATCH(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const pathSegments = slug.path || [];
     const path = pathSegments.join('/');
@@ -81,10 +75,7 @@ export async function PATCH(request, { params }) {
     const targetUrl = `${LOCAL_API_BASE}/api/v1/creative-agent/${path}${search}`;
 
     const headers = cleanHeaders(request);
-    const apiKey = getApiKey(request);
-    // NOTE: credential logging removed for security (CWE-200)
-
-    if (apiKey) headers.set('x-api-key', apiKey);
+    if (INTERNAL_API_KEY) headers.set('x-api-key', INTERNAL_API_KEY);
 
     try {
         const body = await request.arrayBuffer();
@@ -98,6 +89,9 @@ export async function PATCH(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+    const auth = await validateRequest(request);
+    if (!auth.authorized) return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+
     const slug = await params;
     const pathSegments = slug.path || [];
     const path = pathSegments.join('/');
@@ -106,10 +100,7 @@ export async function DELETE(request, { params }) {
     const targetUrl = `${LOCAL_API_BASE}/api/v1/creative-agent/${path}${search}`;
 
     const headers = cleanHeaders(request);
-    const apiKey = getApiKey(request);
-    // NOTE: credential logging removed for security (CWE-200)
-
-    if (apiKey) headers.set('x-api-key', apiKey);
+    if (INTERNAL_API_KEY) headers.set('x-api-key', INTERNAL_API_KEY);
 
     try {
         const response = await fetch(targetUrl, { method: 'DELETE', headers });

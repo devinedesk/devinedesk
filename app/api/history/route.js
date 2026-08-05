@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
+import { validateRequest } from '../auth-check';
 import prisma from '@/src/lib/prisma';
 
 export async function GET(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ error: 'Missing x-user-id' }, { status: 400 });
+    const auth = await validateRequest(request);
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
         const history = await prisma.generation.findMany({
-            where: { userId },
+            where: { userId: auth.user.id },
             orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json(history);
@@ -17,41 +20,13 @@ export async function GET(request) {
     }
 }
 
-export async function POST(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ error: 'Missing x-user-id' }, { status: 400 });
-
-    try {
-        const body = await request.json();
-        
-        // Ensure user exists
-        await prisma.user.upsert({
-            where: { id: userId },
-            update: {},
-            create: { id: userId, name: 'Local User' }
-        });
-
-        const newGen = await prisma.generation.create({
-            data: {
-                userId,
-                type: body.type || 'unknown',
-                prompt: body.prompt || '',
-                model: body.model || '',
-                parameters: body.parameters ? JSON.stringify(body.parameters) : null,
-                resultUrl: body.resultUrl || '',
-                status: body.status || 'completed'
-            }
-        });
-        return NextResponse.json(newGen);
-    } catch (error) {
-        console.error('Save history err:', error);
-        return NextResponse.json({ error: 'Failed to save history' }, { status: 500 });
-    }
-}
+// POST method removed: History generation records are now created securely in the /api/generate route during credit deduction.
 
 export async function DELETE(request) {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) return NextResponse.json({ error: 'Missing x-user-id' }, { status: 400 });
+    const auth = await validateRequest(request);
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
         const { searchParams } = new URL(request.url);
@@ -59,12 +34,12 @@ export async function DELETE(request) {
 
         if (id) {
             await prisma.generation.deleteMany({
-                where: { id, userId }
+                where: { id, userId: auth.user.id }
             });
         } else {
             // Delete all for user
             await prisma.generation.deleteMany({
-                where: { userId }
+                where: { userId: auth.user.id }
             });
         }
 
