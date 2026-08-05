@@ -11,9 +11,11 @@ function addSecurityHeaders(response) {
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     // Media can come from various providers now (e.g., Cloudinary, AIMLAPI, HuggingFace).
     // We allow all https/http connections for connect-src to support the multi-provider routing.
+    // Dev-only allowance so impeccable live mode can load
+    const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
     response.headers.set(
         'Content-Security-Policy',
-        "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: http: wss: ws:; font-src 'self' data:;"
+        `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'${__impeccableLiveDev}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: http: wss: ws:${__impeccableLiveDev}; font-src 'self' data:;`
     );
     return response;
 }
