@@ -161,7 +161,7 @@ export default function ProfileAgent({ useUser, usedIn = "Local APIapp" }) {
                   {agent.name}
                 </h1>
                 {agent.is_published && (
-                  <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-white/10 text-blue-600 dark:text-gray-300 border border-blue-100 dark:border-white/10">
+                  <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-white/10 text-cyan-500 dark:text-gray-300 border border-blue-100 dark:border-white/10">
                     <MdOutlineVerified className="w-3 h-3" /> Public
                   </span>
                 )}
@@ -288,7 +288,7 @@ export default function ProfileAgent({ useUser, usedIn = "Local APIapp" }) {
                     }
                     className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-[#0a0a0a] flex items-center justify-center shrink-0">
                       <IoChatbubbleEllipsesSharp className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-white transition-colors" />
                     </div>
                     <div className="flex-1 min-w-0">

@@ -586,7 +586,7 @@ function StandaloneShellInner() {
   }, []);
 
   if (!hasMounted) return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+    <div className="min-h-screen bg-[#030303] flex items-center justify-center">
       <div className="animate-spin text-[#22d3ee] text-3xl">◌</div>
     </div>
   );
@@ -643,7 +643,7 @@ function StandaloneShellInner() {
 
       {/* Header */}
       {isHeaderVisible && (
-        <header className="flex-shrink-0 h-14 border-b border-white/[0.05] flex items-center justify-between px-4 bg-[#0a0a0b]/80 backdrop-blur-md z-50 gap-4">
+        <header className="flex-shrink-0 h-14 border-b border-white/[0.05] flex items-center justify-between px-4 bg-black/40 backdrop-blur-xl z-50 gap-4">
           {/* Left: Mobile menu toggle + Logo + Desktop Sidebar Toggle */}
           <div className="flex items-center gap-3">
             {/* Mobile drawer toggle */}
@@ -681,7 +681,7 @@ function StandaloneShellInner() {
                 </svg>
               </button>
               {/* Custom Tooltip */}
-              <div className="absolute left-0 top-full mt-2 px-2.5 py-1 bg-[#121215]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md shadow-2xl border border-white/15 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 whitespace-nowrap">
+              <div className="absolute left-0 top-full mt-2 px-2.5 py-1 bg-[#111111]/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md shadow-2xl border border-white/15 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 whitespace-nowrap">
                 {isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               </div>
             </div>
@@ -741,7 +741,7 @@ function StandaloneShellInner() {
         {isHeaderVisible && (
           <aside
             className={`
-              fixed top-14 bottom-0 left-0 md:static md:h-full z-30 bg-[#0a0a0b]/95 backdrop-blur-md border-r border-white/[0.06] flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 select-none
+              fixed top-14 bottom-0 left-0 md:static md:h-full z-30 bg-black/40 backdrop-blur-xl border-r border-white/[0.06] flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 select-none
               ${isMobileOpen ? 'translate-x-0 w-60 z-50' : '-translate-x-full md:translate-x-0'}
               ${isSidebarCollapsed ? 'md:w-16' : 'md:w-52'}
             `}

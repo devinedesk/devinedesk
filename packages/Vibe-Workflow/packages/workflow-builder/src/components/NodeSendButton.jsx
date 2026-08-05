@@ -28,7 +28,7 @@ const NodeSendButton = ({ id, data, outputHistory, currentHistoryIndex, currentO
             setShowMenu(!showMenu);
           }
         }}
-        className={`group/btn relative flex items-center justify-center w-5 h-5 rounded-full transition-all duration-300 bg-blue-600 hover:bg-blue-500 text-white shadow-lg`}
+        className={`group/btn relative flex items-center justify-center w-5 h-5 rounded-full transition-all duration-300 bg-cyan-500 hover:bg-cyan-400 text-white shadow-lg`}
         title="Send to Connected Node"
       >
         <div className="w-1.5 h-1.5 rounded-full bg-current" />

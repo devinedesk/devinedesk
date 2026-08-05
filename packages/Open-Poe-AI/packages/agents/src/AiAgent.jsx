@@ -681,7 +681,7 @@ const ChatPage = ({
 
   return (
     <main
-      className="h-dvh flex flex-col selection:bg-blue-500/30 relative"
+      className="h-dvh flex flex-col selection:bg-cyan-400/30 relative"
       style={{
         ...generateCssVariables(currentTheme),
         background: "var(--bg-primary)",
@@ -1439,7 +1439,7 @@ const ChatPage = ({
                   )
                 }
                 type="button"
-                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-cyan-500 hover:bg-blue-700 text-white font-medium transition-all shadow-lg shadow-cyan-400/20 disabled:opacity-50"
                 disabled={downloadingUrl === selectedMedia.url}
               >
                 {downloadingUrl === selectedMedia.url ? (

@@ -492,7 +492,7 @@ const ImageGeneration = ({ id, data, selected }) => {
         )}
       </div>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#151618] to-[#1c1e21] rounded-t-2xl border-b border-zinc-800 p-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 p-3">
           <div className="flex items-center gap-2.5">
             <div className={`p-1.5 rounded-lg ${selected ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <IoImageOutline size={14} />
@@ -661,15 +661,15 @@ const ImageGeneration = ({ id, data, selected }) => {
         className={`
           !rounded-full !border-[3px] !left-[-8px] transition-all
           ${connectedInputs.imageInput 
-            ? '!bg-blue-600 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]' 
-            : '!bg-zinc-900 !border-blue-600/50 hover:!border-blue-600 shadow-sm'
+            ? '!bg-cyan-500 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]' 
+            : '!bg-zinc-900 !border-cyan-500/50 hover:!border-cyan-500 shadow-sm'
           }
         `}
         data-type="blue"
       />
       {hasPrompt && (
         <p 
-          className={`absolute -left-8 top-[100px] text-xs text-blue-500 transition-opacity duration-200 ${
+          className={`absolute -left-8 top-[100px] text-xs text-cyan-400 transition-opacity duration-200 ${
             data.activeHandleColor === "blue"
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100"

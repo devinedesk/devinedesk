@@ -62,7 +62,7 @@ const initialEdges = [];
 
 const edgeStyles = {
   blue: {
-    stroke: '#3b82f6', // blue-500
+    stroke: '#3b82f6', // cyan-400
     strokeWidth: 2,
     // animated: true,
   },
@@ -2234,7 +2234,7 @@ const NodeFlow = ({
                   suppressHydrationWarning={true}
                   disabled={isRunning === 1 || !interactionMode}
                   onClick={handleRunWorkflow}
-                  className="flex items-center gap-2 px-4 py-1.5 border border-gray-600/70 bg-blue-500 text-white text-sm rounded-full font-semibold group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black hover:text-white whitespace-nowrap"
+                  className="flex items-center gap-2 px-4 py-1.5 border border-gray-600/70 bg-cyan-400 text-white text-sm rounded-full font-semibold group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black hover:text-white whitespace-nowrap"
                 >
                   {isRunning === 1 ? (
                     <>
@@ -2370,7 +2370,7 @@ const NodeFlow = ({
           type="button"
           suppressHydrationWarning={true}
           onClick={() => fitView({ padding: 0.4, duration: 500, minZoom: 0.2 })}
-          className="p-3 rounded-full hover:bg-[#1b1e23] cursor-pointer outline-none text-gray-300 active:bg-blue-600 hover:text-white transition"
+          className="p-3 rounded-full hover:bg-[#1b1e23] cursor-pointer outline-none text-gray-300 active:bg-cyan-500 hover:text-white transition"
         >
           <MdOutlineZoomOutMap size={18} />
         </button>
@@ -2480,7 +2480,7 @@ const NodeFlow = ({
                     suppressHydrationWarning={true}
                     ref={modelDropdownTriggerRef}
                     onClick={() => setDropDown(prev => prev === 3 ? 0 : 3)}
-                    className="flex items-center justify-between gap-1 text-sm text-center text-white w-full h-full cursor-pointer whitespace-nowrap px-3 py-2 bg-zinc-900/50 border border-white/10 hover:border-white/20 focus:outline-none rounded-lg transition-all"
+                    className="flex items-center justify-between gap-1 text-sm text-center text-white w-full h-full cursor-pointer whitespace-nowrap px-3 py-2 bg-black/30 backdrop-blur-md border border-white/10 hover:border-white/20 focus:outline-none rounded-lg transition-all"
                   >
                     {selectedNode?.data?.selectedModel?.name || ""}
                     <FaAngleDown size={14} className={`transition-all duration-300 ${dropDown === 3 && "rotate-180"}`} />
@@ -2492,7 +2492,7 @@ const NodeFlow = ({
                         value={modelSearch}
                         onChange={(e) => setModelSearch(e.target.value)}
                         placeholder="Search models..."
-                        className="px-3 py-2 text-xs bg-black/40 border border-white/5 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500/50 transition-all"
+                        className="px-3 py-2 text-xs bg-black/40 border border-white/5 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400/50 transition-all"
                       />
                       <div className="flex flex-col overflow-y-auto">
                         {getFilteredModelsForNode(selectedNode).length > 0 ? (
@@ -2500,7 +2500,7 @@ const NodeFlow = ({
                             <div
                               key={idx}
                               className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg transition-all ${selectedNode?.data?.selectedModel?.id === model.id
-                                  ? "bg-blue-500/10 text-blue-400"
+                                  ? "bg-cyan-400/10 text-blue-400"
                                   : "text-zinc-400 hover:bg-white/5 hover:text-white"
                                 }`}
                               onClick={() => {
@@ -2542,7 +2542,7 @@ const NodeFlow = ({
                           suppressHydrationWarning={true}
                           onClick={() => selectedNode && runNodeInputsFromFlow(selectedNode.id)}
                           disabled={selectedNode?.data?.loading === 1}
-                          className="absolute top-0 z-10 text-[10px] font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 group disabled:cursor-not-allowed rounded-full text-white bg-blue-600 px-3 py-1 border border-blue-500/50 hover:bg-blue-500 transition-all self-end shadow-lg shadow-blue-900/20"
+                          className="absolute top-0 z-10 text-[10px] font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 group disabled:cursor-not-allowed rounded-full text-white bg-cyan-500 px-3 py-1 border border-cyan-400/50 hover:bg-cyan-400 transition-all self-end shadow-lg shadow-blue-900/20"
                         >
                           {selectedNode?.data?.loading === 1 ? (
                             <><div className="w-3 h-3 rounded-full border border-t-transparent group-hover:border-t-transparent border-black group-hover:border-white animate-spin"></div>Generating...</>
@@ -2704,7 +2704,7 @@ const NodeFlow = ({
                       );
                     }}
                   />
-                  <div className="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
+                  <div className="w-9 h-5 bg-[#0a0a0a] rounded-full peer peer-checked:bg-cyan-500 transition-colors"></div>
                   <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full peer-checked:translate-x-4 transition-transform"></div>
                 </div>
               </label>
@@ -2714,7 +2714,7 @@ const NodeFlow = ({
                   suppressHydrationWarning={true}
                   onClick={() => selectedNode && runNodeFromFlow(selectedNode.id)}
                   disabled={loadingNodes[selectedNode.id]}
-                  className="text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 group disabled:cursor-not-allowed rounded-lg text-white bg-blue-500 px-4 py-2 border border-blue-500/50 hover:bg-blue-600 w-full transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
+                  className="text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 group disabled:cursor-not-allowed rounded-lg text-white bg-cyan-400 px-4 py-2 border border-cyan-400/50 hover:bg-cyan-500 w-full transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
                 >
                   {loadingNodes[selectedNode.id] ? (
                     <><div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>Generating...</>
@@ -2779,7 +2779,7 @@ const NodeFlow = ({
               type="button"
               suppressHydrationWarning={true}
               onClick={() => setDropDown(0)}
-              className="px-4 py-2 bg-gray-700/50 text-white rounded-full text-sm hover:bg-gray-600/50 transition w-full cursor-pointer"
+              className="px-4 py-2 bg-[#0a0a0a]/50 text-white rounded-full text-sm hover:bg-gray-600/50 transition w-full cursor-pointer"
             >
               Cancel
             </button>
@@ -2787,7 +2787,7 @@ const NodeFlow = ({
               type="button"
               suppressHydrationWarning={true}
               onClick={handleSaveWorkFlow}
-              className="px-4 py-2 bg-white text-black rounded-full hover:bg-blue-500 hover:text-white transition w-full text-sm cursor-pointer"
+              className="px-4 py-2 bg-white text-black rounded-full hover:bg-cyan-400 hover:text-white transition w-full text-sm cursor-pointer"
             >
               Save
             </button>
@@ -2812,7 +2812,7 @@ const NodeFlow = ({
                 >
                   <div className="z-10 p-2 bg-[#242629] border-b border-gray-700 flex items-center px-3 justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${preset.id === "empty-workflow" ? "bg-gray-400" : "bg-blue-500"}`}></div>
+                      <div className={`w-2 h-2 rounded-full ${preset.id === "empty-workflow" ? "bg-gray-400" : "bg-cyan-400"}`}></div>
                       <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">{preset.id === "empty-workflow" ? "NEW" : "PRESET"}</span>
                     </div>
                     <div className="flex gap-1">
@@ -2848,7 +2848,7 @@ const NodeFlow = ({
               type="button"
               suppressHydrationWarning={true}
               onClick={() => setIsPresetsDismissed(true)}
-              className="mt-4 px-5 py-2 rounded-full bg-gray-800/80 hover:bg-gray-700 text-xs text-gray-300 font-medium transition-colors border border-gray-700 hover:border-gray-500"
+              className="mt-4 px-5 py-2 rounded-full bg-[#111111]/80 hover:bg-[#0a0a0a] text-xs text-gray-300 font-medium transition-colors border border-gray-700 hover:border-gray-500"
             >
               Dismiss & Enter Empty Canvas
             </button>
@@ -2878,7 +2878,7 @@ const NodeFlow = ({
                     value={categoryInput}
                     onChange={(e) => setCategoryInput(e.target.value)}
                     placeholder="Enter category..."
-                    className="w-full px-4 py-3 bg-[#151618] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 hover:border-gray-600 transition-all"
+                    className="w-full px-4 py-3 bg-[#151618] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 hover:border-gray-600 transition-all"
                     autoFocus
                   />
                 </div>
@@ -2889,7 +2889,7 @@ const NodeFlow = ({
                 type="button"
                 suppressHydrationWarning={true}
                 onClick={() => setIsCategoryPopupOpen(false)}
-                className="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 rounded-xl transition-all"
+                className="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111111] rounded-xl transition-all"
               >
                 Cancel
               </button>
@@ -2897,7 +2897,7 @@ const NodeFlow = ({
                 type="button"
                 suppressHydrationWarning={true}
                 onClick={handleCategorySave}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95"
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95"
               >
                 <MdSave size={18} />
                 Save Category

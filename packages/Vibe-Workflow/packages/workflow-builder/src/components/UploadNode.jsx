@@ -218,7 +218,7 @@ const UploadNode = ({ id, data, formValues, setFormValues, selectedModel, loadin
               <div className="flex flex-col justify-center gap-2 w-full h-full max-w-[95%]">
                 <h4 className="text-xs text-white">Uploading... {uploadProgress}%</h4>
                 <div className="w-full bg-gray-100 rounded h-1 overflow-hidden">
-                  <div className="bg-blue-500 h-full" style={{ width: `${uploadProgress}%` }}></div>
+                  <div className="bg-cyan-400 h-full" style={{ width: `${uploadProgress}%` }}></div>
                 </div>
               </div>
             ) : hasFileUrl ? (
@@ -275,7 +275,7 @@ const UploadNode = ({ id, data, formValues, setFormValues, selectedModel, loadin
             ) : (
               <label 
                 style={{ minHeight: 200 }} 
-                className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-600 rounded-lg p-4 w-full flex-1 hover:bg-gray-700/50 h-full"
+                className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-600 rounded-lg p-4 w-full flex-1 hover:bg-[#0a0a0a]/50 h-full"
               >                <FiUpload size={20} />
                 <span className="text-xs capitalize">Upload {acceptType}</span>
                 <span className="text-xs text-gray-500">Hint: drag and drop file(s) here.</span>

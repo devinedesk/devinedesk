@@ -23,7 +23,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
   const label = (
     <label className="text-[10px] font-bold text-zinc-500 text-start px-1 mb-1">
       {meta.title || fieldName}
-      {isRequired && <span className="text-blue-500 text-[9px] ml-1">* required</span>}
+      {isRequired && <span className="text-cyan-400 text-[9px] ml-1">* required</span>}
     </label>
   );
 
@@ -135,7 +135,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
             suppressHydrationWarning={true}
             ref={buttonRef} 
             onClick={() => handleDropdownToggle(idx + 1)}
-            className="flex items-center justify-between gap-1 text-xs text-center text-white w-full h-full cursor-pointer whitespace-nowrap px-3 py-1.5 bg-zinc-900/50 border border-white/10 hover:border-white/20 focus:outline-none rounded-lg transition-all"
+            className="flex items-center justify-between gap-1 text-xs text-center text-white w-full h-full cursor-pointer whitespace-nowrap px-3 py-1.5 bg-black/30 backdrop-blur-md border border-white/10 hover:border-white/20 focus:outline-none rounded-lg transition-all"
           >
             <div className="flex items-center gap-2 truncate">
               <span className="truncate">{value}</span>
@@ -163,7 +163,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
                 key={i}
                 className={`flex items-center gap-2 px-3 py-2 text-xs cursor-pointer rounded-lg transition-all ${
                   formValues[fieldName] === option
-                    ? "bg-blue-500/10 text-blue-400"
+                    ? "bg-cyan-400/10 text-blue-400"
                     : "text-zinc-400 hover:bg-white/5 hover:text-white"
                 }`}
                 onClick={() => {handleChange(fieldName, option); setDropDown(-1)}}
@@ -190,7 +190,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
             value={formValues[fieldName] || ''} 
             readOnly
             // onChange={(e) => handleChange(fieldName, e.target.value)} 
-            className="bg-zinc-900/50 text-white text-xs py-2 px-3 rounded-lg border border-white/10 transition-all hover:border-white/20 w-full outline-none focus:border-blue-500/50" 
+            className="bg-black/30 backdrop-blur-md text-white text-xs py-2 px-3 rounded-lg border border-white/10 transition-all hover:border-white/20 w-full outline-none focus:border-cyan-400/50" 
             placeholder="Add a file or provide an URL" 
           />
           {/* <input 
@@ -208,7 +208,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
           />
           <label 
             htmlFor={`file-upload-${fieldName}`} 
-            className={`flex items-center justify-center gap-1 bg-blue-500 text-white hover:bg-blue-600 text-xs font-medium cursor-pointer flex-shrink-0 ${
+            className={`flex items-center justify-center gap-1 bg-cyan-400 text-white hover:bg-cyan-500 text-xs font-medium cursor-pointer flex-shrink-0 ${
               uploading ? 'rounded-full h-6 w-6': 'rounded py-1 px-3'}
             `}
           >
@@ -220,8 +220,8 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
           </label> */}
         </div>
         {uploading && (
-          <div className="w-full bg-gray-700/70 rounded h-1 overflow-hidden">
-            <div className="bg-blue-500 h-full" style={{ width: `${uploadProgress}%` }}></div>
+          <div className="w-full bg-[#0a0a0a]/70 rounded h-1 overflow-hidden">
+            <div className="bg-cyan-400 h-full" style={{ width: `${uploadProgress}%` }}></div>
           </div>
         )}
         {formValues[fieldName] && (
@@ -304,7 +304,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
               />
               <label
                 htmlFor={`file-upload-${fieldName}`} 
-                className="w-full h-full aspect-[1/1] flex items-center justify-center border border-dashed border-gray-400 text-gray-500 hover:text-white text-xl rounded cursor-pointer hover:bg-gray-800/50"
+                className="w-full h-full aspect-[1/1] flex items-center justify-center border border-dashed border-gray-400 text-gray-500 hover:text-white text-xl rounded cursor-pointer hover:bg-[#111111]/50"
               >
                 {uploading ? (
                   <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full" />
@@ -332,7 +332,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
             step={meta.step}
             value={formValues[fieldName] ?? meta.default ?? 0}
             onChange={(e) => handleChange(fieldName, parseFloat(e.target.value))}
-            className="h-1.5 rounded-full cursor-pointer accent-blue-600 outline-none w-full bg-zinc-800"
+            className="h-1.5 rounded-full cursor-pointer accent-cyan-500 outline-none w-full bg-zinc-800"
           />
           <input 
             type="number" 
@@ -347,7 +347,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
             //   const clamped = Math.max(meta.minValue, Math.min(val, meta.maxValue));
             //   handleChange(fieldName, clamped);
             // }} 
-            className="w-12 h-8 text-center text-white rounded-lg border border-white/10 text-[10px] font-bold bg-zinc-900/50 outline-none focus:border-blue-500/50 transition-all" 
+            className="w-12 h-8 text-center text-white rounded-lg border border-white/10 text-[10px] font-bold bg-black/30 backdrop-blur-md outline-none focus:border-cyan-400/50 transition-all" 
           />
         </div>
       </div>
@@ -362,7 +362,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
       <div key={fieldName} className="flex flex-col gap-1 w-full">
         <label htmlFor={fieldName} className="flex items-center gap-2 text-sm text-white font-medium relative">
           {label}
-          {isRequired && <span className="text-blue-500 text-xs">* required</span>}
+          {isRequired && <span className="text-cyan-400 text-xs">* required</span>}
         </label>
         <div className="flex items-center gap-2 w-full">
           <input 
@@ -383,7 +383,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
               num = Math.max(min, Math.min(num, max));
               handleChange(fieldName, num);
             }} 
-            className="w-full rounded-lg border border-white/10 px-3 py-2 text-white text-xs bg-zinc-900/50 hover:border-white/20 focus:border-blue-500/50 outline-none transition-all" 
+            className="w-full rounded-lg border border-white/10 px-3 py-2 text-white text-xs bg-black/30 backdrop-blur-md hover:border-white/20 focus:border-cyan-400/50 outline-none transition-all" 
           />
         </div>
       </div>
@@ -417,7 +417,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
           value={value}
           placeholder={meta.placeholder || ""}
           onChange={(e) => handleChange(fieldName, e.target.value)}
-          className="bg-zinc-900/50 text-white text-xs py-2 px-3 rounded-lg border border-white/10 hover:border-white/20 transition-all w-full outline-none focus:border-blue-500/50"
+          className="bg-black/30 backdrop-blur-md text-white text-xs py-2 px-3 rounded-lg border border-white/10 hover:border-white/20 transition-all w-full outline-none focus:border-cyan-400/50"
         />
       </div>
     );
@@ -436,7 +436,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
               checked={!!formValues[fieldName]}
               onChange={(e) => handleChange(fieldName, e.target.checked)}
             />
-            <span className={`flex items-center h-[20px] w-[36px] rounded-full p-1 duration-200 transition-all ${!!formValues[fieldName] ? "bg-blue-600 shadow-lg shadow-blue-900/40" : "bg-zinc-800 border border-white/10"}`}>
+            <span className={`flex items-center h-[20px] w-[36px] rounded-full p-1 duration-200 transition-all ${!!formValues[fieldName] ? "bg-cyan-500 shadow-lg shadow-blue-900/40" : "bg-zinc-800 border border-white/10"}`}>
               <span className={`h-[12px] w-[12px] rounded-full bg-white duration-200 shadow-sm ${!!formValues[fieldName] && "translate-x-[16px]"}`}></span>
             </span>
           </label>
@@ -455,7 +455,7 @@ const RenderField = ({ fieldName, meta, idx, formValues, setFormValues, handleCh
           readOnly
           // onChange={(e) => handleChange(fieldName, e.target.value)}
           placeholder={meta.description || ""}
-          className="bg-zinc-900/50 text-white text-xs py-2 px-3 rounded-lg border border-white/10 hover:border-white/20 transition-all w-full outline-none focus:border-blue-500/50"
+          className="bg-black/30 backdrop-blur-md text-white text-xs py-2 px-3 rounded-lg border border-white/10 hover:border-white/20 transition-all w-full outline-none focus:border-cyan-400/50"
           rows={6}
         />
       </div>

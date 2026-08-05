@@ -295,9 +295,9 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
     <div ref={widgetRef} className="fixed bottom-10 right-10 z-50 flex flex-col items-end gap-2 font-sans">
       {isOpen && (
         <div className={`${isWide ? 'w-[800px]' : 'w-[380px]'} max-w-[100vw] h-[600px] max-h-[100%] flex flex-col bg-[#0B0F17]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in text-left`}>
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-white/10">
+          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600/20 to-cyan-500/20 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg shadow-lg">
+              <div className="p-2 bg-cyan-500 rounded-lg shadow-lg">
                 <FaRobot className="text-white text-lg" />
               </div>
               <div>
@@ -359,7 +359,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                       suppressHydrationWarning={true}
                       key={sIdx}
                       onClick={() => onSendMessage(suggestion)}
-                      className="px-4 py-3 text-xs font-medium bg-white/5 text-gray-300 rounded-xl hover:bg-blue-600/20 hover:text-blue-400 hover:border-blue-500/50 transition-all text-left border border-white/10 shadow-sm cursor-pointer flex items-center gap-3 group"
+                      className="px-4 py-3 text-xs font-medium bg-white/5 text-gray-300 rounded-xl hover:bg-cyan-500/20 hover:text-blue-400 hover:border-cyan-400/50 transition-all text-left border border-white/10 shadow-sm cursor-pointer flex items-center gap-3 group"
                     >
                       <BsStars size={12} className="text-blue-400/50 group-hover:text-blue-400 transition-colors" />
                       {suggestion}
@@ -391,7 +391,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                       <div
                         className={`flex flex-col gap-4 max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap ${
                           msg.role === "user"
-                            ? "bg-blue-600 text-white rounded-br-none"
+                            ? "bg-cyan-500 text-white rounded-br-none"
                             : "bg-[#1A1F2B] text-gray-200 rounded-bl-none border border-white/5"
                         }`}
                       >
@@ -407,7 +407,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                             li: ({node, ...props}) => <li className="pl-1" {...props} />,
                             strong: ({node, ...props}) => <strong className="font-extrabold text-white" {...props} />,
                             em: ({node, ...props}) => <em className="italic text-gray-400" {...props} />,
-                            a: ({node, ...props}) => <a className="text-blue-400 hover:text-blue-300 underline underline-offset-4 decoration-blue-500/30 break-all transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+                            a: ({node, ...props}) => <a className="text-blue-400 hover:text-blue-300 underline underline-offset-4 decoration-cyan-400/30 break-all transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
                             code: ({node, inline, className, children, ...props}) => {
                               const match = /language-(\w+)/.exec(className || "");
                               const lang = match ? match[1] : "";
@@ -448,7 +448,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                                   suppressHydrationWarning={true}
                                   key={sIdx}
                                   onClick={() => onSendMessage(suggestion)}
-                                  className="px-3 py-1.5 text-xs font-medium bg-[#242936] text-gray-300 rounded-lg hover:bg-blue-600/20 hover:text-blue-400 transition-colors text-left border border-white/10 shadow-sm cursor-pointer"
+                                  className="px-3 py-1.5 text-xs font-medium bg-[#242936] text-gray-300 rounded-lg hover:bg-cyan-500/20 hover:text-blue-400 transition-colors text-left border border-white/10 shadow-sm cursor-pointer"
                                 >
                                   {suggestion}
                                 </button>
@@ -465,7 +465,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                           type="button"
                           suppressHydrationWarning={true}
                           onClick={() => handleCopy(msg.content, idx)}
-                          className="text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
+                          className="text-gray-400 hover:text-cyan-400 transition-colors cursor-pointer"
                           title="Copy Message"
                         >
                           {copiedId === idx ? <IoMdCheckmark size={12} className="text-green-500" /> : <FaRegCopy size={12} />}
@@ -481,9 +481,9 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                 <div className="flex flex-col gap-1">
                   <div className="bg-[#1A1F2B]/80 backdrop-blur-sm p-3.5 rounded-2xl rounded-bl-none border border-white/5 shadow-sm flex items-center gap-2 min-w-[70px]">
                     <div className="flex gap-1.5">
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
                       <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
+                      <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" />
                     </div>
                     <span className="text-[10px] font-medium text-gray-500 tracking-widest ml-1">{loadingTexts[loadingStep]}...</span>
                   </div>
@@ -495,7 +495,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
           <div className="p-4 bg-white/5 border-t border-white/10">
             <form
               onSubmit={handleSubmit}
-              className="flex items-center gap-2 bg-[#0B0F17] border border-white/10 rounded-xl px-2 py-2 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all"
+              className="flex items-center gap-2 bg-[#0B0F17] border border-white/10 rounded-xl px-2 py-2 focus-within:ring-2 focus-within:ring-cyan-400/50 transition-all"
             >
               <textarea
                 ref={inputRef}
@@ -521,7 +521,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                 type="submit"
                 suppressHydrationWarning={true}
                 disabled={!inputValue.trim()}
-                className="p-2 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 shrink-0"
+                className="p-2 bg-cyan-500 text-white rounded-full shadow-md hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 shrink-0"
               >
                 {isLoading ? <FaRegCirclePause size={18} /> : <IoMdSend size={16} />}
               </button>
@@ -534,7 +534,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
           type="button"
           suppressHydrationWarning={true}
           onClick={toggleChat}
-          className={`group relative right-6 md:right-0 flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 hover:scale-110 transition-all duration-300 ${isLoading ? 'ring-2 ring-blue-200 ring-offset-2' : ''}`}
+          className={`group relative right-6 md:right-0 flex items-center justify-center w-10 h-10 bg-cyan-500 rounded-full shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-110 transition-all duration-300 ${isLoading ? 'ring-2 ring-blue-200 ring-offset-2' : ''}`}
         >
           {isLoading ? (
             <div className="flex gap-1 animate-pulse">

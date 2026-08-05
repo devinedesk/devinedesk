@@ -113,7 +113,7 @@ const AudioPlayer = ({ src, className }) => {
           type="button"
           suppressHydrationWarning={true}
           onClick={toggleAudio}
-          className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:scale-110 active:scale-95 group/play"
+          className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-cyan-500 hover:bg-cyan-400 text-white rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:scale-110 active:scale-95 group/play"
         >
           {isPlaying ? (
             <FaPause size={14} className="group-hover/play:scale-110 transition-transform" />
@@ -162,7 +162,7 @@ const AudioPlayer = ({ src, className }) => {
                 vertical="true"
                 value={volume} 
                 onChange={handleVolumeChange}
-                className="h-full w-1 accent-blue-500 cursor-pointer appearance-none bg-white/10 rounded-full"
+                className="h-full w-1 accent-cyan-400 cursor-pointer appearance-none bg-white/10 rounded-full"
                 style={{
                   WebkitAppearance: 'slider-vertical',
                   appearance: 'slider-vertical',

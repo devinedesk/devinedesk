@@ -110,7 +110,7 @@ const CreateAgent = ({ useUser, usedIn }) => {
           <button
             type="submit"
             disabled={loading || !prompt.trim()}
-            className="w-full py-3 bg-blue-500 dark:bg-primary hover:bg-blue-600 dark:hover:bg-primary/90 disabled:bg-gray-200 dark:disabled:bg-divider disabled:text-gray-400 dark:disabled:text-secondary-text disabled:cursor-not-allowed text-white text-base font-semibold rounded-xl transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
+            className="w-full py-3 bg-cyan-400 dark:bg-primary hover:bg-cyan-500 dark:hover:bg-primary/90 disabled:bg-gray-200 dark:disabled:bg-divider disabled:text-gray-400 dark:disabled:text-secondary-text disabled:cursor-not-allowed text-white text-base font-semibold rounded-xl transition-all flex items-center justify-center gap-3 active:scale-[0.98]"
           >
             {loading ? (
               <>

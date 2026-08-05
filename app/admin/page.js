@@ -39,7 +39,7 @@ export default function AdminDashboard() {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard title="Total Users" value={data.metrics.totalUsers} icon="👥" color="from-blue-500 to-cyan-500" />
+        <MetricCard title="Total Users" value={data.metrics.totalUsers} icon="👥" color="from-cyan-400 to-cyan-500" />
         <MetricCard title="Total Generations" value={data.metrics.totalGenerations} icon="⚡" color="from-purple-500 to-pink-500" />
         <MetricCard title="Credits Purchased" value={data.metrics.totalPurchasedCredits} icon="💎" color="from-green-500 to-emerald-500" />
         <MetricCard title="Credits Spent" value={data.metrics.totalSpentCredits} icon="🔥" color="from-orange-500 to-red-500" />
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
                       <div className="text-xs text-secondary mt-0.5">{user.email}</div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${user.role === 'ADMIN' ? 'bg-red-500/20 text-red-400' : 'bg-cyan-400/20 text-blue-400'}`}>
                         {user.role}
                       </span>
                     </td>

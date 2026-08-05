@@ -577,7 +577,7 @@ const ApiNode = ({ id, data, selected }) => {
         nowheel group flex flex-col w-80 
         rounded-2xl border-2 relative transition-all duration-300 ease-in-out 
         ${selected 
-          ? "border-blue-600 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-blue-500/20" 
+          ? "border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20" 
           : "border-zinc-800 hover:border-zinc-700 shadow-lg"} 
         bg-[#0c0d0f]/95 backdrop-blur-sm
       `}
@@ -586,14 +586,14 @@ const ApiNode = ({ id, data, selected }) => {
         <h3 className="text-zinc-400 text-[10px] font-medium tracking-wider uppercase">
           Api {id.replace(/^\D+/g, "")}
         </h3>
-        <span className="text-xs text-blue-500 -mt-0.5 font-medium flex items-center gap-1 opacity-80">
+        <span className="text-xs text-cyan-400 -mt-0.5 font-medium flex items-center gap-1 opacity-80">
           $0.025
         </span>
       </div>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#151618] to-[#1c1e21] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
-            <div className={`p-1.5 rounded-lg ${selected ? "bg-blue-600 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
+            <div className={`p-1.5 rounded-lg ${selected ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <RiInputMethodLine size={14} />
             </div>
             <h3 className="text-xs font-bold text-zinc-100">
@@ -659,8 +659,8 @@ const ApiNode = ({ id, data, selected }) => {
         {data.isLoading ? (
           <div className="flex items-center justify-center w-full h-full overflow-hidden aspect-[1/1] bg-white/5 animate-pulse rounded-b-2xl">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-[10px] font-bold text-blue-500 tracking-wider uppercase">Processing...</span>
+              <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase">Processing...</span>
             </div>
           </div>
         ) : data.errorMsg ? (
@@ -748,10 +748,10 @@ const ApiNode = ({ id, data, selected }) => {
 
         if (output?.type === 'text' || modelType === 'chat') {
           outputColor = "blue";
-          activeClass = "!bg-blue-600 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]";
-          inactiveClass = "!bg-zinc-900 !border-blue-600/50 hover:!border-blue-600 shadow-sm";
+          activeClass = "!bg-cyan-500 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]";
+          inactiveClass = "!bg-zinc-900 !border-cyan-500/50 hover:!border-cyan-500 shadow-sm";
           labelText = "Text";
-          labelColor = "text-blue-500";
+          labelColor = "text-cyan-400";
         } else if (output?.type === 'video_url' || modelType === 'video') {
           outputColor = "orange";
           activeClass = "!bg-orange-600 !border-zinc-900 shadow-[0_0_15px_rgba(249,115,22,0.8)]";

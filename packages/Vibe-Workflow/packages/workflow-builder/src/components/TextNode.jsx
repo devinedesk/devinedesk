@@ -427,7 +427,7 @@ const TextGeneration = ({ id, data, selected }) => {
         nowheel group flex flex-col flex-1 w-80 
         rounded-2xl border-2 relative transition-all duration-300 ease-in-out 
         ${selected 
-          ? "border-blue-600 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-blue-500/20" 
+          ? "border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20" 
           : "border-zinc-800 hover:border-zinc-700 shadow-lg"} 
         bg-[#0c0d0f]/95 backdrop-blur-sm
       `}
@@ -440,7 +440,7 @@ const TextGeneration = ({ id, data, selected }) => {
           Text {id.replace(/^\D+/g, "")}
         </h3>
         {generationCost !== null && !selectedModel?.id.includes("passthrough") && (
-          <span className="text-xs text-blue-500 -mt-0.5 font-medium flex items-center gap-1 opacity-80">
+          <span className="text-xs text-cyan-400 -mt-0.5 font-medium flex items-center gap-1 opacity-80">
             {isRefreshingCost ? (
               <span className="flex items-center gap-1 italic text-blue-200">
                 <div className="w-2 h-2 border-[1.5px] border-blue-200/30 border-t-blue-400 rounded-full animate-spin"></div>
@@ -454,9 +454,9 @@ const TextGeneration = ({ id, data, selected }) => {
         )}
       </div>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#151618] to-[#1c1e21] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
-            <div className={`p-1.5 rounded-lg ${selected ? "bg-blue-600 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
+            <div className={`p-1.5 rounded-lg ${selected ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <TfiText size={14} />
             </div>
             <h3 className="text-xs font-bold text-zinc-100">
@@ -600,15 +600,15 @@ const TextGeneration = ({ id, data, selected }) => {
         className={`
           !rounded-full !border-[3px] !left-[-8px] transition-all
           ${connectedInputs.textInput 
-            ? '!bg-blue-500 !border-zinc-900 shadow-[0_0_15px_rgba(59,130,246,0.8)]' 
-            : '!bg-zinc-900 !border-blue-500/50 hover:!border-blue-500 shadow-sm'
+            ? '!bg-cyan-400 !border-zinc-900 shadow-[0_0_15px_rgba(59,130,246,0.8)]' 
+            : '!bg-zinc-900 !border-cyan-400/50 hover:!border-cyan-400 shadow-sm'
           }
         `}
         data-type="blue"
       />
       {hasPrompt && (
         <p 
-          className={`absolute -left-9 top-[100px] text-[10px] font-bold tracking-tight text-blue-500 transition-all duration-300 ${
+          className={`absolute -left-9 top-[100px] text-[10px] font-bold tracking-tight text-cyan-400 transition-all duration-300 ${
             data.activeHandleColor === "blue" 
               ? "opacity-100 translate-x-0" 
               : "opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"
@@ -699,15 +699,15 @@ const TextGeneration = ({ id, data, selected }) => {
         className={`
           !rounded-full !border-[3px] !left-[-8px] transition-all
           ${connectedInputs.textInput4 
-            ? '!bg-blue-600 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]' 
-            : '!bg-zinc-900 !border-blue-600/50 hover:!border-blue-600 shadow-sm'
+            ? '!bg-cyan-500 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]' 
+            : '!bg-zinc-900 !border-cyan-500/50 hover:!border-cyan-500 shadow-sm'
           }
         `}
         data-type="blue"
       />
       {hasSystemPrompt && (
         <p 
-          className={`absolute -left-14 top-[250px] text-[10px] font-bold tracking-tight text-blue-600 transition-all duration-300 ${
+          className={`absolute -left-14 top-[250px] text-[10px] font-bold tracking-tight text-cyan-500 transition-all duration-300 ${
             data.activeHandleColor === "blue" 
               ? "opacity-100 translate-x-0" 
               : "opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"
@@ -730,14 +730,14 @@ const TextGeneration = ({ id, data, selected }) => {
         className={`
           !rounded-full !border-[3px] !right-[-8px] transition-all
           ${connectedOutputs.textOutput 
-            ? '!bg-blue-500 !border-zinc-900 shadow-[0_0_15px_rgba(59,130,246,0.8)]' 
-            : '!bg-zinc-900 !border-blue-500/50 hover:!border-blue-500 shadow-sm'
+            ? '!bg-cyan-400 !border-zinc-900 shadow-[0_0_15px_rgba(59,130,246,0.8)]' 
+            : '!bg-zinc-900 !border-cyan-400/50 hover:!border-cyan-400 shadow-sm'
           }
         `}
         data-type="blue"
       />
       <p 
-        className={`absolute -right-9 top-[100px] text-[10px] font-bold tracking-tight text-blue-500 transition-all duration-300 ${
+        className={`absolute -right-9 top-[100px] text-[10px] font-bold tracking-tight text-cyan-400 transition-all duration-300 ${
           data.activeHandleColor === "blue" 
             ? "opacity-100 translate-x-0" 
             : "opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0"

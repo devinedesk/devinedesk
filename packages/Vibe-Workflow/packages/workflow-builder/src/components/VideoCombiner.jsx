@@ -424,7 +424,7 @@ const VideoCombiner = ({ id, data, selected }) => {
         )}
       </div>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#151618] to-[#1c1e21] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
             <div className={`p-1.5 rounded-lg ${selected ? "bg-orange-600 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <TbArrowMerge size={14} className="rotate-90" />

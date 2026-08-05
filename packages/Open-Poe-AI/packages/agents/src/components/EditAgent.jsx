@@ -278,7 +278,7 @@ const EditAgent = ({ useUser, usedIn }) => {
     return (
       <main className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-          <BiLoaderAlt className="w-12 h-12 text-blue-600 animate-spin" />
+          <BiLoaderAlt className="w-12 h-12 text-cyan-500 animate-spin" />
           <p className="text-gray-500 font-medium animate-pulse">Loading Identity Data...</p>
         </div>
       </main>
@@ -297,7 +297,7 @@ const EditAgent = ({ useUser, usedIn }) => {
         </p>
         <Link 
           href="/agents"
-          className="mt-4 px-8 py-3 bg-gray-900 dark:bg-primary text-white font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-primary/90 transition-all shadow-lg active:scale-95"
+          className="mt-4 px-8 py-3 bg-gray-900 dark:bg-primary text-white font-bold rounded-xl hover:bg-[#111111] dark:hover:bg-primary/90 transition-all shadow-lg active:scale-95"
         >
           Return to My Agents
         </Link>
@@ -318,7 +318,7 @@ const EditAgent = ({ useUser, usedIn }) => {
         <div className="flex items-center gap-3">
           <Link 
             href={`${window.location.origin}/agents/${id}`}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-bold text-white transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-blue-700 rounded-xl text-sm font-bold text-white transition-all active:scale-95 shadow-sm"
           >
             <IoChatbubblesOutline className="w-4 h-4" />
             Chat
@@ -341,7 +341,7 @@ const EditAgent = ({ useUser, usedIn }) => {
           <Link 
             href="/docs/agents"
             target="_blank"
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-secondary-bg border border-gray-100 dark:border-divider rounded-lg text-xs font-bold text-blue-600 dark:text-primary hover:bg-blue-50 dark:hover:bg-primary-bg transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-secondary-bg border border-gray-100 dark:border-divider rounded-lg text-xs font-bold text-cyan-500 dark:text-primary hover:bg-blue-50 dark:hover:bg-primary-bg transition-all active:scale-95 shadow-sm"
           >
             Docs
           </Link>
@@ -354,13 +354,13 @@ const EditAgent = ({ useUser, usedIn }) => {
               <div className="relative">
                 <div 
                   onClick={() => setShowIconSelectionModal(true)}
-                  className="w-28 h-28 rounded-full bg-gray-100 dark:bg-secondary-bg overflow-hidden ring-4 ring-white dark:ring-primary-bg shadow-sm border border-gray-100 dark:border-divider cursor-pointer group transition-all hover:ring-blue-500/30"
+                  className="w-28 h-28 rounded-full bg-gray-100 dark:bg-secondary-bg overflow-hidden ring-4 ring-white dark:ring-primary-bg shadow-sm border border-gray-100 dark:border-divider cursor-pointer group transition-all hover:ring-cyan-400/30"
                 >
                   {formData.icon_url ? (
                     <img src={formData.icon_url} alt="Profile" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-primary-bg transition-colors group-hover:bg-gray-100 dark:group-hover:bg-secondary-bg">
-                      <RiRobot2Fill className="w-12 h-12 text-gray-300 dark:text-divider group-hover:text-blue-500 transition-colors" />
+                      <RiRobot2Fill className="w-12 h-12 text-gray-300 dark:text-divider group-hover:text-cyan-400 transition-colors" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
@@ -424,7 +424,7 @@ const EditAgent = ({ useUser, usedIn }) => {
                 type="submit"
                 form="edit-agent-form"
                 disabled={saving}
-                className="px-6 py-3 whitespace-nowrap bg-black dark:bg-primary hover:bg-gray-800 dark:hover:bg-primary/90 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg text-sm active:scale-95"
+                className="px-6 py-3 whitespace-nowrap bg-black dark:bg-primary hover:bg-[#111111] dark:hover:bg-primary/90 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg text-sm active:scale-95"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
@@ -433,11 +433,11 @@ const EditAgent = ({ useUser, usedIn }) => {
                   onClick={() => setFormData(prev => ({ ...prev, is_published: !prev.is_published }))}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-300 ${
                     formData.is_published 
-                      ? "bg-white dark:bg-primary-bg shadow-sm text-blue-600 dark:text-primary" 
+                      ? "bg-white dark:bg-primary-bg shadow-sm text-cyan-500 dark:text-primary" 
                       : "text-gray-400 hover:text-gray-600 dark:text-secondary-text dark:hover:text-primary-text"
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full transition-all duration-500 ${formData.is_published ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" : "bg-gray-300 dark:bg-gray-600"}`} />
+                  <div className={`w-2 h-2 rounded-full transition-all duration-500 ${formData.is_published ? "bg-cyan-400 shadow-[0_0_8px_rgba(59,130,246,0.5)]" : "bg-gray-300 dark:bg-gray-600"}`} />
                   <span className="text-xs font-bold tracking-wider">Publish</span>
                 </div>
               </div>
@@ -804,7 +804,7 @@ const EditAgent = ({ useUser, usedIn }) => {
                   value={iconPrompt}
                   onChange={(e) => setIconPrompt(e.target.value)}
                   placeholder="Describe your agent's icon..."
-                  className="w-full h-40 p-5 bg-gray-50 dark:bg-primary-bg border border-gray-200 dark:border-divider rounded-2xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none dark:text-white placeholder:text-gray-400"
+                  className="w-full h-40 p-5 bg-gray-50 dark:bg-primary-bg border border-gray-200 dark:border-divider rounded-2xl text-sm focus:ring-2 focus:ring-cyan-400/20 focus:border-cyan-400 outline-none transition-all resize-none dark:text-white placeholder:text-gray-400"
                 />
 
                 <div className="flex gap-3 pt-4">
@@ -817,7 +817,7 @@ const EditAgent = ({ useUser, usedIn }) => {
                   <button
                     onClick={() => handleGenerateIcon(iconPrompt)}
                     disabled={generatingIcon || !iconPrompt.trim()}
-                    className="flex-[2] px-6 py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="flex-[2] px-6 py-4 bg-cyan-500 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-2xl transition-all shadow-lg shadow-cyan-400/20 active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     {generatingIcon ? (
                       <>
@@ -859,9 +859,9 @@ const EditAgent = ({ useUser, usedIn }) => {
                   setShowIconSelectionModal(false);
                   fileInputRef.current?.click();
                 }}
-                className="group flex flex-col items-center gap-4 p-8 bg-gray-50 dark:bg-primary-bg rounded-[2rem] border border-gray-100 dark:border-divider hover:border-blue-500/50 hover:bg-white dark:hover:bg-secondary-bg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5 active:scale-[0.98]"
+                className="group flex flex-col items-center gap-4 p-8 bg-gray-50 dark:bg-primary-bg rounded-[2rem] border border-gray-100 dark:border-divider hover:border-cyan-400/50 hover:bg-white dark:hover:bg-secondary-bg transition-all duration-300 hover:shadow-xl hover:shadow-cyan-400/5 active:scale-[0.98]"
               >
-                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-secondary-bg shadow-sm flex items-center justify-center text-gray-400 group-hover:text-blue-500 transition-colors duration-300">
+                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-secondary-bg shadow-sm flex items-center justify-center text-gray-400 group-hover:text-cyan-400 transition-colors duration-300">
                   <IoImageOutline className="w-8 h-8" />
                 </div>
                 <div className="text-center">
@@ -876,14 +876,14 @@ const EditAgent = ({ useUser, usedIn }) => {
                   setIconPrompt(`A professional, clean profile icon for an AI agent named "${formData.name}". Description: ${formData.description || "An AI assistant"}. Minimalist, high-quality, circular composition.`);
                   setShowIconPromptModal(true);
                 }}
-                className="group flex flex-col items-center gap-4 p-8 bg-blue-50/30 dark:bg-blue-500/5 rounded-[2rem] border border-blue-100/50 dark:border-blue-500/20 hover:border-blue-500 hover:bg-white dark:hover:bg-secondary-bg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 active:scale-[0.98]"
+                className="group flex flex-col items-center gap-4 p-8 bg-blue-50/30 dark:bg-cyan-400/5 rounded-[2rem] border border-blue-100/50 dark:border-cyan-400/20 hover:border-cyan-400 hover:bg-white dark:hover:bg-secondary-bg transition-all duration-300 hover:shadow-xl hover:shadow-cyan-400/10 active:scale-[0.98]"
               >
-                <div className="w-16 h-16 rounded-2xl bg-blue-600 shadow-lg shadow-blue-500/30 flex items-center justify-center text-white transform transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
+                <div className="w-16 h-16 rounded-2xl bg-cyan-500 shadow-lg shadow-cyan-400/30 flex items-center justify-center text-white transform transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
                   <IoSparklesOutline className="w-8 h-8" />
                 </div>
                 <div className="text-center">
-                  <h4 className="font-bold text-blue-600 dark:text-primary text-lg">Generate with AI</h4>
-                  <p className="text-sm text-blue-500/70 dark:text-primary/70 mt-1">Create unique icon from prompt</p>
+                  <h4 className="font-bold text-cyan-500 dark:text-primary text-lg">Generate with AI</h4>
+                  <p className="text-sm text-cyan-400/70 dark:text-primary/70 mt-1">Create unique icon from prompt</p>
                 </div>
               </button>
             </div>

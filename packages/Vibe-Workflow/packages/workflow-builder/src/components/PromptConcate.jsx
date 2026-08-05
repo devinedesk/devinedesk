@@ -201,7 +201,7 @@ const PromptConcate = ({ id, data, selected }) => {
         nowheel group flex flex-col flex-1 w-80 
         rounded-2xl border-2 relative transition-all duration-300 ease-in-out 
         ${selected 
-          ? "border-blue-600 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-blue-500/20" 
+          ? "border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20" 
           : "border-zinc-800 hover:border-zinc-700 shadow-lg"} 
         bg-[#0c0d0f]/95 backdrop-blur-sm
       `}
@@ -210,9 +210,9 @@ const PromptConcate = ({ id, data, selected }) => {
         Prompt Concatenator {id.replace(/^\D+/g, "")}
       </h3>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#151618] to-[#1c1e21] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
-            <div className={`p-1.5 rounded-lg ${selected ? "bg-blue-600 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
+            <div className={`p-1.5 rounded-lg ${selected ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <TbArrowMerge size={14} className="rotate-90" />
             </div>
             <h3 className="text-xs font-bold text-zinc-100">
@@ -249,15 +249,15 @@ const PromptConcate = ({ id, data, selected }) => {
             }} 
             className={`!rounded-full !border-2 transition-all duration-200 !left-[-7px]
               ${connectedInputs.concatInput 
-                ? '!bg-blue-500 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]' 
-                : '!bg-black !border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                ? '!bg-cyan-400 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]' 
+                : '!bg-black !border-cyan-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
               }
               hover:!scale-125 hover:shadow-[0_0_20px_rgba(59,130,246,1)]
             `}
             data-type="blue"
           />
           <p 
-            className={`absolute -left-7 top-[100px] text-xs text-blue-500 transition-opacity duration-200 ${
+            className={`absolute -left-7 top-[100px] text-xs text-cyan-400 transition-opacity duration-200 ${
               data.activeHandleColor === "blue" 
                 ? "opacity-100" 
                 : "opacity-0 group-hover:opacity-100"
@@ -279,15 +279,15 @@ const PromptConcate = ({ id, data, selected }) => {
         }} 
         className={`!rounded-full !border-2 transition-all duration-200 !right-[-7px]
           ${connectedOutputs.concatOutput 
-            ? '!bg-blue-500 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]' 
-            : '!bg-black !border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+            ? '!bg-cyan-400 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]' 
+            : '!bg-black !border-cyan-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
           }
           hover:!scale-125 hover:shadow-[0_0_20px_rgba(59,130,246,1)]
         `}
         data-type="blue"
       />
       <p 
-        className={`absolute -right-7 top-[100px] text-xs text-blue-500 transition-opacity duration-200 ${
+        className={`absolute -right-7 top-[100px] text-xs text-cyan-400 transition-opacity duration-200 ${
           data.activeHandleColor === "blue" 
             ? "opacity-100" 
             : "opacity-0 group-hover:opacity-100"
