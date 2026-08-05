@@ -24,7 +24,7 @@
     "build:agent": "npm run build -w ai-agent",
     "build:design": "npm run build -w design-agent",
     "build:packages": "npm run build:workflow && npm run build:agent && npm run build:design && npm run build:studio",
-    "vercel-build": "npm run build:packages && npm run build",
+    "vercel-build": "npm run build:packages && npx prisma generate && npm run build",
     "setup": "git submodule update --init --recursive && npm install && npm run build:packages",
     "vite:dev": "vite",
     "vite:build": "vite build",
