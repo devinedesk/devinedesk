@@ -1,0 +1,120 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const SettingsContext = createContext();
+
+export function SettingsProvider({ children }) {
+  const [keys, setKeys] = useState({
+    platform_api_key: '',
+    openrouter_key: '',
+    aimlapi_key: '',
+    goapi_key: '',
+    hf_token: '',
+    fal_key: '',
+    cloudinary_cloud_name: '',
+    cloudinary_upload_preset: ''
+  });
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const getDeviceId = () => {
+    let id = localStorage.getItem('device_id');
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('device_id', id);
+    }
+    return id;
+  };
+
+  useEffect(() => {
+    // 1. Initial load from localStorage (fast sync)
+    const localKeys = {
+      platform_api_key: localStorage.getItem('platform_api_key') || '',
+      openrouter_key: localStorage.getItem('openrouter_key') || '',
+      aimlapi_key: localStorage.getItem('aimlapi_key') || '',
+      goapi_key: localStorage.getItem('goapi_key') || '',
+      hf_token: localStorage.getItem('hf_token') || '',
+      fal_key: localStorage.getItem('fal_key') || '',
+      cloudinary_cloud_name: localStorage.getItem('cloudinary_cloud_name') || '',
+      cloudinary_upload_preset: localStorage.getItem('cloudinary_upload_preset') || ''
+    };
+    setKeys(localKeys);
+
+    // 2. Fetch from DB (authoritative)
+    const fetchDbSettings = async () => {
+      try {
+        const res = await fetch('/api/settings', {
+          headers: { 'x-user-id': getDeviceId() }
+        });
+        if (res.ok) {
+          const dbKeys = await res.json();
+          // Merge and save to localStorage
+          const merged = { ...localKeys, ...dbKeys };
+          setKeys(merged);
+          Object.entries(merged).forEach(([k, v]) => {
+            if (v) localStorage.setItem(k, v);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to sync settings from DB', err);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    fetchDbSettings();
+  }, []);
+
+  const updateKey = (keyName, value) => {
+    const trimmed = value.trim();
+    if (trimmed) {
+      localStorage.setItem(keyName, trimmed);
+    } else {
+      localStorage.removeItem(keyName);
+    }
+    setKeys(prev => ({ ...prev, [keyName]: trimmed }));
+    
+    // Sync to DB
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-user-id': getDeviceId() },
+      body: JSON.stringify({ [keyName]: trimmed })
+    }).catch(err => console.error('Failed to save setting to DB', err));
+  };
+
+  const updateMultipleKeys = (newKeys) => {
+    const updated = { ...keys };
+    const payload = {};
+    Object.entries(newKeys).forEach(([key, value]) => {
+      const trimmed = value.trim();
+      if (trimmed) {
+        localStorage.setItem(key, trimmed);
+      } else {
+        localStorage.removeItem(key);
+      }
+      updated[key] = trimmed;
+      payload[key] = trimmed;
+    });
+    setKeys(updated);
+
+    // Sync to DB
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-user-id': getDeviceId() },
+      body: JSON.stringify(payload)
+    }).catch(err => console.error('Failed to save settings to DB', err));
+  };
+
+  return (
+    <SettingsContext.Provider value={{ keys, updateKey, updateMultipleKeys, isLoaded }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+}
+
+export function useSettings() {
+  const context = useContext(SettingsContext);
+  if (context === undefined) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
+}

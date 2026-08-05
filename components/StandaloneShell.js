@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { ImageStudio, VideoStudio, ClippingStudio, VibeMotionStudio, LipSyncStudio, RecastStudio, CinemaStudio, AudioStudio, MarketingStudio, WorkflowStudio, AgentStudio, AppsStudio, AiInfluencerStudio, getUserBalance } from 'studio';
+import { ImageStudio, VideoStudio, ClippingStudio, VibeMotionStudio, LipSyncStudio, RecastStudio, CinemaStudio, AudioStudio, MarketingStudio, WorkflowStudio, AgentStudio, AppsStudio, AiInfluencerStudio, getUserBalance, SettingsModal, SettingsProvider, useSettings } from 'studio';
 
 const DesignAgentStudio = dynamic(() => import('studio').then(mod => mod.DesignAgentStudio), {
   ssr: false,
@@ -270,6 +270,14 @@ const persistNotifications = (notifications) => {
 };
 
 export default function StandaloneShell() {
+  return (
+    <SettingsProvider>
+      <StandaloneShellInner />
+    </SettingsProvider>
+  );
+}
+
+function StandaloneShellInner() {
   const params = useParams();
   const router = useRouter();
   const slug = useMemo(() => params?.slug || [], [params?.slug]);
@@ -302,7 +310,8 @@ export default function StandaloneShell() {
     return 'image';
   };
   
-  const [apiKey, setApiKey] = useState(null);
+  const { keys, updateKey, isLoaded } = useSettings();
+  const apiKey = keys.platform_api_key;
   const [activeTab, setActiveTab] = useState(getInitialTab());
 
   const [balance, setBalance] = useState(null);
@@ -518,6 +527,7 @@ export default function StandaloneShell() {
   }, [activeTab]);
 
   const fetchBalance = useCallback(async (key) => {
+    if (!key) return;
     try {
       const data = await getUserBalance(key);
       setBalance(data.balance);
@@ -528,30 +538,30 @@ export default function StandaloneShell() {
 
   useEffect(() => {
     setHasMounted(true);
-    let stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    let stored = apiKey;
+    if (!stored && typeof window !== 'undefined') {
       stored = "1bedd3ca-1895-4136-b392-49bb7939ad15:f499d1c19e8be1cdd2b33c51060256ec";
-      localStorage.setItem(STORAGE_KEY, stored);
+      updateKey('platform_api_key', stored);
     }
-    setApiKey(stored);
-    fetchBalance(stored);
-    // Sync cookie immediately on mount to establish identity for background requests
-    document.cookie = `platform_api_key=${stored}; path=/; max-age=31536000; SameSite=Lax`;
-  }, [fetchBalance]);
+    if (stored) {
+      fetchBalance(stored);
+      document.cookie = `platform_api_key=${stored}; path=/; max-age=31536000; SameSite=Lax`;
+    }
+  }, [isLoaded, apiKey, fetchBalance, updateKey]);
 
   const handleKeySave = useCallback((key) => {
-    localStorage.setItem(STORAGE_KEY, key);
-    setApiKey(key);
-    fetchBalance(key);
-    document.cookie = `platform_api_key=${key}; path=/; max-age=31536000; SameSite=Lax`;
-  }, [fetchBalance]);
+    updateKey('platform_api_key', key);
+  }, [updateKey]);
 
   const handleKeyChange = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setApiKey(null);
+    updateKey('platform_api_key', '');
     setBalance(null);
     document.cookie = "platform_api_key=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-  }, []);
+  }, [updateKey]);
 
   // Inject API key into all outgoing Axios requests (prop-based approach)
   // We use an interceptor to be selective and NOT send the key to external domains like S3
@@ -1114,40 +1124,7 @@ export default function StandaloneShell() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up">
-          <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-8 w-full max-w-sm shadow-2xl">
-            <h2 className="text-white font-bold text-lg mb-2">Settings</h2>
-            <p className="text-white/60 text-[13px] mb-8">
-              Manage your AI studio preferences and authentication.
-            </p>
-            
-            <div className="space-y-4 mb-8">
-              <div className="bg-white/5 border border-white/[0.03] rounded-md p-4">
-                <label className="block text-xs font-bold text-white/60 mb-2">
-                   Active API Key
-                </label>
-                <div className="text-[13px] font-mono text-white/80">
-                  {apiKey.slice(0, 8)}••••••••••••••••
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleKeyChange}
-                className="flex-1 h-10 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-all"
-              >
-                Change Key
-              </button>
-              <button
-                onClick={() => setShowSettings(false)}
-                className="flex-1 h-10 rounded-md bg-white/5 text-white/80 hover:bg-white/10 text-xs font-semibold transition-all border border-white/5"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <SettingsModal onClose={() => setShowSettings(false)} />
       )}
     </div>
   );

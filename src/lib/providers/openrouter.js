@@ -1,15 +1,16 @@
 export const openRouterAdapter = {
-    getKey: () => {
-        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_OPENROUTER_API_KEY) 
+    getKey: (params) => {
+        const key = params?._apiKey
+            || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_OPENROUTER_API_KEY) 
             || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_OPENROUTER_API_KEY)
-            || window.__OPENROUTER_KEY__ 
-            || localStorage.getItem('openrouter_key');
+            || (typeof window !== 'undefined' && window.__OPENROUTER_KEY__) 
+            || (typeof localStorage !== 'undefined' && localStorage.getItem('openrouter_key'));
         if (!key) throw new Error('OpenRouter API Key missing. Please set it in Settings.');
         return key;
     },
     
     generateImage: async function(params) {
-        const key = this.getKey();
+        const key = this.getKey(params);
         const url = 'https://openrouter.ai/api/v1/chat/completions';
         
         // OpenRouter acts like OpenAI, so we wrap the image generation or text generation in its expected format.

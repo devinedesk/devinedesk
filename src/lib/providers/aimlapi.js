@@ -1,9 +1,10 @@
 export const aimlapiAdapter = {
-    getKey: () => {
-        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AIMLAPI_KEY) 
+    getKey: (params) => {
+        const key = params?._apiKey
+            || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_AIMLAPI_KEY) 
             || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_AIMLAPI_KEY)
-            || window.__AIMLAPI_KEY__ 
-            || localStorage.getItem('aimlapi_key');
+            || (typeof window !== 'undefined' && window.__AIMLAPI_KEY__) 
+            || (typeof localStorage !== 'undefined' && localStorage.getItem('aimlapi_key'));
         if (!key) throw new Error('AIMLAPI Key missing. Please set it in Settings.');
         return key;
     },
@@ -37,7 +38,7 @@ export const aimlapiAdapter = {
     },
     
     generateVideo: async function(params) {
-        const key = this.getKey();
+        const key = this.getKey(params);
         const url = 'https://api.aimlapi.com/v2/generate/video';
 
         const payload = {
@@ -84,7 +85,7 @@ export const aimlapiAdapter = {
     },
 
     generateAudio: async function(params) {
-        const key = this.getKey();
+        const key = this.getKey(params);
         const url = 'https://api.aimlapi.com/v2/generate/audio/suno-ai/suno-v3_5'; // Default suno endpoint
 
         const payload = {

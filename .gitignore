@@ -45,3 +45,16 @@ out/
 /playwright/.cache/
 /playwright/.auth/
 data/
+
+/src/generated/prisma
+
+# Local Database
+*.db
+*.db-journal
+
+# AI IDEs
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+

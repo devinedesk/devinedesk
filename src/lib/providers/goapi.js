@@ -1,9 +1,10 @@
 export const goapiAdapter = {
-    getKey: () => {
-        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOAPI_KEY) 
+    getKey: (params) => {
+        const key = params?._apiKey
+            || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOAPI_KEY) 
             || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_GOAPI_KEY)
-            || window.__GOAPI_KEY__ 
-            || localStorage.getItem('goapi_key');
+            || (typeof window !== 'undefined' && window.__GOAPI_KEY__) 
+            || (typeof localStorage !== 'undefined' && localStorage.getItem('goapi_key'));
         if (!key) throw new Error('GoAPI Key missing. Please set it in Settings.');
         return key;
     },
@@ -36,7 +37,7 @@ export const goapiAdapter = {
     },
     
     generateImage: async function(params) {
-        const key = this.getKey();
+        const key = this.getKey(params);
         const url = 'https://api.midjourneyapi.xyz/mj/v2/imagine';
 
         let fullPrompt = params.prompt;

@@ -16,3 +16,5 @@ export { default as AppsStudio } from './components/AppsStudio';
 export { default as McpCliStudio } from './components/McpCliStudio';
 export { default as AiInfluencerStudio } from './components/AiInfluencerStudio';
 export * from './apiClient';
+export { SettingsModal } from './components/SettingsModal';
+export { SettingsProvider, useSettings } from './contexts/SettingsContext';

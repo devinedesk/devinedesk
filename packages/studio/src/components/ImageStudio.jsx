@@ -9,6 +9,12 @@ import DrawModal from "./DrawModal.jsx";
 import MobileGenerationActions, {
   GenerationCopyButtons,
 } from "./MobileGenerationActions.jsx";
+import AdvancedOptionsPanel from "./AdvancedOptionsPanel.jsx";
+import { SettingsContext } from "../contexts/SettingsContext.jsx";
+import { useDatabaseSync } from "../hooks/useDatabaseSync.js";
+import QuickToolsPanel from "./QuickToolsPanel.jsx";
+import { localAI, isLocalAIAvailable } from "../../../../src/lib/localInferenceClient.js";
+import { LOCAL_MODEL_CATALOG, getLocalModelById } from "../../../../src/lib/localModels.js";
 import {
   t2iModels,
   i2iModels,
@@ -599,8 +605,39 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
     }
   }, []);
 
+  // Sync with DB
+  useDatabaseSync(PERSIST_KEY, {
+    prompt,
+    negativePrompt,
+    aspectRatio,
+    numOutputs,
+    outputFormat,
+    customModel,
+    width,
+    height,
+    advancedParams,
+    loras,
+    useLocalModel,
+    uploadHistory
+  }, (dbState) => {
+    if (dbState.prompt !== undefined) setPrompt(dbState.prompt);
+    if (dbState.negativePrompt !== undefined) setNegativePrompt(dbState.negativePrompt);
+    if (dbState.aspectRatio !== undefined) setAspectRatio(dbState.aspectRatio);
+    if (dbState.numOutputs !== undefined) setNumOutputs(dbState.numOutputs);
+    if (dbState.outputFormat !== undefined) setOutputFormat(dbState.outputFormat);
+    if (dbState.customModel !== undefined) setCustomModel(dbState.customModel);
+    if (dbState.width !== undefined) setWidth(dbState.width);
+    if (dbState.height !== undefined) setHeight(dbState.height);
+    if (dbState.advancedParams !== undefined) setAdvancedParams(dbState.advancedParams);
+    if (dbState.loras !== undefined) setLoras(dbState.loras);
+    if (dbState.useLocalModel !== undefined) setUseLocalModel(dbState.useLocalModel);
+    if (dbState.uploadHistory !== undefined) setUploadHistory(dbState.uploadHistory);
+  });
+
   const getProviderStyle = (provider) => {
     switch (provider) {
+      case "local":
+        return { text: "L", bg: "bg-green-500/10 text-green-400 border-green-500/25" };
       case "grok":
         return { text: "xI", bg: "bg-orange-500/10 text-orange-400 border-orange-500/25" };
       case "openai":
@@ -640,8 +677,8 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
   const seenProviders = new Set();
   
   models.forEach(m => {
-    const pId = m.provider || 'Local API';
-    const pName = m.provider_name || 'Local API';
+    const pId = m.provider || (useLocalModel ? 'local' : 'Local API');
+    const pName = m.provider_name || (useLocalModel ? 'Local Inference' : 'Local API');
     if (!seenProviders.has(pId)) {
       seenProviders.add(pId);
       availableProviders.push({ id: pId, name: pName });
@@ -651,7 +688,7 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
   const filtered = models.filter((m) => {
     // 1. Filter by provider tab
     if (selectedProvider !== "all") {
-      const pId = m.provider || 'Local API';
+      const pId = m.provider || (useLocalModel ? 'local' : 'Local API');
       if (pId !== selectedProvider) return false;
     }
     // 2. Filter by search query
@@ -779,23 +816,30 @@ function ModelDropdown({ models, selectedModel, onSelect, onClose }) {
                   ) : (
                     <div
                       className={`w-8 h-8 ${
-                        m.family === "kontext"
-                          ? "bg-blue-500/10 text-blue-400 border-blue-500/10"
-                          : m.family === "effects"
-                            ? "bg-purple-500/10 text-purple-400 border-purple-500/10"
-                            : "bg-primary/10 text-primary border-primary/10"
+                        useLocalModel 
+                          ? (m.featured ? 'bg-primary/10 text-primary border-primary/10' : 'bg-green-500/10 text-green-400 border-green-500/10')
+                          : m.family === "kontext"
+                            ? "bg-blue-500/10 text-blue-400 border-blue-500/10"
+                            : m.family === "effects"
+                              ? "bg-purple-500/10 text-purple-400 border-purple-500/10"
+                              : "bg-primary/10 text-primary border-primary/10"
                       } border rounded-full flex items-center justify-center font-bold text-xs shadow-inner uppercase`}
                     >
-                      {m.name.charAt(0)}
+                      {useLocalModel && m.featured ? '⚡' : m.name.charAt(0)}
                     </div>
                   )}
                   <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-xs font-bold text-white tracking-tight truncate">
-                      {m.name}
-                    </span>
-                    {selectedProvider === "all" && m.provider_name && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-white tracking-tight truncate">
+                        {m.name}
+                      </span>
+                      {useLocalModel && m.featured && (
+                        <span className="text-[9px] font-black px-1 py-0.5 rounded bg-primary/20 text-primary">FEATURED</span>
+                      )}
+                    </div>
+                    {(selectedProvider === "all" || useLocalModel) && (m.provider_name || m.type) && (
                       <span className="text-[9px] text-white/60">
-                        {m.provider_name}
+                        {useLocalModel ? `${m.type?.toUpperCase()} · ${m.family}` : m.provider_name}
                       </span>
                     )}
                   </div>
@@ -878,6 +922,26 @@ export default function ImageStudio({
   const [selectedEffect, setSelectedEffect] = useState("");
   const [maxImages, setMaxImages] = useState(1);
 
+  // ── Local AI State ──────────────────────────────────────────────────────
+  const LOCAL_IMAGE_MODELS = LOCAL_MODEL_CATALOG.filter(m => m.type !== 'video');
+  const [useLocalModel, setUseLocalModel] = useState(false);
+  const [selectedLocalModel, setSelectedLocalModel] = useState(LOCAL_IMAGE_MODELS[0]?.id || null);
+  const [localGenProgress, setLocalGenProgress] = useState(0);
+
+  // ── Advanced Options State ──────────────────────────────────────────────
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showToolsPanel, setShowToolsPanel] = useState(false);
+  const [negativePrompt, setNegativePrompt] = useState("");
+  const [guidanceScale, setGuidanceScale] = useState(7.5);
+  const [steps, setSteps] = useState(25);
+  const [seed, setSeed] = useState(-1);
+  const [selectedStyle, setSelectedStyle] = useState("None");
+  const [customWidth, setCustomWidth] = useState(0);
+  const [customHeight, setCustomHeight] = useState(0);
+  const [referenceStrength, setReferenceStrength] = useState(50);
+  const [selectedLora, setSelectedLora] = useState("");
+  const [loraWeight, setLoraWeight] = useState(1.0);
+
   // ── Prompt / upload state ───────────────────────────────────────────────
   const [prompt, setPrompt] = useState("");
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
@@ -935,6 +999,18 @@ export default function ImageStudio({
         if (data.uploadHistory) setUploadHistory(data.uploadHistory);
         if (data.batchSize) setBatchSize(data.batchSize);
         if (data.localHistory) setLocalHistory(data.localHistory);
+        if (data.useLocalModel !== undefined) setUseLocalModel(data.useLocalModel);
+        if (data.selectedLocalModel) setSelectedLocalModel(data.selectedLocalModel);
+        if (data.negativePrompt !== undefined) setNegativePrompt(data.negativePrompt);
+        if (data.guidanceScale !== undefined) setGuidanceScale(data.guidanceScale);
+        if (data.steps !== undefined) setSteps(data.steps);
+        if (data.seed !== undefined) setSeed(data.seed);
+        if (data.selectedStyle) setSelectedStyle(data.selectedStyle);
+        if (data.customWidth !== undefined) setCustomWidth(data.customWidth);
+        if (data.customHeight !== undefined) setCustomHeight(data.customHeight);
+        if (data.referenceStrength !== undefined) setReferenceStrength(data.referenceStrength);
+        if (data.selectedLora) setSelectedLora(data.selectedLora);
+        if (data.loraWeight !== undefined) setLoraWeight(data.loraWeight);
       }
     } catch (err) {
       console.warn("Failed to load ImageStudio persistence:", err);
@@ -959,6 +1035,18 @@ export default function ImageStudio({
           uploadHistory,
           batchSize,
           localHistory,
+          useLocalModel,
+          selectedLocalModel,
+          negativePrompt,
+          guidanceScale,
+          steps,
+          seed,
+          selectedStyle,
+          customWidth,
+          customHeight,
+          referenceStrength,
+          selectedLora,
+          loraWeight,
         };
         localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
       } catch (err) {
@@ -1150,6 +1238,13 @@ export default function ImageStudio({
 
   // ── Model selection ──────────────────────────────────────────────────────
   const handleModelSelect = (m) => {
+    if (useLocalModel) {
+      setSelectedLocalModel(m.id);
+      setSelectedModelName(m.name);
+      setSelectedAr(m.aspectRatios?.[0] || "1:1");
+      return;
+    }
+
     const ars = imageMode
       ? getAspectRatiosForI2IModel(m.id)
       : getAspectRatiosForModel(m.id);
@@ -1228,12 +1323,45 @@ export default function ImageStudio({
     try {
       const results = await Promise.all(
         Array.from({ length: batchSize }).map(async () => {
+          if (useLocalModel) {
+            return new Promise((resolve, reject) => {
+              const unsub = localAI.onProgress(({ progress, status, message }) => {
+                const pct = Math.round((progress ?? 0) * 100);
+                setLocalGenProgress(pct);
+              });
+              
+              localAI.generate({
+                model: selectedLocalModel,
+                prompt: prompt.trim(),
+                negative_prompt: negativePrompt || undefined,
+                aspect_ratio: selectedAr,
+                steps: steps,
+                guidance_scale: guidanceScale,
+                seed,
+              }).then(res => {
+                unsub();
+                setLocalGenProgress(0);
+                resolve(res);
+              }).catch(err => {
+                unsub();
+                setLocalGenProgress(0);
+                reject(err);
+              });
+            });
+          }
+
           if (imageMode) {
             const genParams = {
               model: selectedModelId,
               images_list: uploadedImageUrls,
               image_url: uploadedImageUrls[0],
               aspect_ratio: selectedAr,
+              negative_prompt: negativePrompt || undefined,
+              steps: steps,
+              guidance_scale: guidanceScale,
+              seed,
+              lora_model: selectedLora || undefined,
+              lora_strength: loraWeight,
             };
             if (swapImageUrl) genParams.swap_url = swapImageUrl;
             if (prompt.trim()) genParams.prompt = prompt.trim();
@@ -1241,15 +1369,32 @@ export default function ImageStudio({
               genParams[currentQualityField] = selectedQuality;
             }
             if (showEffectBtn && selectedEffect) genParams.name = selectedEffect;
+            if (customWidth > 0 && customHeight > 0) {
+              genParams.width = customWidth;
+              genParams.height = customHeight;
+            }
+            if (referenceStrength !== 50) {
+              genParams.image_weight = referenceStrength / 100;
+            }
             return await generateI2I(apiKey, genParams);
           } else {
             const genParams = {
               model: selectedModelId,
               prompt: prompt.trim(),
               aspect_ratio: selectedAr,
+              negative_prompt: negativePrompt || undefined,
+              steps: steps,
+              guidance_scale: guidanceScale,
+              seed,
+              lora_model: selectedLora || undefined,
+              lora_strength: loraWeight,
             };
             if (currentQualityField && selectedQuality) {
               genParams[currentQualityField] = selectedQuality;
+            }
+            if (customWidth > 0 && customHeight > 0) {
+              genParams.width = customWidth;
+              genParams.height = customHeight;
             }
             return await generateImage(apiKey, genParams);
           }
@@ -1262,14 +1407,14 @@ export default function ImageStudio({
             id: res.id || Math.random().toString(36).substring(7),
             url: res.url,
             prompt: prompt.trim(),
-            model: selectedModelId,
+            model: useLocalModel ? `local:${selectedLocalModel}` : selectedModelId,
             aspect_ratio: selectedAr,
             timestamp: new Date().toISOString(),
           };
           addToHistory(entry);
           onGenerationComplete?.({
             url: res.url,
-            model: selectedModelId,
+            model: useLocalModel ? `local:${selectedLocalModel}` : selectedModelId,
             prompt: prompt.trim(),
             type: "image",
           });
@@ -1440,6 +1585,45 @@ export default function ImageStudio({
         )}
       </div>
 
+      {/* ── PANELS ── */}
+      <div className="w-full max-w-4xl mx-auto px-4 z-10 flex flex-col gap-4 mb-4">
+        {showToolsPanel && (
+          <QuickToolsPanel 
+            onClose={() => setShowToolsPanel(false)}
+            onSelectStarter={(p) => setPrompt(p)}
+            onUseEnhancedPrompt={(p) => setPrompt(p)}
+          />
+        )}
+        {showAdvanced && (
+          <AdvancedOptionsPanel 
+            onClose={() => setShowAdvanced(false)}
+            selectedStyle={selectedStyle}
+            setSelectedStyle={setSelectedStyle}
+            negativePrompt={negativePrompt}
+            setNegativePrompt={setNegativePrompt}
+            guidanceScale={guidanceScale}
+            setGuidanceScale={setGuidanceScale}
+            steps={steps}
+            setSteps={setSteps}
+            seed={seed}
+            setSeed={setSeed}
+            batchCount={batchSize}
+            setBatchCount={setBatchSize}
+            customWidth={customWidth}
+            setCustomWidth={setCustomWidth}
+            customHeight={customHeight}
+            setCustomHeight={setCustomHeight}
+            referenceStrength={referenceStrength}
+            setReferenceStrength={setReferenceStrength}
+            selectedLora={selectedLora}
+            setSelectedLora={setSelectedLora}
+            loraWeight={loraWeight}
+            setLoraWeight={setLoraWeight}
+            isI2I={imageMode}
+          />
+        )}
+      </div>
+
       {/* ── BOTTOM PROMPT BAR ── */}
       <PromptComposer>
           {/* Top row: upload picker + textarea */}
@@ -1502,6 +1686,28 @@ export default function ImageStudio({
           <PromptFooter>
             {/* Left controls */}
             <PromptControls ref={dropdownRef}>
+              {/* Local AI Toggle (Only if available) */}
+              {isLocalAIAvailable() && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextUseLocal = !useLocalModel;
+                    setUseLocalModel(nextUseLocal);
+                    if (nextUseLocal) {
+                      const lm = getLocalModelById(selectedLocalModel);
+                      if (lm) setSelectedModelName(lm.name);
+                    } else {
+                      const apiModel = currentModels.find(m => m.id === selectedModelId);
+                      if (apiModel) setSelectedModelName(apiModel.name);
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border text-xs font-bold whitespace-nowrap ${useLocalModel ? 'bg-[#22d3ee]/20 border-[#22d3ee]/40 text-[#22d3ee]' : 'bg-white/5 border-white/5 text-white/60 hover:bg-white/10'}`}
+                >
+                  {useLocalModel ? 'Local' : 'API'}
+                </button>
+              )}
+
               {/* Model button */}
               <div className="relative">
                 <button
@@ -1542,10 +1748,11 @@ export default function ImageStudio({
                   >
                     <PromptPopoverHeader>Model</PromptPopoverHeader>
                     <ModelDropdown
-                      models={currentModels}
-                      selectedModel={selectedModelId}
+                      models={useLocalModel ? LOCAL_IMAGE_MODELS : currentModels}
+                      selectedModel={useLocalModel ? selectedLocalModel : selectedModelId}
                       onSelect={handleModelSelect}
                       onClose={() => setDropdownOpen(null)}
+                      useLocalModel={useLocalModel}
                     />
                   </PromptPopover>
                 )}
@@ -1657,26 +1864,35 @@ export default function ImageStudio({
                 </div>
               )}
 
-              {/* Batch size stepper */}
-              <div className={promptControlClassName({ compact: true, className: "select-none" })}>
-                <button
-                  type="button"
-                  onClick={() => setBatchSize(prev => Math.max(1, prev - 1))}
-                  className="text-white/60 hover:text-white/80 font-extrabold text-xs transition-colors px-1"
-                >
-                  -
-                </button>
-                <span className="text-xs font-semibold text-white/70 min-w-[24px] text-center">
-                  {batchSize}/4
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setBatchSize(prev => Math.min(4, prev + 1))}
-                  className="text-white/60 hover:text-white/80 font-extrabold text-xs transition-colors px-1"
-                >
-                  +
-                </button>
-              </div>
+              {/* Tools button */}
+              <button
+                type="button"
+                className={promptControlClassName({ active: showToolsPanel })}
+                onClick={() => {
+                  setShowToolsPanel(!showToolsPanel);
+                  if (!showToolsPanel && showAdvanced) setShowAdvanced(false);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60 text-secondary">
+                  <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+                </svg>
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>Tools</span>
+              </button>
+
+              {/* Advanced button */}
+              <button
+                type="button"
+                className={promptControlClassName({ active: showAdvanced })}
+                onClick={() => {
+                  setShowAdvanced(!showAdvanced);
+                  if (!showAdvanced && showToolsPanel) setShowToolsPanel(false);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60 text-secondary">
+                  <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 001.82-.33 1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-1.82.33A1.65 1.65 0 0019.4 9a1.65 1.65 0 00-1.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>Advanced</span>
+              </button>
 
               {/* Draw button */}
               <button
@@ -1702,7 +1918,7 @@ export default function ImageStudio({
               {generating ? (
                 <>
                   <span className="animate-spin inline-block text-black">◌</span>
-                  Generating...
+                  {useLocalModel && localGenProgress > 0 ? `${localGenProgress}%` : 'Generating...'}
                 </>
               ) : (
                 <>

@@ -1,6 +1,8 @@
 export const falaiAdapter = {
-    getKey: () => {
-        const key = window.__FAL_KEY__ || localStorage.getItem('fal_key');
+    getKey: (params) => {
+        const key = params?._apiKey
+            || (typeof window !== 'undefined' && window.__FAL_KEY__) 
+            || (typeof localStorage !== 'undefined' && localStorage.getItem('fal_key'));
         if (!key) throw new Error('Fal.ai API Key missing. Please set it in Settings.');
         return key;
     },
@@ -36,7 +38,7 @@ export const falaiAdapter = {
     },
 
     processLipSync: async function(params) {
-        const key = this.getKey();
+        const key = this.getKey(params);
         // Fal.ai uses fal-ai/latentsync
         const url = 'https://queue.fal.run/fal-ai/latentsync';
 

@@ -14,6 +14,84 @@ function notifyAuthRequired(status, detail) {
     window.dispatchEvent(new CustomEvent('platform:auth-required', { detail: { status, message: detail } }));
 }
 
+// Check if running in a web environment (Next.js) vs desktop (Electron/file://)
+const IS_WEB_APP = typeof window !== 'undefined' && window.location?.protocol?.startsWith('http');
+
+async function executeGeneration(action, params) {
+    if (IS_WEB_APP) {
+        // Retrieve BYOK keys to pass in headers
+        const openrouterKey = localStorage.getItem('openrouter_key') || '';
+        const aimlapiKey = localStorage.getItem('aimlapi_key') || '';
+        const goapiKey = localStorage.getItem('goapi_key') || '';
+        const hfToken = localStorage.getItem('hf_token') || '';
+        const falKey = localStorage.getItem('fal_key') || '';
+        
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-openrouter-key': openrouterKey,
+                'x-aimlapi-key': aimlapiKey,
+                'x-goapi-key': goapiKey,
+                'x-hf-token': hfToken,
+                'x-fal-key': falKey
+            },
+            body: JSON.stringify({ action, params })
+        });
+        
+        if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            const errText = errBody.error || await response.text();
+            throw new Error(`Server Generation Error: ${errText}`);
+        }
+        
+        return await response.json();
+    } else {
+        // Fallback for Electron / SSR
+        let adapter;
+        switch (action) {
+            case 'generateImage':
+                adapter = getAdapterForModel(getModelById(params.model), 't2i');
+                return adapter.generateImage(params);
+            case 'generateI2I':
+                adapter = getAdapterForModel(getI2IModelById(params.model), 'i2i');
+                return adapter.generateI2I(params);
+            case 'generateVideo':
+                adapter = getAdapterForModel(getVideoModelById(params.model), 'video');
+                return adapter.generateVideo(params);
+            case 'generateI2V':
+                adapter = getAdapterForModel(getI2VModelById(params.model), 'i2v');
+                return adapter.generateI2V(params);
+            case 'generateMarketingStudioAd':
+                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+                return adapter.generateMarketingStudioAd(params);
+            case 'processV2V':
+                adapter = getAdapterForModel(getV2VModelById(params.model), 'v2v');
+                return adapter.processV2V(params);
+            case 'processRecast':
+                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+                return adapter.processRecast(params);
+            case 'processLipSync':
+                adapter = getAdapterForModel(getLipSyncModelById(params.model), 'lipsync');
+                return adapter.processLipSync(params);
+            case 'generateAudio':
+                adapter = getAdapterForModel(getAudioModelById(params._modelId || params.model), 'audio');
+                return adapter.generateAudio(params);
+            case 'runClipping':
+                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+                return adapter.runClipping(params);
+            case 'runMotionGraphics':
+                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+                return adapter.runMotionGraphics(params);
+            case 'runMotionGraphicsEdit':
+                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
+                return adapter.runMotionGraphicsEdit(params);
+            default:
+                throw new Error('Unsupported action in executeGeneration');
+        }
+    }
+}
+
 async function pollForResult(requestId, key, maxAttempts = 900, interval = 2000) {
     const pollUrl = `${BASE_URL}/api/v1/predictions/${requestId}/result`;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -61,61 +139,39 @@ async function submitAndPoll(endpoint, payload, key, onRequestId, maxAttempts = 
 }
 
 export async function generateImage(apiKey, params) {
-    const modelInfo = getModelById(params.model);
-    const adapter = getAdapterForModel(modelInfo, 't2i');
-    return adapter.generateImage(params);
+    return executeGeneration('generateImage', params);
 }
 
 export async function generateI2I(apiKey, params) {
-    const modelInfo = getI2IModelById(params.model);
-    const adapter = getAdapterForModel(modelInfo, 'i2i');
-    if (!adapter.generateI2I) throw new Error("Adapter does not support I2I");
-    return adapter.generateI2I(params);
+    return executeGeneration('generateI2I', params);
 }
 
 export async function generateVideo(apiKey, params) {
-    const modelInfo = getVideoModelById(params.model);
-    const adapter = getAdapterForModel(modelInfo, 'video');
-    return adapter.generateVideo(params);
+    return executeGeneration('generateVideo', params);
 }
 
 export async function generateI2V(apiKey, params) {
-    const modelInfo = getI2VModelById(params.model);
-    const adapter = getAdapterForModel(modelInfo, 'i2v');
-    if (!adapter.generateI2V) throw new Error("Adapter does not support I2V");
-    return adapter.generateI2V(params);
+    return executeGeneration('generateI2V', params);
 }
 
 export async function generateMarketingStudioAd(apiKey, params) {
-    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-    return adapter.generateMarketingStudioAd(params);
+    return executeGeneration('generateMarketingStudioAd', params);
 }
 
 export async function processV2V(apiKey, params) {
-    const modelInfo = getV2VModelById(params.model);
-    const adapter = getAdapterForModel(modelInfo, 'v2v');
-    if (!adapter.processV2V) throw new Error("Adapter does not support V2V");
-    return adapter.processV2V(params);
+    return executeGeneration('processV2V', params);
 }
 
 export async function processRecast(apiKey, params) {
-    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-    return adapter.processRecast(params);
+    return executeGeneration('processRecast', params);
 }
 
 export async function processLipSync(apiKey, params) {
-    const modelInfo = getLipSyncModelById(params.model);
-    const adapter = getAdapterForModel(modelInfo, 'lipsync');
-    if (!adapter.processLipSync) throw new Error("Adapter does not support LipSync");
-    return adapter.processLipSync(params);
+    return executeGeneration('processLipSync', params);
 }
 
 export async function generateAudio(apiKey, params) {
-    const modelId = params._modelId || params.model;
-    const modelInfo = getAudioModelById(modelId);
-    const adapter = getAdapterForModel(modelInfo, 'audio');
-    if (!adapter.generateAudio) throw new Error("Adapter does not support Audio");
-    return adapter.generateAudio(params);
+    return executeGeneration('generateAudio', params);
 }
 
 export function uploadFile(apiKey, file, onProgress) {
@@ -718,16 +774,13 @@ export async function getHistory(apiKey, { cursor, limit = 50 } = {}) {
 }
 
 export async function runClipping(apiKey, params) {
-    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-    return adapter.runClipping(params);
+    return executeGeneration('runClipping', params);
 }
 
 export async function runMotionGraphics(apiKey, params) {
-    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-    return adapter.runMotionGraphics(params);
+    return executeGeneration('runMotionGraphics', params);
 }
 
 export async function runMotionGraphicsEdit(apiKey, params) {
-    const adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-    return adapter.runMotionGraphicsEdit(params);
+    return executeGeneration('runMotionGraphicsEdit', params);
 }

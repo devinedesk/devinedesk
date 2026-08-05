@@ -7,7 +7,7 @@ from typing import Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-Local API_BASE_URL = os.getenv("Local API_BASE_URL", "http://localhost:3000")
+LOCAL_API_BASE_URL = os.getenv("LOCAL_API_BASE_URL", "http://localhost:3000")
 
 async def get_api_key():
     api_key = os.getenv("LOCAL_API_KEY")
@@ -17,7 +17,7 @@ async def get_api_key():
 
 async def proxy_request(method: str, path: str, payload: Optional[dict] = None, params: Optional[dict] = None):
     api_key = await get_api_key()
-    url = f"{Local API_BASE_URL}/{path.lstrip('/')}"
+    url = f"{LOCAL_API_BASE_URL}/{path.lstrip('/')}"
     
     headers = {
         "Content-Type": "application/json",

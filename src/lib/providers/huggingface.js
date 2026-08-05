@@ -1,15 +1,16 @@
 export const huggingfaceAdapter = {
-    getKey: () => {
-        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_HF_TOKEN) 
+    getKey: (params) => {
+        const key = params?._apiKey
+            || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_HF_TOKEN) 
             || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_HF_TOKEN)
-            || window.__HF_TOKEN__ 
-            || localStorage.getItem('hf_token');
+            || (typeof window !== 'undefined' && window.__HF_TOKEN__) 
+            || (typeof localStorage !== 'undefined' && localStorage.getItem('hf_token'));
         if (!key) throw new Error('Hugging Face Token missing. Please set it in Settings.');
         return key;
     },
     
     generateImage: async function(params) {
-        const key = this.getKey();
+        const key = this.getKey(params);
         // Fallback to a generic inference endpoint if specific model not mapped
         const endpointId = params.model || 'stabilityai/stable-diffusion-xl-base-1.0';
         const url = `https://api-inference.huggingface.co/models/${endpointId}`;
