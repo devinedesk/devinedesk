@@ -1,6 +1,9 @@
 export const openRouterAdapter = {
     getKey: () => {
-        const key = window.__OPENROUTER_KEY__ || localStorage.getItem('openrouter_key');
+        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_OPENROUTER_API_KEY) 
+            || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_OPENROUTER_API_KEY)
+            || window.__OPENROUTER_KEY__ 
+            || localStorage.getItem('openrouter_key');
         if (!key) throw new Error('OpenRouter API Key missing. Please set it in Settings.');
         return key;
     },
