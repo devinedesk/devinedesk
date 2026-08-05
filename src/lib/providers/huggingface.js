@@ -1,6 +1,9 @@
 export const huggingfaceAdapter = {
     getKey: () => {
-        const key = window.__HF_TOKEN__ || localStorage.getItem('hf_token');
+        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_HF_TOKEN) 
+            || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_HF_TOKEN)
+            || window.__HF_TOKEN__ 
+            || localStorage.getItem('hf_token');
         if (!key) throw new Error('Hugging Face Token missing. Please set it in Settings.');
         return key;
     },

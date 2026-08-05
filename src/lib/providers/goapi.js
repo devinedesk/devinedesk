@@ -1,6 +1,9 @@
 export const goapiAdapter = {
     getKey: () => {
-        const key = window.__GOAPI_KEY__ || localStorage.getItem('goapi_key');
+        const key = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOAPI_KEY) 
+            || (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_GOAPI_KEY)
+            || window.__GOAPI_KEY__ 
+            || localStorage.getItem('goapi_key');
         if (!key) throw new Error('GoAPI Key missing. Please set it in Settings.');
         return key;
     },
