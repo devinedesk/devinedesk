@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import { runClipping, uploadFile } from "../api.js";
+import { runClipping, uploadFile } from "../apiClient.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
 import MobileGenerationActions, {

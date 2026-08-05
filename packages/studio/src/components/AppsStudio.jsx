@@ -7,7 +7,7 @@ import {
   FaUserInjured, FaStethoscope, FaCar, FaPaw, FaBalanceScale, FaTruck, FaMapMarkerAlt,
   FaGithub, FaExternalLinkAlt, FaDollarSign, FaRocket, FaCreditCard 
 } from "react-icons/fa";
-import { registerAppInterest, getAppInterests } from '../api.js';
+import { registerAppInterest, getAppInterests } from '../apiClient.js';
 import toast, { Toaster } from 'react-hot-toast';
 
 const templateApps = [

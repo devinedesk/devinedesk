@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { uploadFile, generateMarketingStudioAd } from "../api.js";
+import { uploadFile, generateMarketingStudioAd } from "../apiClient.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
 import MobileGenerationActions, {
   GenerationCopyButtons,

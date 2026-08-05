@@ -13,7 +13,7 @@ import {
   sendAgentChatMessage,
   pollAgentChatResult,
   createAgent,
-} from "../api.js";
+} from "../apiClient.js";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function timeAgo(dateStr) {

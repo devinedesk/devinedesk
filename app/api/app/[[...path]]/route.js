@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const Local API_BASE = process.env.BACKEND_API_URL || 'https://api.Local API.ai';
+const LOCAL_API_BASE = process.env.BACKEND_API_URL || 'http://localhost:3000';
 
 function getApiKey(request) {
     // Only accept x-api-key header. Cookie-based auth is removed for security:
@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
     const effectivePath = path === 'get_upload_file' ? 'get_file_upload_url' : path;
     
     const { search } = new URL(request.url);
-    const targetUrl = `${Local API_BASE}/app/${effectivePath}${search}`;
+    const targetUrl = `${LOCAL_API_BASE}/app/${effectivePath}${search}`;
 
     const headers = cleanHeaders(request);
 
@@ -67,7 +67,7 @@ export async function POST(request, { params }) {
     const path = pathSegments.join('/');
     
     const { search } = new URL(request.url);
-    const targetUrl = `${Local API_BASE}/app/${path}${search}`;
+    const targetUrl = `${LOCAL_API_BASE}/app/${path}${search}`;
 
     const headers = cleanHeaders(request);
 
@@ -95,7 +95,7 @@ export async function DELETE(request, { params }) {
     const path = pathSegments.join('/');
     
     const { search } = new URL(request.url);
-    const targetUrl = `${Local API_BASE}/app/${path}${search}`;
+    const targetUrl = `${LOCAL_API_BASE}/app/${path}${search}`;
 
     const headers = cleanHeaders(request);
 
@@ -120,7 +120,7 @@ export async function PUT(request, { params }) {
     const path = pathSegments.join('/');
     
     const { search } = new URL(request.url);
-    const targetUrl = `${Local API_BASE}/app/${path}${search}`;
+    const targetUrl = `${LOCAL_API_BASE}/app/${path}${search}`;
 
     const headers = cleanHeaders(request);
 
