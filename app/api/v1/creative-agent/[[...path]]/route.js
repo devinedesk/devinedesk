@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { validateRequest } from '../../../auth-check';
 
-const LOCAL_API_BASE = process.env.BACKEND_API_URL || 'http://localhost:3000';
+const LOCAL_API_BASE = process.env.BACKEND_API_URL || 'http://localhost:8000';
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || process.env.LOCAL_API_KEY || process.env.OPENROUTER_API_KEY || '';
 
 function cleanHeaders(request) {

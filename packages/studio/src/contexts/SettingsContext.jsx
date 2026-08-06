@@ -4,14 +4,7 @@ const SettingsContext = createContext();
 
 export function SettingsProvider({ children }) {
   const [keys, setKeys] = useState({
-    platform_api_key: '',
-    openrouter_key: '',
-    aimlapi_key: '',
-    goapi_key: '',
-    hf_token: '',
-    fal_key: '',
-    cloudinary_cloud_name: '',
-    cloudinary_upload_preset: ''
+    platform_api_key: '' // Kept for legacy standalone testing
   });
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -19,14 +12,7 @@ export function SettingsProvider({ children }) {
   useEffect(() => {
     // 1. Initial load from localStorage (fast sync)
     const localKeys = {
-      platform_api_key: localStorage.getItem('platform_api_key') || '',
-      openrouter_key: localStorage.getItem('openrouter_key') || '',
-      aimlapi_key: localStorage.getItem('aimlapi_key') || '',
-      goapi_key: localStorage.getItem('goapi_key') || '',
-      hf_token: localStorage.getItem('hf_token') || '',
-      fal_key: localStorage.getItem('fal_key') || '',
-      cloudinary_cloud_name: localStorage.getItem('cloudinary_cloud_name') || '',
-      cloudinary_upload_preset: localStorage.getItem('cloudinary_upload_preset') || ''
+      platform_api_key: localStorage.getItem('platform_api_key') || ''
     };
     setKeys(localKeys);
 

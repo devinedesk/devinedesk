@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -34,7 +34,6 @@ model User {
   agents        Agent[]
   assets        Asset[]
   transactions  Transaction[]
-  notifications Notification[]
   conversations Conversation[]
   appInterests  AppInterest[]
 }
@@ -185,16 +184,7 @@ model Asset {
   createdAt DateTime @default(now())
 }
 
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  message   String
-  type      String   @default("info") // info, success, warning, error
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
-}
+
 
 model AppInterest {
   id        String   @id @default(cuid())

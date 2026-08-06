@@ -19,22 +19,11 @@ const IS_WEB_APP = typeof window !== 'undefined' && window.location?.protocol?.s
 
 async function executeGeneration(action, params) {
     if (IS_WEB_APP) {
-        // Retrieve BYOK keys to pass in headers
-        const openrouterKey = localStorage.getItem('openrouter_key') || '';
-        const aimlapiKey = localStorage.getItem('aimlapi_key') || '';
-        const goapiKey = localStorage.getItem('goapi_key') || '';
-        const hfToken = localStorage.getItem('hf_token') || '';
-        const falKey = localStorage.getItem('fal_key') || '';
-        
+        // Use NextAuth session cookies for authentication
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'x-openrouter-key': openrouterKey,
-                'x-aimlapi-key': aimlapiKey,
-                'x-goapi-key': goapiKey,
-                'x-hf-token': hfToken,
-                'x-fal-key': falKey
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ action, params })
         });
@@ -45,7 +34,13 @@ async function executeGeneration(action, params) {
             throw new Error(`Server Generation Error: ${errText}`);
         }
         
-        return await response.json();
+        const data = await response.json();
+        
+        if (data.jobId && data.status === 'queued') {
+            return await pollForQueueJob(data.jobId);
+        }
+        
+        return data;
     } else {
         // Fallback for Electron / SSR
         let adapter;
@@ -117,6 +112,30 @@ async function pollForResult(requestId, key, maxAttempts = 900, interval = 2000)
     throw new Error('Generation timed out after polling.');
 }
 
+async function pollForQueueJob(jobId, maxAttempts = 300, interval = 2000) {
+    const pollUrl = `${BASE_URL}/generate/${jobId}`;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, interval));
+        try {
+            const response = await fetch(pollUrl);
+            if (!response.ok) {
+                const errText = await response.text();
+                if (response.status >= 500) continue;
+                throw new Error(`Queue Poll Failed: ${response.status} - ${errText.slice(0, 100)}`);
+            }
+            const data = await response.json();
+            const status = data.status?.toLowerCase();
+            if (status === 'completed') return data.result;
+            if (status === 'failed' || status === 'error') throw new Error(`Queue job failed: ${data.error || JSON.stringify(data)}`);
+        } catch (e) {
+            if (e.message.includes('Queue Poll Failed')) throw e;
+            console.error('Queue poll error, retrying...', e);
+        }
+    }
+    throw new Error('Timeout waiting for queue job result');
+}
+
+
 async function submitAndPoll(endpoint, payload, key, onRequestId, maxAttempts = 60) {
     const url = `${BASE_URL}/v1/${endpoint}`;
     const response = await fetch(url, {
@@ -174,22 +193,17 @@ export async function generateAudio(apiKey, params) {
     return executeGeneration('generateAudio', params);
 }
 
-export function uploadFile(apiKey, file, onProgress, customCloudName, customUploadPreset) {
+export function uploadFile(apiKey, file, onProgress) {
     return new Promise((resolve, reject) => {
-        const cloudName = customCloudName || (typeof window !== 'undefined' ? (window.__CLOUDINARY_CLOUD_NAME__ || localStorage.getItem('cloudinary_cloud_name')) : null);
-        const uploadPreset = customUploadPreset || (typeof window !== 'undefined' ? (window.__CLOUDINARY_UPLOAD_PRESET__ || localStorage.getItem('cloudinary_upload_preset')) : null);
-        
-        if (!cloudName || !uploadPreset) {
-            return reject(new Error('Cloudinary credentials missing. Please set Cloud Name and Upload Preset in Settings.'));
-        }
-
-        const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+        const url = `${BASE_URL}/upload`;
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', uploadPreset);
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', url);
+        if (apiKey) {
+            xhr.setRequestHeader('x-api-key', apiKey);
+        }
 
         if (onProgress) {
             xhr.upload.onprogress = (event) => {
@@ -204,9 +218,9 @@ export function uploadFile(apiKey, file, onProgress, customCloudName, customUplo
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const data = JSON.parse(xhr.responseText);
-                    const fileUrl = data.secure_url || data.url;
+                    const fileUrl = data.url;
                     if (!fileUrl) {
-                        reject(new Error('No URL returned from Cloudinary upload'));
+                        reject(new Error('No URL returned from upload'));
                     } else {
                         resolve(fileUrl);
                     }
@@ -214,7 +228,7 @@ export function uploadFile(apiKey, file, onProgress, customCloudName, customUplo
                     reject(new Error('Failed to parse upload response'));
                 }
             } else {
-                reject(new Error(`File upload failed: ${xhr.status}`));
+                reject(new Error(`File upload failed: ${xhr.status} ${xhr.responseText}`));
             }
         };
 

@@ -473,6 +473,8 @@ Every image you upload is saved locally (URL + thumbnail) so you never upload th
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+)
+- [PostgreSQL](https://www.postgresql.org/) (Running on port 5434, see `docker-compose.yml`)
+- [Redis](https://redis.io/) (Running on port 6379, see `docker-compose.yml`)
 - A [Local API.ai access key](https://Local API.ai/access-keys?utm_source=github&utm_medium=readme&utm_campaign=open-generative-ai). Copy the generated key value into the app; do not enter the key name or label.
 
 ### Setup
@@ -497,12 +499,22 @@ cd Open-Generative-AI
 # need to be built before either dev script will work.
 npm run setup
 
+# Setup environment variables
+cp .env.example .env
+# Edit .env and configure DATABASE_URL and REDIS_URL
+# Example:
+# DATABASE_URL="postgresql://user:password@127.0.0.1:5434/devinedesk?schema=public"
+# REDIS_URL="redis://127.0.0.1:6379"
+
+# Start the background worker for AI generation tasks
+npm run worker &
+
 # Then start ONE of:
 npm run electron:dev   # Desktop app (Electron + Vite) — recommended
 npm run dev            # Hosted web version (Next.js) → http://localhost:3000
 ```
 
-You'll be prompted to enter your Local API API key on first use (skip the key if you only plan to use local models).
+You'll be prompted to enter your Local API API key on first use (skip the key if you only plan to use local models). Or, configure the provider API keys directly in your `.env`.
 
 > **Troubleshooting — `Couldn't find a 'pages' directory`**: this means Next.js can't see the `app/` folder. Confirm you're running `npm run dev` from the repo root (the directory that contains `app/`, `package.json`, and `next.config.mjs`), and that you cloned with submodules. Re-run `npm run setup` if `packages/Vibe-Workflow` or `packages/agents` are empty.
 
@@ -515,7 +527,7 @@ npm run start
 
 ### Docker Deployment (Recommended)
 
-You can deploy the entire platform (Next.js, Prisma SQLite database, and static assets) using Docker Compose.
+You can deploy the entire platform (Next.js, Prisma database, and static assets) using Docker Compose.
 
 ```bash
 # Make sure you are in the devinedesk subdirectory
@@ -526,7 +538,7 @@ docker-compose up -d --build
 ```
 
 The app will be available at `http://localhost:3001` (to avoid conflicts with local dev servers on 3000).
-The SQLite database will be persisted in a local Docker volume automatically.
+The database will be persisted in a local Docker volume automatically.
 
 ### Desktop App Build
 
@@ -560,8 +572,7 @@ Open-Generative-AI/
 │   └── studio/
 │       └── page.js             # Studio page — renders StandaloneShell
 ├── components/
-│   ├── StandaloneShell.js      # Tab nav + BYOK (API key from localStorage)
-│   └── ApiKeyModal.js          # API key entry modal
+│   ├── StandaloneShell.js      # Tab nav + Server-side configuration
 ├── packages/
 │   └── studio/                 # Shared React component library
 │       └── src/

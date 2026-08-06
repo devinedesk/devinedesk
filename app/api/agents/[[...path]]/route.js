@@ -15,8 +15,8 @@ export async function GET(request, { params }) {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
 
-    if (segments.length === 0) {
-        // GET /api/agents
+    if (segments.length === 0 || (segments[0] === 'user' && segments[1] === 'agents')) {
+        // GET /api/agents or GET /api/agents/user/agents
         const isTemplate = searchParams.get('is_template') === 'true';
         if (isTemplate) {
             return NextResponse.json({ agents: [] }); // No templates for now
@@ -26,6 +26,31 @@ export async function GET(request, { params }) {
             orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json({ agents });
+    }
+
+    if (segments[0] === 'featured' && segments[1] === 'agents') {
+        return NextResponse.json({ agents: [] });
+    }
+
+    if (segments[0] === 'user' && segments[1] === 'conversations') {
+        const conversations = await prisma.conversation.findMany({
+            where: { userId: session.user.id },
+            include: { agent: true },
+            orderBy: { createdAt: 'desc' }
+        });
+        return NextResponse.json(conversations);
+    }
+
+    if (segments[0] === 'by-slug' && segments[1] && segments[2]) {
+        // GET /api/agents/by-slug/:slug/:conversationId
+        const slug = segments[1];
+        const conversationId = segments[2];
+        const conversation = await prisma.conversation.findUnique({
+            where: { id: conversationId, userId: session.user.id },
+            include: { messages: true }
+        });
+        if (!conversation) return NextResponse.json({ detail: "Not found" }, { status: 404 });
+        return NextResponse.json(conversation);
     }
 
     if (segments[0] === 'by-slug' && segments[1]) {
@@ -50,15 +75,13 @@ export async function GET(request, { params }) {
         return NextResponse.json({ agents: [] });
     }
 
-    // Return request status if asked
+    // Note: The /requests endpoint is deprecated since Next.js serverless functions
+    // handle agent chats synchronously and no longer return request_ids for polling.
     if (segments[0] === 'requests' && segments[1]) {
-        const reqId = segments[1];
-        const req = global.requests ? global.requests[reqId] : null;
-        if (!req) return NextResponse.json({ detail: "Not found" }, { status: 404 });
-        return NextResponse.json(req);
+        return NextResponse.json({ detail: "Polling deprecated on this backend" }, { status: 404 });
     }
 
-    return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
+    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }
 
 export async function POST(request, { params }) {
@@ -221,26 +244,36 @@ export async function POST(request, { params }) {
             }
         });
 
-        // For simplicity, we just return the full messages to act as the completed request response.
-        // Wait, the client polls /api/agents/requests/:id ? 
-        // If the client expects `{ request_id: ..., status: "processing" }` and then polls, 
-        // we can just return it. 
-        // BUT, what if we just emulate the poll right here? 
-        // Let's check how ai-agent works. ai-agent usually POSTs to `/chat` and gets a request_id, 
-        // then GETs `/requests/:request_id`.
-        // Let's create a temporary in-memory store for requests to satisfy polling if we must.
-        const reqId = `req_${Date.now()}`;
-        
-        global.requests = global.requests || {};
-        global.requests[reqId] = {
+        return NextResponse.json({
             is_complete: true,
             conversation_id: conversation.id,
             messages: [...allMessages, aiMsg].map(m => ({ role: m.role, content: m.content })),
             suggestions: []
-        };
-
-        return NextResponse.json({ request_id: reqId, status: "processing" });
+        });
     }
 
-    return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
+    if (segments.length === 0) {
+        // POST /api/agents (handled by create for simplicity, assuming generic agent creation form falls back here)
+        const body = await request.json();
+        
+        const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        // Ensure slug is unique
+        const existing = await prisma.agent.findUnique({ where: { slug } });
+        const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
+
+        const newAgent = await prisma.agent.create({
+            data: {
+                userId: session.user.id,
+                slug: finalSlug,
+                name: body.name,
+                description: body.description || "",
+                systemPrompt: body.system_prompt || "",
+                model: "meta-llama/llama-3.1-8b-instruct:free"
+            }
+        });
+        
+        return NextResponse.json({ ...newAgent, system_prompt: newAgent.systemPrompt });
+    }
+
+    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }

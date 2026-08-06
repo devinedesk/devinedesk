@@ -35,7 +35,7 @@ export function middleware(request) {
                                 url.pathname.startsWith('/api/v1/upload-binary');
 
         if (url.pathname.startsWith('/api/v1') && !isHandledByRoute) {
-            const targetBase = process.env.BACKEND_API_URL || 'http://localhost:3000';
+            const targetBase = process.env.BACKEND_API_URL || 'http://localhost:8000';
             const targetUrl = new URL(url.pathname + url.search, targetBase);
             const rewriteResponse = NextResponse.rewrite(targetUrl);
             return addSecurityHeaders(rewriteResponse);

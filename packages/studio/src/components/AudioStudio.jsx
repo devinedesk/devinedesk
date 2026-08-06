@@ -6,6 +6,8 @@ import { generateAudio, uploadFile } from "../apiClient.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
 import { audioModels, getAudioModelById } from "../models.js";
+import { StudioGallery } from "./shared/StudioGallery.jsx";
+import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
 
 // ---------------------------------------------------------------------------
 // Upload button states
@@ -726,7 +728,7 @@ export default function AudioStudio({
             </button>
 
             {openDropdown && (
-              <div className="absolute left-0 right-0 mt-2 z-50 bg-[#161618] border border-zinc-700 rounded shadow-3xl max-h-60 overflow-y-auto custom-scrollbar p-1.5">
+              <div className="absolute left-0 right-0 mt-2 z-50 bg-[#030303] border border-zinc-700 rounded shadow-3xl max-h-60 overflow-y-auto custom-scrollbar p-1.5">
                 {audioModels.map((model) => (
                   <button
                     key={model.id}
@@ -840,7 +842,7 @@ export default function AudioStudio({
                     </button>
 
                     {isOpen && (
-                      <div className="absolute left-0 right-0 mt-1 z-50 bg-[#161618] border border-zinc-700 rounded shadow-3xl max-h-60 overflow-y-auto custom-scrollbar p-1">
+                      <div className="absolute left-0 right-0 mt-1 z-50 bg-[#030303] border border-zinc-700 rounded shadow-3xl max-h-60 overflow-y-auto custom-scrollbar p-1">
                         {schema.enum.map((opt) => (
                           <button
                             key={opt}
@@ -989,13 +991,11 @@ export default function AudioStudio({
       <div className="flex-1 flex flex-col min-w-0 h-full relative z-20">
         
         {/* Main Display panel */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-10 flex flex-col justify-between">
-          
-          <div className="flex-1 flex items-center justify-center min-h-[400px] mb-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-10 flex flex-col min-h-0">
             
             {/* 1. Error Display */}
             {generateError && (
-              <div className="w-full max-w-md p-6 bg-red-500/10 border border-red-500/20 rounded flex flex-col items-center gap-4 animate-shake">
+              <div className="w-full max-w-md mx-auto mb-8 p-6 bg-red-500/10 border border-red-500/20 rounded flex flex-col items-center gap-4 animate-shake">
                 <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center text-red-500 border border-red-500/30 shadow-lg">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <circle cx="12" cy="12" r="10" />
@@ -1016,7 +1016,7 @@ export default function AudioStudio({
 
             {/* 2. Generating / Loading View */}
             {isGenerating && !generateError && (
-              <div className="flex flex-col items-center gap-6 animate-fade-in">
+              <div className="flex flex-col items-center justify-center min-h-[400px] gap-6 animate-fade-in">
                 <div className="relative">
                   <div className="w-24 h-24 border-[3px] border-zinc-800 border-t-primary rounded-full animate-spin shadow-glow" />
                   <div className="absolute inset-0 flex items-center justify-center text-primary">
@@ -1035,25 +1035,22 @@ export default function AudioStudio({
             )}
 
             {/* 3. Empty State (no audio, not loading, no error) */}
-            {view === "input" && !isGenerating && !generateError && (
-              <div className="flex flex-col items-center gap-6 max-w-md text-center p-8 bg-zinc-900/40 border border-zinc-800 rounded backdrop-blur-sm relative group animate-fade-in-up">
-                {/* Glow behind the icon */}
-                <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-25 group-hover:opacity-40 transition-opacity duration-1000 pointer-events-none" />
-                <div className="w-20 h-20 bg-zinc-900 border border-zinc-705 rounded flex items-center justify-center shadow-inner relative z-10 transition-transform duration-500 group-hover:scale-105">
-                  <MusicIcon className="text-primary w-8 h-8 filter drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]" />
-                </div>
-                <div className="relative z-10">
-                  <h3 className="text-white font-black text-xl mb-3 tracking-tight">Audio Studio</h3>
-                  <p className="text-sm text-zinc-200 font-medium leading-relaxed px-4">
-                    Choose an AI music model, voice cloner, or sound generator. Modify variables on the left and craft your next high-fidelity track.
-                  </p>
-                </div>
-              </div>
+            {view === "input" && !isGenerating && !generateError && history.length === 0 && (
+              <EmptyStateHero
+                title="AUDIO STUDIO"
+                subtitle="Choose an AI music model, voice cloner, or sound generator to craft your next high-fidelity track."
+                imageAssets={[
+                  "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/sdxl-image.avif",
+                  "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/chroma-image.avif",
+                  "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/neta-lumina.avif",
+                  "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/perfect-pony-xl.avif",
+                ]}
+              />
             )}
 
             {/* 4. Active Result Player Display */}
             {view === "result" && activeResultUrl && !isGenerating && !generateError && (
-              <div className="w-full max-w-2xl animate-fade-in-up space-y-4">
+              <div className="w-full max-w-2xl mx-auto animate-fade-in-up space-y-4 mb-10">
                 <div className="flex items-center justify-between px-1">
                   <button
                     onClick={handleNew}
@@ -1074,45 +1071,36 @@ export default function AudioStudio({
               </div>
             )}
 
-          </div>
-
-          {/* ─── BOTTOM HISTORY FOOTER ─── */}
-          {history.length > 0 && (
-            <div className="border-t border-zinc-900 pt-6 w-full animate-fade-in-up">
-              <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-4 px-1">
-                Generation History ({history.length})
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {history.map((entry, idx) => (
-                  <div
-                    key={entry.id || idx}
-                    onClick={() => handleSelectHistory(entry, idx)}
-                    className={`p-3.5 bg-zinc-900 border rounded cursor-pointer transition-all flex flex-col justify-between h-28 border-zinc-700/80 hover:bg-zinc-850 hover:border-zinc-500 ${
-                      activeResultUrl === entry.url && view === "result"
-                        ? "border-primary bg-primary/5 shadow-glow"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${
-                        activeResultUrl === entry.url && view === "result" ? "bg-primary/20 text-primary" : "bg-zinc-800 text-zinc-200"
-                      }`}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                        </svg>
-                      </div>
-                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider truncate">
-                        {entry.model ? entry.model.split('-').slice(0, 2).join(' ') : 'Audio'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] font-semibold text-white line-clamp-2 leading-tight">
-                      {entry.title || entry.prompt || "Untitled Audio"}
-                    </p>
-                  </div>
-                ))}
+            {/* 5. Studio Gallery (History) */}
+            {!isGenerating && history.length > 0 && (
+              <div className="w-full pt-6 border-t border-white/5">
+                <StudioGallery
+                  history={history}
+                  onSelectFullscreen={(url) => {
+                    const entry = history.find(h => h.url === url);
+                    if (entry) handleSelectHistory(entry, history.indexOf(entry));
+                  }}
+                  onDelete={(entry) => setInternalHistory(prev => prev.filter(h => h.id !== entry.id))}
+                  onDownload={async (entry) => {
+                    try {
+                      const response = await fetch(entry.url);
+                      const blob = await response.blob();
+                      const blobUrl = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = blobUrl;
+                      a.download = entry.title ? `${entry.title.replace(/\\s+/g, '_')}.mp3` : "generated_audio.mp3";
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(blobUrl);
+                    } catch {
+                      window.open(entry.url, "_blank");
+                    }
+                  }}
+                  studioName="Audio Studio"
+                />
               </div>
-            </div>
-          )}
+            )}
 
         </div>
 

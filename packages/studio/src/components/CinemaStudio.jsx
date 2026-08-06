@@ -21,6 +21,9 @@ import {
   promptControlClassName,
   promptMediaButtonClassName,
 } from "./prompt/PromptComposer.jsx";
+import DrawModal from "./DrawModal.jsx";
+import { StudioGallery } from "./shared/StudioGallery.jsx";
+import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
 
 // ─── Constants (inlined from promptUtils) ───────────────────────────────────
 
@@ -560,7 +563,6 @@ export default function CinemaStudio({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageUploadProgress, setImageUploadProgress] = useState(0);
   const imageInputRef = useRef(null);
-  const [activeHistoryIndex, setactiveHistoryIndex] = useState(null);
   const [copiedPromptIndex, setCopiedPromptIndex] = useState(null);
   const [copiedImageIndex, setCopiedImageIndex] = useState(null);
 
@@ -752,64 +754,6 @@ export default function CinemaStudio({
     }
   }, [canvasUrl]);
 
-  const handleCopyPrompt = useCallback(
-    async (prompt, index) => {
-      if (!prompt) return;
-
-      try {
-        await navigator.clipboard.writeText(prompt);
-        setCopiedPromptIndex(index);
-        window.setTimeout(() => {
-          setCopiedPromptIndex((current) => (current === index ? null : current));
-        }, 1600);
-      } catch (error) {
-        console.error("Failed to copy the prompt:", error);
-        onGenerationError?.("Could not copy the prompt to the clipboard.");
-      }
-    },
-    [onGenerationError],
-  );
-
-  const handleCopyImage = useCallback(
-    async (url, index) => {
-      if (!url) return;
-
-      try {
-        if (
-          !window.isSecureContext ||
-          !navigator.clipboard?.write ||
-          typeof window.ClipboardItem === "undefined"
-        ) {
-          throw new Error("Image clipboard access requires HTTPS or localhost.");
-        }
-
-        await navigator.clipboard.write([
-          new window.ClipboardItem({
-            "image/png": fetchImageAsPngBlob(url),
-          }),
-        ]);
-        setCopiedImageIndex(index);
-        window.setTimeout(() => {
-          setCopiedImageIndex((current) => (current === index ? null : current));
-        }, 1600);
-      } catch (error) {
-        console.error("Failed to copy the image:", error);
-        onGenerationError?.(
-          "Could not copy the image. Image copy requires HTTPS or localhost.",
-        );
-      }
-    },
-    [onGenerationError],
-  );
-
-  const resetToPrompt = () => {
-    setCanvasUrl(null);
-    setSettings((prev) => ({ ...prev, prompt: "" }));
-    if (textareaRef.current) {
-      setTimeout(() => textareaRef.current?.focus(), 50);
-    }
-  };
-
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
@@ -817,225 +761,35 @@ export default function CinemaStudio({
       {/* ── CENTRAL GALLERY AREA ── */}
       <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto custom-scrollbar pb-40 lg:pb-32 px-2">
         {history.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full pt-4 animate-fade-in-up">
-            {history.map((entry, idx) => (
-              <div
-                key={entry.timestamp ?? idx}
-                className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-xl hover:border-[#22d3ee]/50 transition-all duration-300 flex flex-col cursor-pointer"
-                onClick={() => setFullscreenUrl(entry.url)}
-              >
-                <img
-                  src={entry.url}
-                  alt={`History item ${idx + 1}`}
-                  className="w-full aspect-[4/3] object-cover bg-black/40"
-                />
-                
-                {/* Overlay actions */}
-                <div className="absolute top-2 right-2 hidden md:flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    type="button"
-                    title={copiedPromptIndex === idx ? "Prompt copied" : "Copy prompt"}
-                    aria-label={copiedPromptIndex === idx ? "Prompt copied" : "Copy prompt"}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleCopyPrompt(entry.settings?.prompt, idx);
-                    }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/60 font-black backdrop-blur-md transition-all hover:bg-[#22d3ee] hover:text-black ${
-                      copiedPromptIndex === idx ? "text-[#22d3ee]" : "text-white"
-                    }`}
-                  >
-                    {copiedPromptIndex === idx ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M5 12l4 4L19 6" />
-                      </svg>
-                    ) : (
-                      <CopyContentIcon kind="text" size={17} />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    title={copiedImageIndex === idx ? "Image copied" : "Copy image"}
-                    aria-label={copiedImageIndex === idx ? "Image copied" : "Copy image"}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleCopyImage(entry.url, idx);
-                    }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/60 backdrop-blur-md transition-all hover:bg-[#22d3ee] hover:text-black ${
-                      copiedImageIndex === idx ? "text-[#22d3ee]" : "text-white"
-                    }`}
-                  >
-                    {copiedImageIndex === idx ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M5 12l4 4L19 6" />
-                      </svg>
-                    ) : (
-                      <CopyContentIcon kind="image" size={17} />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    title="Download"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        const response = await fetch(entry.url);
-                        const blob = await response.blob();
-                        const blobUrl = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = blobUrl;
-                        a.download = `cinema-shot-${entry.id || idx}.jpg`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(blobUrl);
-                      } catch {
-                        window.open(entry.url, "_blank");
-                      }
-                    }}
-                    className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-[#22d3ee] hover:text-black transition-all border border-white/10"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    title="Delete"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm("Are you sure you want to delete this generated item?")) {
-                        setInternalHistory(prev => prev.filter((_, i) => i !== idx));
-                      }
-                    }}
-                    className="p-2 bg-black/60 backdrop-blur-md rounded-full text-red-400 hover:bg-red-500 hover:text-white transition-all border border-white/10"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                      <line x1="10" y1="11" x2="10" y2="17" />
-                      <line x1="14" y1="11" x2="14" y2="17" />
-                    </svg>
-                  </button>
-                </div>
-                <MobileGenerationActions
-                  actions={[
-                    {
-                      kind: "text",
-                      label: "Copy prompt",
-                      onSelect: () =>
-                        handleCopyPrompt(entry.settings?.prompt, idx),
-                    },
-                    {
-                      kind: "image",
-                      label: "Copy image",
-                      onSelect: () => handleCopyImage(entry.url, idx),
-                    },
-                    {
-                      kind: "download",
-                      label: "Download",
-                      onSelect: async () => {
-                        try {
-                          const response = await fetch(entry.url);
-                          const blob = await response.blob();
-                          const blobUrl = URL.createObjectURL(blob);
-                          const anchor = document.createElement("a");
-                          anchor.href = blobUrl;
-                          anchor.download = `cinema-shot-${entry.id || idx}.jpg`;
-                          document.body.appendChild(anchor);
-                          anchor.click();
-                          document.body.removeChild(anchor);
-                          URL.revokeObjectURL(blobUrl);
-                        } catch {
-                          window.open(entry.url, "_blank");
-                        }
-                      },
-                    },
-                    {
-                      kind: "delete",
-                      label: "Delete",
-                      danger: true,
-                      onSelect: () => {
-                        if (confirm("Are you sure you want to delete this generated item?")) {
-                          setInternalHistory((prev) => prev.filter((_, i) => i !== idx));
-                        }
-                      },
-                    },
-                  ]}
-                />
-
-                {/* Details */}
-                <div className="p-3 bg-black/80 backdrop-blur-sm border-t border-white/5 flex-1 flex flex-col justify-between gap-2">
-                  <p
-                    className="w-full text-left text-xs line-clamp-3 leading-relaxed text-white/70"
-                    title={entry.settings?.prompt || "No prompt"}
-                  >
-                    {entry.settings?.prompt || "No prompt"}
-                  </p>
-                  <span className="sr-only" aria-live="polite">
-                    {copiedPromptIndex === idx
-                      ? "Prompt copied"
-                      : copiedImageIndex === idx
-                        ? "Image copied"
-                        : ""}
-                  </span>
-                  <div className="flex items-center mt-1 flex-wrap gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-[#22d3ee] px-2 py-0.5 bg-[#22d3ee]/10 rounded border border-[#22d3ee]/20">
-                        Cinema Studio
-                      </span>
-                      {entry.settings?.camera && (
-                        <span className="text-[10px] text-white/60">{entry.settings.camera}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <StudioGallery 
+            history={history}
+            onSelectFullscreen={setFullscreenUrl}
+            onDownload={async (entry, idx) => {
+              try {
+                const response = await fetch(entry.url);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = `cinema-shot-${entry.id || idx}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+              } catch {
+                window.open(entry.url, "_blank");
+              }
+            }}
+            onDelete={(entry, idx) => setInternalHistory(prev => prev.filter((_, i) => i !== idx))}
+            onCopyError={onGenerationError}
+            studioName="Cinema Studio"
+          />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center px-4 animate-fade-in-up transition-all duration-700 min-h-[50vh]">
-            {/* Overlapping floating cards */}
-            <div className="flex items-center justify-center gap-1.5 md:gap-3 mb-10 select-none scale-90 sm:scale-100">
-              <div className="w-18 h-22 sm:w-24 sm:h-28 rounded-2xl border border-white/10 shadow-2xl -rotate-[12deg] transform hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 overflow-hidden bg-white/[0.01] flex-shrink-0">
-                <img
-                  src="https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/sdxl-image.avif"
-                  alt="Creative asset 1"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="w-18 h-22 sm:w-24 sm:h-28 rounded-2xl border border-white/10 shadow-2xl -rotate-[4deg] transform hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 overflow-hidden bg-white/[0.01] -ml-3 sm:-ml-4 flex-shrink-0">
-                <img
-                  src="https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/chroma-image.avif"
-                  alt="Creative asset 2"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="w-18 h-18 sm:w-24 sm:h-24 rounded-full border border-white/10 shadow-2xl rotate-[6deg] transform hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 overflow-hidden bg-white/[0.01] -ml-3 sm:-ml-4 flex-shrink-0">
-                <img
-                  src="https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/neta-lumina.avif"
-                  alt="Creative asset 3"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="w-18 h-22 sm:w-24 sm:h-28 rounded-2xl border border-white/10 shadow-2xl rotate-[12deg] transform hover:rotate-0 hover:scale-110 hover:z-20 transition-all duration-300 overflow-hidden bg-white/[0.01] -ml-3 sm:-ml-4 flex-shrink-0">
-                <img
-                  src="https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/perfect-pony-xl.avif"
-                  alt="Creative asset 4"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-center px-4 flex flex-col items-center">
-              <span className="text-white font-black uppercase text-xl sm:text-3xl tracking-wide mb-1 opacity-90">START CREATING WITH</span>
-              <span className="text-[#22d3ee] font-black uppercase text-2xl sm:text-4xl sm:mt-1 tracking-tight">
-                CINEMA STUDIO
-              </span>
-            </h1>
-            <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
-              What would you shoot with infinite budget? Control cameras, lighting, lenses, and prompt high-end cinematic scenes.
-            </p>
-          </div>
+          <EmptyStateHero 
+            selectedModelName="CINEMA STUDIO"
+            title="START CREATING WITH"
+            subtitle="What would you shoot with infinite budget? Control cameras, lighting, lenses, and prompt high-end cinematic scenes."
+          />
         )}
       </div>
 

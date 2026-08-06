@@ -6,16 +6,33 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:/app/prisma/data/dev.db
-    volumes:
-      - devinedesk_data:/app/prisma/data
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/devinedesk?schema=public
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
     restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+
+  db:
+    image: postgres:15-alpine
+    container_name: devinedesk_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: devinedesk
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata2:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: devinedesk_redis
+    ports:
+      - "6379:6379"
+    restart: always
 
 volumes:
-  devinedesk_data:
+  pgdata:
+  pgdata2:

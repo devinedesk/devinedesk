@@ -67,20 +67,13 @@ export function SettingsModal({ onClose }) {
           {activeTab === 'api' ? (
             <div className="flex flex-col gap-5 pb-16">
               {[
-                { id: 'openrouter_key', label: 'OpenRouter API Key (Text & Image)', placeholder: 'sk-or-v1-...' },
-                { id: 'aimlapi_key', label: 'AI/ML API Key (Video & Audio)', placeholder: 'Enter AIMLAPI Key' },
-                { id: 'goapi_key', label: 'GoAPI Key (Midjourney)', placeholder: 'Enter GoAPI Key' },
-                { id: 'hf_token', label: 'Hugging Face Token (3D & Niche)', placeholder: 'hf_...' },
-                { id: 'fal_key', label: 'Fal.ai Key (Lip-sync)', placeholder: 'Enter Fal.ai Key' },
-                { id: 'cloudinary_cloud_name', label: 'Cloudinary Cloud Name (File Uploads)', placeholder: 'Enter Cloud Name', type: 'text' },
-                { id: 'cloudinary_upload_preset', label: 'Cloudinary Upload Preset', placeholder: 'Enter Upload Preset', type: 'text' },
-                { id: 'platform_api_key', label: 'Platform API Key (Legacy)', placeholder: 'Enter Platform API Key' },
+                { id: 'platform_api_key', label: 'Platform API Key (Legacy Standalone)', placeholder: 'Enter Platform API Key' },
               ].map(field => (
                 <div key={field.id} className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-secondary">{field.label}</label>
                   <input
                     type={field.type || 'password'}
-                    value={keys[field.id]}
+                    value={keys[field.id] || ''}
                     onChange={handleChange(field.id)}
                     placeholder={field.placeholder}
                     className="w-full bg-card-bg border border-muted focus:border-secondary focus:ring-1 focus:ring-secondary rounded-xl px-4 py-2.5 text-sm text-white placeholder-muted outline-none transition-colors"
@@ -88,7 +81,7 @@ export function SettingsModal({ onClose }) {
                 </div>
               ))}
               <p className="text-sm text-secondary mt-2">
-                Configure multiple API keys for the Multi-Provider routing model.
+                API operations now securely use platform-level credentials and your account credits.
               </p>
             </div>
           ) : (

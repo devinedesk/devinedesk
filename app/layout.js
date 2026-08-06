@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
           </main>
         </Providers>
       {/* impeccable-live-start */}
-<script src="http://localhost:8400/live.js?token=415d6bd9-c978-409e-bf73-97b4355add5d"></script>
+<script src="http://localhost:8400/live.js?token=415d6bd9-c978-409e-bf73-97b4355add5d" async></script>
 {/* impeccable-live-end */}
 </body>
     </html>

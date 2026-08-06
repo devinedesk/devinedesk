@@ -46,22 +46,33 @@ export const authOptions = {
     signIn: '/auth/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.credits = user.credits;
       }
+      
+      // Update token if session is explicitly updated
+      if (trigger === "update" && session?.credits !== undefined) {
+        token.credits = session.credits;
+      }
+      
+      // Alternatively, we could fetch from DB here on every request for 100% accuracy,
+      // but let's just make sure it initializes. For live credits, it's better to fetch 
+      // in the component or have a dedicated hook.
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.credits = token.credits;
       }
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET || "default_secret_key_change_me",
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

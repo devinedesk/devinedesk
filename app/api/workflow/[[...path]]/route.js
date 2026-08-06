@@ -61,7 +61,30 @@ export async function GET(request, { params }) {
         return NextResponse.json({ detail: "Run not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ detail: "Endpoint not supported in custom backend" }, { status: 404 });
+    if (segments[0] === 'get-template-workflows') {
+        return NextResponse.json([]);
+    }
+
+    if (segments[0] === 'get-published-workflows') {
+        return NextResponse.json([]);
+    }
+
+    if (segments.length === 2 && segments[1] === 'api-inputs') {
+        return NextResponse.json({});
+    }
+
+    if (segments[0] === 'run' && segments[2] === 'status') {
+        const runId = segments[1];
+        const run = await prisma.workflowRun.findUnique({
+            where: { id: runId, userId: auth.user.id }
+        });
+        if (run) {
+            return NextResponse.json({ status: run.status });
+        }
+        return NextResponse.json({ detail: "Run not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }
 
 export async function POST(request, { params }) {
@@ -168,7 +191,34 @@ export async function POST(request, { params }) {
         return NextResponse.json({ run_id: run.id, status: "processing" });
     }
 
-    return NextResponse.json({ detail: "Not implemented in custom backend" }, { status: 404 });
+    if (segments.length === 4 && segments[1] === 'node' && segments[3] === 'run') {
+        const workflowId = segments[0];
+        const nodeId = segments[2];
+        const payload = await request.json();
+        
+        const wf = await prisma.workflow.findUnique({
+            where: { id: workflowId, userId: auth.user.id }
+        });
+        if (!wf) return NextResponse.json({ detail: "Workflow not found" }, { status: 404 });
+        
+        const parsedWorkflow = {
+            ...wf,
+            nodes: JSON.parse(wf.nodes || '[]'),
+            edges: JSON.parse(wf.edges || '[]')
+        };
+        
+        const node = parsedWorkflow.nodes.find(n => n.id === nodeId);
+        if (!node) return NextResponse.json({ detail: "Node not found" }, { status: 404 });
+
+        try {
+            const output = await executeNode(node, payload.inputs || {}, {}, auth.user.id);
+            return NextResponse.json({ success: true, output });
+        } catch (e) {
+            return NextResponse.json({ detail: e.message }, { status: 500 });
+        }
+    }
+
+    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }
 
 export async function DELETE(request, { params }) {
@@ -185,10 +235,21 @@ export async function DELETE(request, { params }) {
             });
             return NextResponse.json({ success: true });
         } catch (e) {
-            return NextResponse.json({ detail: "Not implemented or missing" }, { status: 404 });
+            return NextResponse.json({ detail: "Workflow not found" }, { status: 404 });
         }
     }
-    return NextResponse.json({ detail: "Not implemented" }, { status: 404 });
+    if (segments[0] === 'node-run' && segments[1]) {
+        try {
+            await prisma.workflowRun.delete({
+                where: { id: segments[1], userId: auth.user.id }
+            });
+            return NextResponse.json({ success: true });
+        } catch (e) {
+            return NextResponse.json({ detail: "Run not found" }, { status: 404 });
+        }
+    }
+    
+    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
 }
 
 // ----------------------------------------------------------------------------

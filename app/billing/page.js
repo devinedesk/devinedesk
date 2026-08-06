@@ -41,12 +41,10 @@ export default function BillingPage() {
         throw new Error(data.error || 'Failed to initialize checkout');
       }
 
-      if (data.url.startsWith('/')) {
-        // Mock redirect
-        router.push(data.url);
-      } else {
-        // Stripe checkout redirect
+      if (data.url) {
         window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned from server');
       }
     } catch (err) {
       setError(err.message);

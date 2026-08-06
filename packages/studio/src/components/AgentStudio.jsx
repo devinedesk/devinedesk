@@ -273,11 +273,11 @@ export default function AgentStudio({ apiKey }) {
     setChatError(null);
     try {
       const agentSlug = activeAgent.agent_id;
-      const { request_id } = await sendAgentChatMessage(apiKey, agentSlug, {
+      const response = await sendAgentChatMessage(apiKey, agentSlug, {
         message: text,
         conversationId,
       });
-      const result = await pollAgentChatResult(apiKey, request_id);
+      const result = response.request_id ? await pollAgentChatResult(apiKey, response.request_id) : response;
       // result.messages is only this turn's assistant/pulse entries, not the
       // full transcript (see AiAgent.jsx) — append, don't replace, or every
       // send wipes the user's own message and all prior history from view.
