@@ -34,10 +34,10 @@ export default function AgentChatClient({ agentDetails, initialHistory, userData
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] w-full bg-[#030303] text-white/80 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-4rem)] w-full bg-app-bg text-white/80 overflow-hidden">
       
       {/* Header */}
-      <div className="flex-none p-6 border-b border-white/5 bg-[#0a0a0a]">
+      <div className="flex-none p-6 border-b border-white/5 bg-panel-bg">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center">
             <Bot className="w-6 h-6 text-cyan-400" />
@@ -90,14 +90,14 @@ export default function AgentChatClient({ agentDetails, initialHistory, userData
       </div>
 
       {/* Input Area */}
-      <div className="flex-none p-6 border-t border-white/5 bg-[#0a0a0a]">
+      <div className="flex-none p-6 border-t border-white/5 bg-panel-bg">
         <form onSubmit={handleSend} className="max-w-4xl mx-auto relative group">
           <input 
             type="text" 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
-            className="w-full bg-[#030303] border border-white/10 rounded-xl px-6 py-4 pr-16 text-white placeholder-white/30 focus:outline-none focus:border-cyan-400/50 transition-colors"
+            className="w-full bg-app-bg border border-white/10 rounded-xl px-6 py-4 pr-16 text-white placeholder-white/30 focus:outline-none focus:border-cyan-400/50 transition-colors"
             disabled={isLoading}
           />
           <button 

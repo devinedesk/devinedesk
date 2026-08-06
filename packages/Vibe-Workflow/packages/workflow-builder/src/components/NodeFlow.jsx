@@ -2704,7 +2704,7 @@ const NodeFlow = ({
                       );
                     }}
                   />
-                  <div className="w-9 h-5 bg-[#0a0a0a] rounded-full peer peer-checked:bg-cyan-500 transition-colors"></div>
+                  <div className="w-9 h-5 bg-panel-bg rounded-full peer peer-checked:bg-cyan-500 transition-colors"></div>
                   <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full peer-checked:translate-x-4 transition-transform"></div>
                 </div>
               </label>
@@ -2779,7 +2779,7 @@ const NodeFlow = ({
               type="button"
               suppressHydrationWarning={true}
               onClick={() => setDropDown(0)}
-              className="px-4 py-2 bg-[#0a0a0a]/50 text-white rounded-full text-sm hover:bg-gray-600/50 transition w-full cursor-pointer"
+              className="px-4 py-2 bg-panel-bg/50 text-white rounded-full text-sm hover:bg-gray-600/50 transition w-full cursor-pointer"
             >
               Cancel
             </button>
@@ -2848,7 +2848,7 @@ const NodeFlow = ({
               type="button"
               suppressHydrationWarning={true}
               onClick={() => setIsPresetsDismissed(true)}
-              className="mt-4 px-5 py-2 rounded-full bg-[#111111]/80 hover:bg-[#0a0a0a] text-xs text-gray-300 font-medium transition-colors border border-gray-700 hover:border-gray-500"
+              className="mt-4 px-5 py-2 rounded-full bg-card-bg/80 hover:bg-panel-bg text-xs text-gray-300 font-medium transition-colors border border-gray-700 hover:border-gray-500"
             >
               Dismiss & Enter Empty Canvas
             </button>
@@ -2889,7 +2889,7 @@ const NodeFlow = ({
                 type="button"
                 suppressHydrationWarning={true}
                 onClick={() => setIsCategoryPopupOpen(false)}
-                className="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#111111] rounded-xl transition-all"
+                className="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white hover:bg-card-bg rounded-xl transition-all"
               >
                 Cancel
               </button>

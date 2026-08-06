@@ -786,7 +786,7 @@ export default function ImageStudio({
                       if (apiModel) setSelectedModelName(apiModel.name);
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border text-xs font-bold whitespace-nowrap ${useLocalModel ? 'bg-[#22d3ee]/20 border-[#22d3ee]/40 text-[#22d3ee]' : 'bg-white/5 border-white/5 text-white/60 hover:bg-white/10'}`}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border text-xs font-bold whitespace-nowrap ${useLocalModel ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-white/5 border-white/5 text-white/60 hover:bg-white/10'}`}
                 >
                   {useLocalModel ? 'Local' : 'API'}
                 </button>
@@ -984,7 +984,7 @@ export default function ImageStudio({
                 className={promptControlClassName()}
                 onClick={() => setIsDrawModalOpen(true)}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-40 text-white group-hover:text-[#22d3ee] transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-40 text-white group-hover:text-primary transition-colors">
                   <path d="M12 20h9" />
                   <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
                 </svg>

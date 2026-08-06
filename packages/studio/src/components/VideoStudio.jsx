@@ -79,7 +79,7 @@ const CheckSvg = () => (
     height="16"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#22d3ee"
+    stroke="currentColor" className="text-primary"
     strokeWidth="4"
   >
     <polyline points="20 6 9 17 4 12" />
@@ -113,7 +113,7 @@ const VideoReadySvg = () => (
   >
     <polygon points="23 7 16 12 23 17 23 7" />
     <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-    <polyline points="7 10 10 13 15 8" stroke="#22d3ee" strokeWidth="2.5" />
+    <polyline points="7 10 10 13 15 8" stroke="currentColor" className="text-primary" strokeWidth="2.5" />
   </svg>
 );
 
@@ -1156,7 +1156,7 @@ export default function VideoStudio({
                   >
                     ×
                   </button>
-                  <span className="absolute bottom-0.5 left-0.5 px-1 h-3.5 bg-black/60 rounded-md text-[7px] font-black text-[#22d3ee] leading-none flex items-center justify-center pointer-events-none">
+                  <span className="absolute bottom-0.5 left-0.5 px-1 h-3.5 bg-black/60 rounded-md text-[7px] font-black text-primary leading-none flex items-center justify-center pointer-events-none">
                     END
                   </span>
                 </div>
@@ -1189,7 +1189,7 @@ export default function VideoStudio({
                       >
                         ×
                       </button>
-                      <span className="absolute bottom-0.5 right-0.5 px-1 h-3.5 bg-black/60 rounded-full text-[8px] font-black text-[#22d3ee] leading-none flex items-center justify-center pointer-events-none">
+                      <span className="absolute bottom-0.5 right-0.5 px-1 h-3.5 bg-black/60 rounded-full text-[8px] font-black text-primary leading-none flex items-center justify-center pointer-events-none">
                         {idx + 1}
                       </span>
                     </div>
@@ -1235,13 +1235,13 @@ export default function VideoStudio({
                                 fill="transparent"
                                 strokeDasharray={88}
                                 strokeDashoffset={88 - (88 * imageProgress) / 100}
-                                className="text-[#22d3ee] transition-all duration-300"
+                                className="text-primary transition-all duration-300"
                               />
                             </svg>
-                            <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{imageProgress}%</span>
+                            <span className="absolute text-[9px] font-black text-primary leading-none">{imageProgress}%</span>
                           </div>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
@@ -1278,13 +1278,13 @@ export default function VideoStudio({
                                 fill="transparent"
                                 strokeDasharray={88}
                                 strokeDashoffset={88 - (88 * imageProgress) / 100}
-                                className="text-[#22d3ee] transition-all duration-300"
+                                className="text-primary transition-all duration-300"
                               />
                             </svg>
-                            <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{imageProgress}%</span>
+                            <span className="absolute text-[9px] font-black text-primary leading-none">{imageProgress}%</span>
                           </div>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
@@ -1324,13 +1324,13 @@ export default function VideoStudio({
                             fill="transparent"
                             strokeDasharray={88}
                             strokeDashoffset={88 - (88 * endImageProgress) / 100}
-                            className="text-[#22d3ee] transition-all duration-300"
+                            className="text-primary transition-all duration-300"
                           />
                         </svg>
-                        <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{endImageProgress}%</span>
+                        <span className="absolute text-[9px] font-black text-primary leading-none">{endImageProgress}%</span>
                       </div>
                     ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-[#22d3ee] transition-colors">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
@@ -1369,10 +1369,10 @@ export default function VideoStudio({
                             fill="transparent"
                             strokeDasharray={88}
                             strokeDashoffset={88 - (88 * videoProgress) / 100}
-                            className="text-[#22d3ee] transition-all duration-300"
+                            className="text-primary transition-all duration-300"
                           />
                         </svg>
-                        <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">{videoProgress}%</span>
+                        <span className="absolute text-[9px] font-black text-primary leading-none">{videoProgress}%</span>
                       </div>
                     ) : (
                       <svg
@@ -1382,7 +1382,7 @@ export default function VideoStudio({
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
-                        className="text-white/60 group-hover:text-[#22d3ee] transition-colors"
+                        className="text-white/60 group-hover:text-primary transition-colors"
                       >
                         <polygon points="23 7 16 12 23 17 23 7" fill="currentColor" />
                         <rect x="1" y="5" width="15" height="14" rx="2" ry="2" fill="currentColor" />
@@ -1666,7 +1666,7 @@ export default function VideoStudio({
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
-                    className="opacity-40 text-white group-hover:text-[#22d3ee] transition-colors"
+                    className="opacity-40 text-white group-hover:text-primary transition-colors"
                   >
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />

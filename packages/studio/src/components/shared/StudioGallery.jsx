@@ -18,7 +18,7 @@ export function StudioGallery({
       {history.map((entry, idx) => (
         <div
           key={entry.id || idx}
-          className="relative group rounded-lg overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-xl hover:border-primary/50 transition-all duration-300 flex flex-col cursor-pointer"
+          className="relative group rounded-lg overflow-hidden border border-white/10 bg-panel-bg shadow-xl hover:border-primary/50 transition-all duration-300 flex flex-col cursor-pointer"
           onClick={() => onSelectFullscreen && onSelectFullscreen(entry.url)}
         >
           {entry.url?.endsWith(".mp4") ? (

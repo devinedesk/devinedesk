@@ -42,11 +42,11 @@ export default function AgentEditClient({ userData, agentId }) {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-[#030303] text-white/60 flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen bg-app-bg text-white/60 flex items-center justify-center">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white/80 p-6 md:p-12">
+    <div className="min-h-screen bg-app-bg text-white/80 p-6 md:p-12">
       <div className="max-w-3xl mx-auto space-y-8">
         
         {/* Header */}
@@ -64,14 +64,14 @@ export default function AgentEditClient({ userData, agentId }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6 bg-[#0a0a0a] p-8 rounded-2xl border border-white/5">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-panel-bg p-8 rounded-2xl border border-white/5">
           <div className="space-y-2">
             <label className="text-sm font-medium text-white/60">Agent Name</label>
             <input 
               type="text" 
               value={formData.name}
               onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-              className="w-full bg-[#030303] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
+              className="w-full bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
               placeholder="e.g. Design Assistant"
             />
           </div>
@@ -82,7 +82,7 @@ export default function AgentEditClient({ userData, agentId }) {
               type="text" 
               value={formData.description}
               onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-              className="w-full bg-[#030303] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
+              className="w-full bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
               placeholder="Brief summary of capabilities"
             />
           </div>
@@ -92,7 +92,7 @@ export default function AgentEditClient({ userData, agentId }) {
             <textarea 
               value={formData.systemPrompt}
               onChange={e => setFormData(f => ({ ...f, systemPrompt: e.target.value }))}
-              className="w-full h-32 bg-[#030303] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors resize-none"
+              className="w-full h-32 bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors resize-none"
               placeholder="You are a helpful assistant..."
             />
           </div>

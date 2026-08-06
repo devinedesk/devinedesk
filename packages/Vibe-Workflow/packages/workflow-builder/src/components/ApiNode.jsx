@@ -591,7 +591,7 @@ const ApiNode = ({ id, data, selected }) => {
         </span>
       </div>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 py-2 px-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-panel-bg to-card-bg rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
             <div className={`p-1.5 rounded-lg ${selected ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <RiInputMethodLine size={14} />

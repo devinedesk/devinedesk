@@ -297,7 +297,7 @@ const RenderApiField = ({ fieldName, meta, idx, formValues, setFormValues, handl
           </label> */}
         </div>
         {uploading && (
-          <div className="w-full bg-[#0a0a0a]/70 rounded h-1 overflow-hidden">
+          <div className="w-full bg-panel-bg/70 rounded h-1 overflow-hidden">
             <div className="bg-cyan-400 h-full" style={{ width: `${uploadProgress}%` }}></div>
           </div>
         )}
@@ -386,7 +386,7 @@ const RenderApiField = ({ fieldName, meta, idx, formValues, setFormValues, handl
               />
               <label
                 htmlFor={`file-upload-${fieldName}`} 
-                className="w-full h-full aspect-[1/1] flex items-center justify-center border border-dashed border-gray-400 text-gray-500 hover:text-white text-xl rounded cursor-pointer hover:bg-[#111111]/50"
+                className="w-full h-full aspect-[1/1] flex items-center justify-center border border-dashed border-gray-400 text-gray-500 hover:text-white text-xl rounded cursor-pointer hover:bg-card-bg/50"
               >
                 {uploading ? (
                   <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full" />

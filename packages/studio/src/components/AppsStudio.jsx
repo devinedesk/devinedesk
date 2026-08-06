@@ -108,7 +108,7 @@ export default function AppsStudio({ apiKey }) {
     return (
       <div 
         key={app.name}
-        className="group bg-[#0a0a0a] border border-white/5 rounded-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/10 hover:bg-[#0f0f0f] hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"
+        className="group bg-panel-bg border border-white/5 rounded-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/10 hover:bg-[#0f0f0f] hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"
       >
         {/* Thumbnail Section */}
         <div className="relative h-44 w-full overflow-hidden bg-white/5">
@@ -129,7 +129,7 @@ export default function AppsStudio({ apiKey }) {
         {/* Content Section */}
         <div className="p-5 flex flex-col flex-1 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg text-[#22d3ee] border border-white/5 group-hover:border-white/10 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg text-primary border border-white/5 group-hover:border-white/10 transition-colors">
               <app.icon />
             </div>
             <div className="flex-1 min-w-0">
@@ -155,7 +155,7 @@ export default function AppsStudio({ apiKey }) {
                   href={app.hosted || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-2 bg-[#22d3ee]/10 text-[#22d3ee] rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-[#22d3ee]/20 transition-all border border-[#22d3ee]/20 active:scale-95"
+                  className="flex-1 py-2 bg-primary/10 text-primary rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary/20 transition-all border border-primary/20 active:scale-95"
                 >
                   <FaExternalLinkAlt className="text-[9px]" />
                   Demo
@@ -167,16 +167,16 @@ export default function AppsStudio({ apiKey }) {
   };
 
   return (
-    <div className="h-full w-full flex flex-col items-center bg-[#030303] overflow-y-auto custom-scrollbar relative">
+    <div className="h-full w-full flex flex-col items-center bg-app-bg overflow-y-auto custom-scrollbar relative">
       <Toaster position="bottom-right" reverseOrder={false} />
       
       <div className="flex flex-col gap-10 items-center w-full max-w-7xl pt-12 pb-24 px-6">
         
         {/* Header Section */}
         <div className="text-center space-y-6 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#22d3ee]/10 border border-[#22d3ee]/20 rounded-full">
-            <FaDollarSign className="text-[#22d3ee] text-xs" />
-            <span className="text-[10px] font-black text-[#22d3ee] uppercase tracking-widest">Revenue-Ready Templates</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+            <FaDollarSign className="text-primary text-xs" />
+            <span className="text-[10px] font-black text-primary uppercase tracking-widest">Revenue-Ready Templates</span>
           </div>
           <h1 className="text-5xl font-black text-white tracking-tighter leading-[0.9]">
             LAUNCH AN AI APP.<br />START EARNING TODAY.
@@ -209,8 +209,8 @@ export default function AppsStudio({ apiKey }) {
               body: "Payments go straight to your Stripe account. You own the product, the brand, and the profits."
             }
           ].map(({ icon: Icon, step, title, body }) => (
-            <div key={step} className="flex items-start gap-4 bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-colors">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center text-[#22d3ee] border border-white/5">
+            <div key={step} className="flex items-start gap-4 bg-panel-bg border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-colors">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5">
                 <Icon className="text-lg" />
               </div>
               <div>
@@ -230,7 +230,7 @@ export default function AppsStudio({ apiKey }) {
         {/* Footer Accent */}
         <div className="pt-24 pb-12 flex flex-col items-center gap-4">
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/5">
-            <span className="block w-1.5 h-1.5 rounded-full bg-[#22d3ee] animate-pulse" />
+            <span className="block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">Local API Ecosystem — More templates coming soon</span>
           </div>
         </div>
@@ -240,9 +240,9 @@ export default function AppsStudio({ apiKey }) {
       {selectedApp && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedApp(null)} />
-          <div className="relative bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-2xl p-8 space-y-8 animate-scale-up shadow-2xl">
+          <div className="relative bg-panel-bg border border-white/10 w-full max-w-md rounded-2xl p-8 space-y-8 animate-scale-up shadow-2xl">
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-20 h-20 rounded-[28px] bg-[#22d3ee]/10 border border-[#22d3ee]/20 flex items-center justify-center text-4xl text-[#22d3ee] mb-2">
+              <div className="w-20 h-20 rounded-[28px] bg-primary/10 border border-primary/20 flex items-center justify-center text-4xl text-primary mb-2">
                 <selectedApp.icon />
               </div>
               <h2 className="text-2xl font-black text-white uppercase tracking-tight">
@@ -257,7 +257,7 @@ export default function AppsStudio({ apiKey }) {
               <button 
                 onClick={handleRequestAccess}
                 disabled={isRequesting}
-                className="w-full py-4 bg-[#22d3ee] text-black rounded-md text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#22d3ee]/90 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                className="w-full py-4 bg-primary text-black rounded-md text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-50"
               >
                 {isRequesting ? 'Sending Details...' : 'Get Template'}
               </button>

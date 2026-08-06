@@ -823,7 +823,7 @@ export default function LipSyncStudio({
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
-                      className="text-white/60 group-hover:text-[#22d3ee] transition-colors"
+                      className="text-white/60 group-hover:text-primary transition-colors"
                     >
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
@@ -851,7 +851,7 @@ export default function LipSyncStudio({
                   accept="video/*"
                   label="Video"
                   icon={
-                    <VideoIcon className="text-white/60 group-hover:text-[#22d3ee] transition-colors" />
+                    <VideoIcon className="text-white/60 group-hover:text-primary transition-colors" />
                   }
                   onUpload={handleVideoPick}
                   onClear={() => {
@@ -873,7 +873,7 @@ export default function LipSyncStudio({
                 accept="audio/*"
                 label="Audio"
                 icon={
-                  <MicIcon className="text-white/60 group-hover:text-[#22d3ee] transition-colors" />
+                  <MicIcon className="text-white/60 group-hover:text-primary transition-colors" />
                 }
                 onUpload={handleAudioPick}
                 onClear={() => {
@@ -919,7 +919,7 @@ export default function LipSyncStudio({
                     active: openDropdown === "model",
                   })}
                 >
-                  <div className="w-3.5 h-3.5 bg-[#22d3ee] rounded-sm flex items-center justify-center">
+                  <div className="w-3.5 h-3.5 bg-primary rounded-sm flex items-center justify-center">
                     <span className="text-[9px] font-black text-black">
                       S
                     </span>

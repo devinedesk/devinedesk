@@ -244,7 +244,7 @@ function Wan2gpConfigBar({ onChange }) {
       <div className="flex flex-col gap-0.5">
         <span className="text-xs font-bold text-white">Wan2GP server (optional)</span>
         <span className="text-[11px] text-white/50 leading-relaxed">
-          Run <a href="https://github.com/deepbeepmeep/Wan2GP" target="_blank" rel="noreferrer" className="text-[#22d3ee] hover:underline">Wan2GP</a> on a CUDA box (<code>python wgp.py --listen --server-name 0.0.0.0</code>) to unlock video models from this UI.
+          Run <a href="https://github.com/deepbeepmeep/Wan2GP" target="_blank" rel="noreferrer" className="text-primary hover:underline">Wan2GP</a> on a CUDA box (<code>python wgp.py --listen --server-name 0.0.0.0</code>) to unlock video models from this UI.
         </span>
       </div>
       <div className="flex items-center gap-2">
@@ -253,19 +253,19 @@ function Wan2gpConfigBar({ onChange }) {
           placeholder="http://127.0.0.1:7860"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          className="flex-1 bg-white/5 border border-white/10 focus:border-[#22d3ee]/40 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none"
+          className="flex-1 bg-white/5 border border-white/10 focus:border-primary/40 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none"
         />
         <button
           onClick={handleTest}
           disabled={testing || saving}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#22d3ee]/20 text-[#22d3ee] border border-[#22d3ee]/30 hover:bg-[#22d3ee]/30 transition-all disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-all disabled:opacity-50"
         >
           {testing ? '...' : 'Test'}
         </button>
         <button
           onClick={handleSave}
           disabled={testing || saving}
-          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#22d3ee] text-black hover:scale-105 transition-all disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-black hover:scale-105 transition-all disabled:opacity-50"
         >
           {saving ? '...' : 'Save'}
         </button>

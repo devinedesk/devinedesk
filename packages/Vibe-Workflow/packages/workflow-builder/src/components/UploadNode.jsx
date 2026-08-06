@@ -275,7 +275,7 @@ const UploadNode = ({ id, data, formValues, setFormValues, selectedModel, loadin
             ) : (
               <label 
                 style={{ minHeight: 200 }} 
-                className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-600 rounded-lg p-4 w-full flex-1 hover:bg-[#0a0a0a]/50 h-full"
+                className="cursor-pointer flex flex-col items-center justify-center gap-2 text-gray-400 border border-dashed border-gray-600 rounded-lg p-4 w-full flex-1 hover:bg-panel-bg/50 h-full"
               >                <FiUpload size={20} />
                 <span className="text-xs capitalize">Upload {acceptType}</span>
                 <span className="text-xs text-gray-500">Hint: drag and drop file(s) here.</span>

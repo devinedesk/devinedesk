@@ -474,12 +474,12 @@ export default function AiInfluencerStudio({
   const TAGS_VISIBLE = 7; // how many pills to show before "show more"
 
   return (
-    <div className="flex h-full bg-[#0a0a0a] text-white overflow-hidden select-none font-sans">
+    <div className="flex h-full bg-panel-bg text-white overflow-hidden select-none font-sans">
 
       {/* ════════════════════════════════════════════════════════════
           LEFT — Builder / Options Panel
       ════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-col w-[320px] shrink-0 border-r border-white/[0.07] bg-[#111111] overflow-hidden">
+      <div className="flex flex-col w-[320px] shrink-0 border-r border-white/[0.07] bg-card-bg overflow-hidden">
 
         {/* Builder header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.07] shrink-0">
@@ -566,7 +566,7 @@ export default function AiInfluencerStudio({
       {/* ════════════════════════════════════════════════════════════
           CENTER — Current Character Preview
       ════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-[#0a0a0a]">
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-panel-bg">
 
         {/* Center top bar: aspect ratio + generate */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-white/[0.07] shrink-0">
@@ -710,7 +710,7 @@ export default function AiInfluencerStudio({
       {/* ════════════════════════════════════════════════════════════
           RIGHT — Generated Characters History Gallery
       ════════════════════════════════════════════════════════════ */}
-      <div className="flex flex-col w-[160px] shrink-0 border-l border-white/[0.07] bg-[#111111] overflow-hidden">
+      <div className="flex flex-col w-[160px] shrink-0 border-l border-white/[0.07] bg-card-bg overflow-hidden">
 
         {/* Gallery header */}
         <div className="px-3 py-3 border-b border-white/[0.07] shrink-0">

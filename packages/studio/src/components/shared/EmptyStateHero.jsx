@@ -33,7 +33,7 @@ export function EmptyStateHero({
 
       <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-center px-4 flex flex-col items-center">
         <span className="text-white font-black uppercase text-xl sm:text-3xl tracking-wide mb-1 opacity-90">{title}</span>
-        <span className="text-[#22d3ee] font-black uppercase text-2xl sm:text-4xl sm:mt-1 tracking-tight">
+        <span className="text-primary font-black uppercase text-2xl sm:text-4xl sm:mt-1 tracking-tight">
           {selectedModelName}
         </span>
       </h1>

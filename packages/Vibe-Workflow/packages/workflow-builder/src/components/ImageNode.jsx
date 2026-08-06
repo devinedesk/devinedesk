@@ -492,7 +492,7 @@ const ImageGeneration = ({ id, data, selected }) => {
         )}
       </div>
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-[#0a0a0a] to-[#111111] rounded-t-2xl border-b border-zinc-800 p-3">
+        <div className="flex items-center justify-between bg-gradient-to-r from-panel-bg to-card-bg rounded-t-2xl border-b border-zinc-800 p-3">
           <div className="flex items-center gap-2.5">
             <div className={`p-1.5 rounded-lg ${selected ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
               <IoImageOutline size={14} />

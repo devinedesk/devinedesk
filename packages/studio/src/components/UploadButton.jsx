@@ -230,10 +230,10 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
           fill="transparent"
           strokeDasharray={88}
           strokeDashoffset={88 - (88 * lastUploadProgress) / 100}
-          className="text-[#22d3ee] transition-all duration-300"
+          className="text-primary transition-all duration-300"
         />
       </svg>
-      <span className="absolute text-[9px] font-black text-[#22d3ee] leading-none">
+      <span className="absolute text-[9px] font-black text-primary leading-none">
         {lastUploadProgress}%
       </span>
     </div>
@@ -251,7 +251,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
-      className="text-white/60 group-hover:text-[#22d3ee] transition-colors"
+      className="text-white/60 group-hover:text-primary transition-colors"
     >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
