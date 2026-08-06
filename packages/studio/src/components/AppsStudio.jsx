@@ -169,7 +169,6 @@ export default function AppsStudio({ apiKey }) {
 
   return (
     <div className="h-full w-full flex flex-col items-center bg-app-bg overflow-y-auto custom-scrollbar relative">
-      <Toaster position="bottom-right" reverseOrder={false} />
       
       <div className="flex flex-col gap-10 items-center w-full max-w-7xl pt-12 pb-24 px-6">
         

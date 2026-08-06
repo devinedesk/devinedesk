@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
 
-function addSecurityHeaders(response) {
+function addSecurityHeaders(response, request) {
     // Prevent MIME type sniffing (CWE-693)
     response.headers.set('X-Content-Type-Options', 'nosniff');
     // Prevent clickjacking (CWE-1021)
@@ -16,12 +16,23 @@ function addSecurityHeaders(response) {
         'Content-Security-Policy',
         `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'${__impeccableLiveDev}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' https: http: wss: ws:${__impeccableLiveDev}; font-src 'self' data: https://fonts.gstatic.com;`
     );
+
+    // CORS headers for API routes
+    if (request?.nextUrl?.pathname?.startsWith('/api')) {
+        response.headers.set('Access-Control-Allow-Origin', '*');
+        response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key');
+    }
+
     return response;
 }
 
 export default withAuth(
     function middleware(request) {
-        return addSecurityHeaders(NextResponse.next());
+        if (request.method === 'OPTIONS' && request.nextUrl.pathname.startsWith('/api')) {
+            return addSecurityHeaders(new NextResponse(null, { status: 200 }), request);
+        }
+        return addSecurityHeaders(NextResponse.next(), request);
     },
     {
         callbacks: {

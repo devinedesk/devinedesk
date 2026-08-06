@@ -22,9 +22,10 @@ const worker = new Worker('generate-queue', async (job) => {
 
     try {
         const timeoutMs = 5 * 60 * 1000; // 5 minutes
-        const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error(`Generation task timed out after ${timeoutMs}ms`)), timeoutMs)
-        );
+        let timeoutId;
+        const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = setTimeout(() => reject(new Error(`Generation task timed out after ${timeoutMs}ms`)), timeoutMs);
+        });
         
         let result;
         if (action === 'execute-workflow') {
@@ -40,6 +41,8 @@ const worker = new Worker('generate-queue', async (job) => {
                 timeoutPromise
             ]);
         }
+        
+        clearTimeout(timeoutId);
 
         // Extract result URL if possible
         let resultUrlStr = '';
@@ -62,11 +65,13 @@ const worker = new Worker('generate-queue', async (job) => {
         
         return result;
     } catch (error) {
-        console.error(`[Worker] Job ${job.id} failed:`, error);
+        console.error(`[Worker] Job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}):`, error);
         
-        // Refund on failure
-        if (authMethod === 'session' && userId) {
-            await BillingService.refundFailedGeneration(userId, cost, action, params?.prompt, params?.model, params);
+        // Only refund on the final attempt
+        if (job.attemptsMade === job.opts.attempts) {
+            if (authMethod === 'session' && userId) {
+                await BillingService.refundFailedGeneration(userId, cost, action, params?.prompt, params?.model, params);
+            }
         }
         
         throw error;

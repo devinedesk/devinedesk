@@ -18,73 +18,30 @@ function notifyAuthRequired(status, detail) {
 const IS_WEB_APP = typeof window !== 'undefined' && window.location?.protocol?.startsWith('http');
 
 async function executeGeneration(action, params) {
-    if (IS_WEB_APP) {
-        // Use NextAuth session cookies for authentication
-        const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ action, params })
-        });
-        
-        if (!response.ok) {
-            const errBody = await response.json().catch(() => ({}));
-            const errText = errBody.error || await response.text();
-            throw new Error(`Server Generation Error: ${errText}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.jobId && data.status === 'queued') {
-            return await pollForQueueJob(data.jobId);
-        }
-        
-        return data;
-    } else {
-        // Fallback for Electron / SSR
-        let adapter;
-        switch (action) {
-            case 'generateImage':
-                adapter = getAdapterForModel(getModelById(params.model), 't2i');
-                return adapter.generateImage(params);
-            case 'generateI2I':
-                adapter = getAdapterForModel(getI2IModelById(params.model), 'i2i');
-                return adapter.generateI2I(params);
-            case 'generateVideo':
-                adapter = getAdapterForModel(getVideoModelById(params.model), 'video');
-                return adapter.generateVideo(params);
-            case 'generateI2V':
-                adapter = getAdapterForModel(getI2VModelById(params.model), 'i2v');
-                return adapter.generateI2V(params);
-            case 'generateMarketingStudioAd':
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                return adapter.generateMarketingStudioAd(params);
-            case 'processV2V':
-                adapter = getAdapterForModel(getV2VModelById(params.model), 'v2v');
-                return adapter.processV2V(params);
-            case 'processRecast':
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                return adapter.processRecast(params);
-            case 'processLipSync':
-                adapter = getAdapterForModel(getLipSyncModelById(params.model), 'lipsync');
-                return adapter.processLipSync(params);
-            case 'generateAudio':
-                adapter = getAdapterForModel(getAudioModelById(params._modelId || params.model), 'audio');
-                return adapter.generateAudio(params);
-            case 'runClipping':
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                return adapter.runClipping(params);
-            case 'runMotionGraphics':
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                return adapter.runMotionGraphics(params);
-            case 'runMotionGraphicsEdit':
-                adapter = getAdapterForModel({ provider: 'aimlapi' }, 'video');
-                return adapter.runMotionGraphicsEdit(params);
-            default:
-                throw new Error('Unsupported action in executeGeneration');
-        }
+    const url = `${BASE_URL.replace(/\/v1$/, '')}/generate`;
+    
+    // Use NextAuth session cookies for authentication
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action, params })
+    });
+    
+    if (!response.ok) {
+        const errBody = await response.json().catch(() => ({}));
+        const errText = errBody.error || await response.text();
+        throw new Error(`Server Generation Error: ${errText}`);
     }
+    
+    const data = await response.json();
+    
+    if (data.jobId && data.status === 'queued') {
+        return await pollForQueueJob(data.jobId);
+    }
+    
+    return data;
 }
 
 async function pollForResult(requestId, key, maxAttempts = 900, interval = 2000) {

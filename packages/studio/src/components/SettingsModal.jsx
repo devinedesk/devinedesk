@@ -68,18 +68,6 @@ export function SettingsModal({ onClose }) {
         <div className="flex-1 overflow-y-auto p-6 bg-panel-bg">
           {activeTab === 'api' ? (
             <div className="flex flex-col gap-5 pb-16">
-              {[
-                { id: 'platform_api_key', label: 'Platform API Key (Legacy Standalone)', placeholder: 'Enter Platform API Key' },
-              ].map(field => (
-                <Input
-                  key={field.id}
-                  label={field.label}
-                  type={field.type || 'password'}
-                  value={keys[field.id] || ''}
-                  onChange={handleChange(field.id)}
-                  placeholder={field.placeholder}
-                />
-              ))}
               <p className="text-sm text-secondary mt-2">
                 API operations now securely use platform-level credentials and your account credits.
               </p>

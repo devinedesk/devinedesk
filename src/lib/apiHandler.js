@@ -31,6 +31,22 @@ export function withApiAuth({ schema, handler, requireAuth = true, requireAdmin 
                 return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
             }
 
+            // CSRF Protection for state-changing requests using session authentication
+            if (auth.method === 'session' && request.method !== 'GET' && request.method !== 'HEAD') {
+                const origin = request.headers.get('origin') || request.headers.get('referer');
+                const host = request.headers.get('host');
+                if (origin && host) {
+                    try {
+                        const originUrl = new URL(origin);
+                        if (originUrl.host !== host) {
+                            return NextResponse.json({ error: 'CSRF validation failed: Origin mismatch' }, { status: 403 });
+                        }
+                    } catch (e) {
+                        return NextResponse.json({ error: 'CSRF validation failed: Invalid Origin' }, { status: 403 });
+                    }
+                }
+            }
+
             // 2. Parse and Validate Body
             let body = null;
             if (request.method !== 'GET' && request.method !== 'HEAD') {

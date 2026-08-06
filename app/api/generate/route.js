@@ -25,7 +25,15 @@ export const POST = withApiAuth({
     handler: async (request, { auth, body }) => {
         const { action, params } = body;
         
-        let cost = COST_MAP[action] || COST_MAP['default'];
+        // Priority 1: Match specific model ID
+        // Priority 2: Match action (e.g. video-gen)
+        // Priority 3: Default cost
+        let cost = COST_MAP['default'];
+        if (params?.model && COST_MAP[params.model]) {
+            cost = COST_MAP[params.model];
+        } else if (COST_MAP[action]) {
+            cost = COST_MAP[action];
+        }
 
         // If it's a web user, verify credits and deduct immediately to prevent spam
         if (auth.method === 'session') {

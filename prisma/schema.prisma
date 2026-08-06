@@ -70,6 +70,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -78,6 +79,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -136,8 +139,8 @@ model WorkflowRun {
   workflowId  String
   userId      String
   status      String   @default("PROCESSING") // PROCESSING, COMPLETED, FAILED
-  nodeOutputs String?  // JSON string
-  outputs     String?  // JSON string
+  nodeOutputs String? // JSON string
+  outputs     String? // JSON string
   error       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -216,10 +219,8 @@ model Notification {
   @@index([userId])
 }
 
-
-
 model AppInterest {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   appName   String

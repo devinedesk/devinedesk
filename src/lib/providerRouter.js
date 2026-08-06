@@ -23,6 +23,13 @@ export function getAdapterForModel(modelInfo, modelType = 't2i') {
     const providerId = modelInfo.provider?.toLowerCase() || '';
     const modelId = modelInfo.id?.toLowerCase() || '';
 
+    // Explicit provider routing
+    if (providerId === 'openrouter') return openRouterAdapter;
+    if (providerId === 'aimlapi') return aimlapiAdapter;
+    if (providerId === 'goapi') return goapiAdapter;
+    if (providerId === 'huggingface') return huggingfaceAdapter;
+    if (providerId === 'falai') return falaiAdapter;
+
     // Midjourney -> GoAPI
     if (providerId === 'midjourney' || modelId.includes('midjourney')) {
         return goapiAdapter;

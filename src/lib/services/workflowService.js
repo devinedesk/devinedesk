@@ -115,8 +115,9 @@ export class WorkflowService {
         const nodeCount = parsedNodes.filter(n => n.type !== 'text-passthrough').length;
         const totalCost = nodeCount * 5;
 
-        // Deduct upfront using BillingService (if needed), but workflow Engine handles per-node billing in parallel.
-        // Thus, we just create the run.
+        // Deduct upfront using BillingService to prevent queue spamming
+        const { BillingService } = await import('@/src/lib/services/billingService');
+        await BillingService.queueGeneration(userId, totalCost, `Execute Workflow ${workflowId}`);
 
         const run = await prisma.workflowRun.create({
             data: {

@@ -314,16 +314,15 @@ function StandaloneShellInner() {
   const [showSettings, setShowSettings] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [hasMounted, setHasMounted] = useState(false);
-  const [showVadooBanner, setShowVadooBanner] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('vadoo_banner_dismissed') !== '1';
-    return true;
-  });
+  const [showVadooBanner, setShowVadooBanner] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Sidebar Collapsed & Mobile Drawer State
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('sidebar_collapsed') === 'true';
-    return false;
-  });
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShowVadooBanner(localStorage.getItem('vadoo_banner_dismissed') !== '1');
+      setIsSidebarCollapsed(localStorage.getItem('sidebar_collapsed') === 'true');
+    }
+  }, []);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [expandedCategoryId, setExpandedCategoryId] = useState(() => (
     getNavigationCategory(getInitialTab())?.id || NAVIGATION_CATEGORIES[0].id

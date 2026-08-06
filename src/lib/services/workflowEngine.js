@@ -56,6 +56,11 @@ export async function executeDAG(runId, workflow, userInputs, userId) {
                     const output = await executeNode(node, incomingData, userInputs, userId);
                     nodeOutputs[node.id] = output;
                     nodeStatus[node.id] = 'completed';
+                    
+                    // Incrementally update the run so the frontend can see progress
+                    await WorkflowService.updateWorkflowRun(runId, {
+                        nodeOutputs: JSON.stringify(nodeOutputs)
+                    });
 
                 } catch (err) {
                     nodeStatus[node.id] = 'failed';
@@ -84,6 +89,7 @@ export async function executeDAG(runId, workflow, userInputs, userId) {
             error: e.message,
             nodeOutputs: JSON.stringify(nodeOutputs)
         });
+        throw e; // Bubble up to worker for refund processing
     }
 }
 
@@ -115,17 +121,20 @@ export async function executeNode(node, incomingData, userInputs, userId) {
         const cost = 5; // Standard cost per node execution
         
         try {
-            await BillingService.recordUsageAndHistory(
-                userId,
-                cost,
-                type,
-                prompt,
-                model,
-                parameters,
-                resultUrlStr
-            );
+            const { default: prisma } = await import('@/src/lib/prisma');
+            await prisma.generation.create({
+                data: {
+                    userId: userId,
+                    type: type,
+                    prompt: prompt || null,
+                    model: model || null,
+                    parameters: parameters ? JSON.stringify(parameters) : null,
+                    resultUrl: resultUrlStr || null,
+                    status: 'completed'
+                }
+            });
         } catch (err) {
-            throw new Error(`Billing failed for node ${node.id}: ${err.message}`);
+            throw new Error(`History recording failed for node ${node.id}: ${err.message}`);
         }
     };
 
