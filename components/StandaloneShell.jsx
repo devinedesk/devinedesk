@@ -6,10 +6,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { ImageStudio, VideoStudio, ClippingStudio, VibeMotionStudio, LipSyncStudio, RecastStudio, CinemaStudio, AudioStudio, MarketingStudio, WorkflowStudio, AgentStudio, AppsStudio, AiInfluencerStudio, getUserBalance, SettingsModal, SettingsProvider, useSettings } from 'studio';
 
-const DesignAgentStudio = dynamic(() => import('studio').then(mod => mod.DesignAgentStudio), {
-  ssr: false,
-  loading: () => <div className="h-full w-full bg-black flex items-center justify-center text-white/60">Loading Design Studio...</div>
-});
+
 
 const TABS = [
   {
@@ -142,18 +139,7 @@ const TABS = [
       </svg>
     )
   },
-  {
-    id: 'design-agent',
-    label: 'Design Agent',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
-        <path d="M2 2l7.586 7.586"/>
-        <circle cx="11" cy="11" r="2"/>
-      </svg>
-    )
-  },
+
   {
     id: 'apps',
     label: 'Explore Apps',
@@ -924,19 +910,7 @@ function StandaloneShellInner() {
         <div className={activeTab === 'agents' ? "h-full w-full" : "hidden"}>
           <AgentStudio apiKey={apiKey} isHeaderVisible={isHeaderVisible} onToggleHeader={setIsHeaderVisible} />
         </div>
-        <div className={activeTab === 'design-agent' ? "h-full w-full" : "hidden"}>
-          {activeTab === 'design-agent' && (
-            <DesignAgentStudio
-              apiKey={apiKey}
-              isHeaderVisible={isHeaderVisible}
-              onToggleHeader={setIsHeaderVisible}
-              onGenerationStart={makeGenerationStartCallback('design-agent')}
-              onGenerationEnd={makeGenerationEndCallback('design-agent')}
-              onGenerationComplete={makeSuccessCallback('design-agent')}
-              onGenerationError={makeErrorCallback('design-agent')}
-            />
-          )}
-        </div>
+
         <div className={activeTab === 'apps' ? "h-full w-full" : "hidden"}>
           <AppsStudio apiKey={apiKey} />
         </div>
