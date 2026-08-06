@@ -14,6 +14,8 @@ import {
   pollAgentChatResult,
   createAgent,
 } from "../apiClient.js";
+import { Button } from "../../../../components/ui/Button.jsx";
+import { Input } from "../../../../components/ui/Input.jsx";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function timeAgo(dateStr) {
@@ -374,69 +376,55 @@ export default function AgentStudio({ apiKey }) {
         </div>
 
         <form onSubmit={handleCreateSubmit} className="max-w-2xl w-full mx-auto p-8 space-y-6">
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">Name</label>
-            <input
-              type="text"
-              required
-              value={createForm.name}
-              onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="e.g. Caption Crafter Pro"
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-            />
-          </div>
+          <Input
+            label="NAME"
+            type="text"
+            required
+            value={createForm.name}
+            onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder="e.g. Caption Crafter Pro"
+          />
+
+          <Input
+            label="DESCRIPTION"
+            type="text"
+            value={createForm.description}
+            onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="What does this agent help with?"
+          />
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">Description</label>
-            <input
-              type="text"
-              value={createForm.description}
-              onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
-              placeholder="What does this agent help with?"
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">System Prompt</label>
+            <label className="block text-sm font-medium text-secondary">SYSTEM PROMPT</label>
             <textarea
               required
               value={createForm.system_prompt}
               onChange={(e) => setCreateForm((f) => ({ ...f, system_prompt: e.target.value }))}
               placeholder="You are a helpful assistant that..."
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors min-h-[140px] resize-none"
+              className="w-full bg-card-bg border border-muted rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary focus:ring-offset-2 ring-offset-app-bg transition-colors min-h-[140px] resize-none"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-white/60 uppercase tracking-widest">Welcome Message (optional)</label>
-            <input
-              type="text"
-              value={createForm.welcome_message}
-              onChange={(e) => setCreateForm((f) => ({ ...f, welcome_message: e.target.value }))}
-              placeholder="Hi! How can I help you today?"
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-            />
-          </div>
+          <Input
+            label="WELCOME MESSAGE (OPTIONAL)"
+            type="text"
+            value={createForm.welcome_message}
+            onChange={(e) => setCreateForm((f) => ({ ...f, welcome_message: e.target.value }))}
+            placeholder="Hi! How can I help you today?"
+          />
 
           {createError && (
             <p className="text-xs font-bold text-red-400">{createError}</p>
           )}
 
-          <button
+          <Button
             type="submit"
-            disabled={creating || !createForm.name.trim() || !createForm.system_prompt.trim()}
-            className="w-full py-4 bg-primary text-black text-xs font-black uppercase tracking-[0.2em] rounded-xl hover:bg-white transition-all disabled:opacity-40 flex items-center justify-center gap-3"
+            fullWidth
+            isLoading={creating}
+            disabled={!createForm.name.trim() || !createForm.system_prompt.trim()}
+            className="py-4 text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3"
           >
-            {creating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                <span>Creating...</span>
-              </>
-            ) : (
-              <span>Create Agent</span>
-            )}
-          </button>
+            Create Agent
+          </Button>
         </form>
       </div>
     );
@@ -515,13 +503,14 @@ export default function AgentStudio({ apiKey }) {
               rows={1}
               className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors resize-none max-h-40"
             />
-            <button
+            <Button
               type="submit"
               disabled={!chatInput.trim() || sending}
-              className="px-5 py-3 bg-primary text-black text-xs font-black uppercase tracking-widest rounded-xl hover:bg-white transition-all disabled:opacity-40"
+              isLoading={sending}
+              className="px-5 py-3 text-xs font-black uppercase tracking-widest"
             >
               Send
-            </button>
+            </Button>
           </form>
         </div>
       </div>
@@ -554,13 +543,14 @@ export default function AgentStudio({ apiKey }) {
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleCreateAgent}
-          className="px-6 py-2 bg-primary text-black text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-[#ebff66] transition-all active:scale-95 flex items-center gap-2"
+          size="sm"
+          className="px-6 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
         >
           <span className="text-sm">+</span>
           Create
-        </button>
+        </Button>
       </div>
 
       {/* Content */}
@@ -577,12 +567,13 @@ export default function AgentStudio({ apiKey }) {
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <p className="text-xs font-bold uppercase tracking-widest">{error}</p>
-            <button
+            <Button
               onClick={() => setActiveMainTab(activeMainTab)} // retrigger effect
-              className="text-[10px] text-white/60 hover:text-white border border-white/10 px-4 py-2 rounded-lg transition-colors"
+              variant="outline"
+              size="sm"
             >
               Retry
-            </button>
+            </Button>
           </div>
         ) : activeMainTab === "my-chats" ? (
           // ── My Chats view ─────────────────────────────────────────────────
@@ -592,12 +583,13 @@ export default function AgentStudio({ apiKey }) {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
               <p className="text-[10px] font-black uppercase tracking-[0.3em]">No chats yet</p>
-              <button
+              <Button
                 onClick={() => setActiveMainTab("templates")}
-                className="text-[10px] text-primary hover:text-white border border-primary/20 hover:border-white/20 px-4 py-2 rounded-lg transition-colors"
+                variant="outline"
+                size="sm"
               >
                 Browse Templates
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-[1600px] mx-auto">

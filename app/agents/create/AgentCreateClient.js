@@ -6,6 +6,9 @@ import axios from "axios";
 import { Bot, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { useAppStore } from "@/src/store/useAppStore";
 
 export default function AgentCreateClient({ userData }) {
   const router = useRouter();
@@ -15,6 +18,8 @@ export default function AgentCreateClient({ userData }) {
     description: "",
     systemPrompt: ""
   });
+  
+  const setActiveAgentId = useAppStore(state => state.setActiveAgentId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,10 +27,11 @@ export default function AgentCreateClient({ userData }) {
     
     setIsSubmitting(true);
     try {
-      // Typically posts to /api/agents/create
       const res = await axios.post("/api/agents/create", formData);
       toast.success("Agent created successfully!");
-      router.push(`/agents/${res.data?.id || res.data?.slug || ""}`);
+      const newAgentId = res.data?.id || res.data?.slug || "";
+      if (newAgentId) setActiveAgentId(newAgentId);
+      router.push(`/agents/${newAgentId}`);
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to create agent");
@@ -45,56 +51,48 @@ export default function AgentCreateClient({ userData }) {
           </Link>
           <div>
             <h1 className="text-2xl font-medium text-white flex items-center gap-3">
-              <Bot className="w-6 h-6 text-cyan-400" />
+              <Bot className="w-6 h-6 text-primary" />
               Create New Agent
             </h1>
-            <p className="text-white/40">Configure a new AI persona for your studio.</p>
+            <p className="text-secondary">Configure a new AI persona for your studio.</p>
           </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 bg-panel-bg p-8 rounded-2xl border border-white/5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white/60">Agent Name</label>
-            <input 
-              type="text" 
-              value={formData.name}
-              onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-              className="w-full bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
-              placeholder="e.g. Design Assistant"
-            />
-          </div>
+          <Input 
+            label="Agent Name"
+            value={formData.name}
+            onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
+            placeholder="e.g. Design Assistant"
+          />
+
+          <Input 
+            label="Description"
+            value={formData.description}
+            onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
+            placeholder="Brief summary of capabilities"
+          />
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/60">Description</label>
-            <input 
-              type="text" 
-              value={formData.description}
-              onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-              className="w-full bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
-              placeholder="Brief summary of capabilities"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white/60">System Prompt</label>
+            <label className="text-sm font-medium text-secondary">System Prompt</label>
             <textarea 
               value={formData.systemPrompt}
               onChange={e => setFormData(f => ({ ...f, systemPrompt: e.target.value }))}
-              className="w-full h-32 bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors resize-none"
+              className="w-full h-32 bg-card-bg border border-muted hover:border-secondary rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-app-bg transition-colors resize-none"
               placeholder="You are a helpful assistant..."
             />
           </div>
 
           <div className="pt-4 flex justify-end">
-            <button 
+            <Button 
               type="submit"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-400/10 text-cyan-400 font-medium hover:bg-cyan-400/20 disabled:opacity-50 transition-colors"
+              isLoading={isSubmitting}
+              className="flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               {isSubmitting ? "Creating..." : "Create Agent"}
-            </button>
+            </Button>
           </div>
         </form>
 

@@ -1,10 +1,8 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
 import AgentChatClient from "./AgentChatClient";
-import { PrismaClient } from "@prisma/client";
+import prisma from '@/src/lib/prisma';
 import { redirect } from "next/navigation";
-
-const prisma = new PrismaClient();
 
 export async function generateMetadata({ params }) {
   const { agent_id } = await params;

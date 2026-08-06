@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/src/lib/utils';
 
 export function Spinner({ size = 'md', className = '' }) {
   const sizes = {
@@ -11,7 +12,7 @@ export function Spinner({ size = 'md', className = '' }) {
   const sizeClass = sizes[size] || sizes.md;
 
   return (
-    <div className={`inline-block animate-spin rounded-full border-solid border-primary border-r-transparent ${sizeClass} ${className}`} role="status">
+    <div className={cn("inline-block animate-spin rounded-full border-solid border-primary border-r-transparent", sizeClass, className)} role="status">
       <span className="sr-only">Loading...</span>
     </div>
   );

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { apiClient } from "@/src/lib/apiClient";
 
 const PACKAGES = [
   { id: 'pkg_500', name: '500 Credits', credits: 500, price: '$5.00', icon: '💎' },
@@ -29,17 +30,7 @@ export default function BillingPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/billing/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to initialize checkout');
-      }
+      const data = await apiClient.post('/billing/checkout', { packageId });
 
       if (data.url) {
         window.location.href = data.url;
@@ -47,7 +38,7 @@ export default function BillingPage() {
         throw new Error('No checkout URL returned from server');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to initialize checkout');
       setLoading(null);
     }
   };

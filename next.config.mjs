@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['@prisma/client', '.prisma/client'],
+  serverExternalPackages: ['@prisma/client', '.prisma/client', 'bullmq', '@valkey/valkey-glide'],
   transpilePackages: ['studio', 'ai-agent', 'workflow-builder', 'design-agent'],
   output: 'standalone',
   eslint: {

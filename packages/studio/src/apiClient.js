@@ -237,178 +237,97 @@ export function uploadFile(apiKey, file, onProgress) {
     });
 }
 
-export async function getUserBalance(apiKey) {
-    const response = await fetch(`${BASE_URL}/v1/account/balance`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
+
+async function apiFetch(path, options = {}) {
+    const { apiKey, method = 'GET', body, ...restOptions } = options;
+    const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+    if (apiKey) headers['x-api-key'] = apiKey;
+    
+    const response = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        ...restOptions
     });
+    
     if (!response.ok) {
+        if (response.status === 400) {
+            try {
+                const errBody = await response.json();
+                if (errBody?.detail?.error) throw new Error(errBody.detail.error);
+            } catch(e) {}
+        }
         const errText = await response.text();
         notifyAuthRequired(response.status, errText);
-        throw new Error(`Failed to fetch balance: ${response.status} - ${errText.slice(0, 100)}`);
+        throw new Error(`API Request Failed: ${response.status} - ${errText.slice(0, 100)}`);
     }
     return await response.json();
 }
 
+// Note: getUserBalance was removed because the frontend natively fetches /api/user/me
 export async function getTemplateWorkflows(apiKey) {
-    const response = await fetch(`${BASE_URL}/workflow/get-template-workflows`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch template workflows: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/workflow/get-template-workflows', { apiKey });
 };
 
 export async function getUserWorkflows(apiKey) {
-    const response = await fetch(`${BASE_URL}/workflow/get-workflow-defs`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch user workflows: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/workflow/get-workflow-defs', { apiKey });
 };
 
 export async function getPublishedWorkflows(apiKey) {
-    const response = await fetch(`${BASE_URL}/workflow/get-published-workflows`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch published workflows: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/workflow/get-published-workflows', { apiKey });
 };
 
 // Agents — uses direct URL → https://api.api.ai/agents/...
 export async function getTemplateAgents(apiKey) {
-    const response = await fetch(`${BASE_URL}/agents/templates/agents`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch template agents: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    const data = await response.json();
+    const data = await apiFetch('/agents/templates/agents', { apiKey });
     return Array.isArray(data) ? data : (data.agents || data.items || []);
 };
 
 export async function getUserAgents(apiKey) {
-    const response = await fetch(`${BASE_URL}/agents/user/agents`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch user agents: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    const data = await response.json();
+    const data = await apiFetch('/agents/user/agents', { apiKey });
     return Array.isArray(data) ? data : (data.agents || data.items || []);
 };
 
 export async function getPublishedAgents(apiKey) {
-    // Local API: GET /agents/featured/agents
-    const response = await fetch(`${BASE_URL}/agents/featured/agents`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch featured agents: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    const data = await response.json();
+    const data = await apiFetch('/agents/featured/agents', { apiKey });
     return Array.isArray(data) ? data : (data.agents || data.items || []);
 };
 
 // GET /agents/user/conversations — returns the user's chat history across all agents
 export async function getUserConversations(apiKey) {
-    const response = await fetch(`${BASE_URL}/agents/user/conversations`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch conversations: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    const data = await response.json();
+    const data = await apiFetch('/agents/user/conversations', { apiKey });
     return Array.isArray(data) ? data : [];
 };
 
 // GET /agents/by-slug/{slug} — public agent details (works unauthenticated for
 // published/template agents; x-api-key is sent for consistency but not required).
 export async function getAgentBySlug(apiKey, slug) {
-    const response = await fetch(`${BASE_URL}/agents/by-slug/${slug}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch agent: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/agents/by-slug/${slug}`, { apiKey });
 }
 
 // GET /agents/by-slug/{slug}/{conversationId} — chat history for one conversation.
 export async function getAgentConversation(apiKey, agentSlug, conversationId) {
-    const response = await fetch(`${BASE_URL}/agents/by-slug/${agentSlug}/${conversationId}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch conversation: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/agents/by-slug/${agentSlug}/${conversationId}`, { apiKey });
 }
 
 // POST /agents/by-slug/{slug}/chat — send a message, returns {request_id, status}
 // to poll via pollAgentChatResult.
 export async function sendAgentChatMessage(apiKey, agentSlug, { message, conversationId, attachments } = {}) {
-    const response = await fetch(`${BASE_URL}/agents/by-slug/${agentSlug}/chat`, {
+    return apiFetch(`/agents/by-slug/${agentSlug}/chat`, {
+        apiKey,
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify({
+        body: {
             message,
             conversation_id: conversationId || null,
             attachments: attachments || null,
             stream: false
-        })
+        }
     });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to send message: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
 }
 
 // Polls /api/v1/predictions/{requestId}/result until the agent turn completes.
@@ -445,100 +364,29 @@ export async function pollAgentChatResult(apiKey, requestId, { maxAttempts = 150
 // embedded form; skill_ids defaults to [] server-side, so the agent is created
 // as a plain system-prompt-driven assistant with no extra tool skills attached).
 export async function createAgent(apiKey, payload) {
-    const response = await fetch(`${BASE_URL}/agents`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify(payload)
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to create agent: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/agents', { apiKey, method: 'POST', body: payload });
 }
 
 export async function createWorkflow(apiKey, payload) {
-    const response = await fetch(`${BASE_URL}/workflow/create`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify(payload)
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to create workflow: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/workflow/create', { apiKey, method: 'POST', body: payload });
 };
 
 export async function updateWorkflowName(apiKey, workflowId, name) {
-    const response = await fetch(`${BASE_URL}/workflow/update-name/${workflowId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify({ name })
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to rename workflow: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/update-name/${workflowId}`, { apiKey, method: 'POST', body: { name } });
 };
 
 export async function deleteWorkflow(apiKey, workflowId) {
-    const response = await fetch(`${BASE_URL}/workflow/delete-workflow-def/${workflowId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to delete workflow: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/delete-workflow-def/${workflowId}`, { apiKey, method: 'DELETE' });
 };
 
 export async function getWorkflowInputs(apiKey, workflowId) {
-    const response = await fetch(`${BASE_URL}/workflow/${workflowId}/api-inputs`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch workflow inputs: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/${workflowId}/api-inputs`, { apiKey });
 };
 
 export async function executeWorkflow(apiKey, workflowId, inputs) {
-    const response = await fetch(`${BASE_URL}/workflow/${workflowId}/api-execute`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify({ inputs })
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to execute workflow: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    const submitData = await response.json();
+    const submitData = await apiFetch(`/workflow/${workflowId}/api-execute`, { apiKey, method: 'POST', body: { inputs } });
     const runId = submitData.run_id || submitData.id;
     if (!runId) return submitData;
-    
-    // Poll for results
     return await pollWorkflowResult(runId, apiKey);
 };
 
@@ -566,90 +414,27 @@ async function pollWorkflowResult(runId, apiKey, maxAttempts = 900, interval = 2
 };
 
 export async function getAllNodeSchemas(apiKey, workflowId) {
-    const response = await fetch(`${BASE_URL}/workflow/${workflowId}/node-schemas`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch node schemas: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/${workflowId}/node-schemas`, { apiKey });
 };
 
 export async function getWorkflowData(apiKey, workflowId) {
-    const response = await fetch(`${BASE_URL}/workflow/get-workflow-def/${workflowId}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch workflow data: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/get-workflow-def/${workflowId}`, { apiKey });
 };
 
 export async function getNodeSchemas(apiKey, workflowId) {
-    const response = await fetch(`${BASE_URL}/workflow/${workflowId}/api-node-schemas`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch node schemas: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/${workflowId}/api-node-schemas`, { apiKey });
 }
 
 export async function runSingleNode(apiKey, workflowId, nodeId, payload) {
-    const response = await fetch(`${BASE_URL}/workflow/${workflowId}/node/${nodeId}/run`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify(payload)
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to run single node: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/${workflowId}/node/${nodeId}/run`, { apiKey, method: 'POST', body: payload });
 }
 
 export async function deleteNodeRun(apiKey, nodeRunId) {
-    const response = await fetch(`${BASE_URL}/workflow/node-run/${nodeRunId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to delete node run: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/node-run/${nodeRunId}`, { apiKey, method: 'DELETE' });
 }
 
 export async function getNodeStatus(apiKey, runId) {
-    const response = await fetch(`${BASE_URL}/workflow/run/${runId}/status`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to get node status: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/workflow/run/${runId}/status`, { apiKey });
 }
 
 /**
@@ -722,50 +507,13 @@ export async function handleServerSideProxy(prefix, request, params, apiKey) {
     }
 }
 
-export async function calculateDynamicCost(apiKey, taskName, payload) {
-    const response = await fetch(`${BASE_URL}/v1/app/calculate_dynamic_cost`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify({ task_name: taskName, payload })
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to calculate dynamic cost: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
-}
-
+// Note: calculateDynamicCost was removed because it is unused
 export async function registerAppInterest(apiKey, appName) {
-    const response = await fetch(`${BASE_URL}/app/interest`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        },
-        body: JSON.stringify({ app_name: appName })
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to register interest: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/app/interest', { apiKey, method: 'POST', body: { app_name: appName } });
 }
 
 export async function getAppInterests(apiKey) {
-    const response = await fetch(`${BASE_URL}/app/interests`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch interests: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch('/app/interests', { apiKey });
 }
 
 // Paginated past-generations list, scoped server-side to the calling identity
@@ -774,17 +522,7 @@ export async function getHistory(apiKey, { cursor, limit = 50 } = {}) {
     const params = new URLSearchParams();
     if (cursor) params.set('cursor', cursor);
     if (limit) params.set('limit', String(limit));
-    const response = await fetch(`${BASE_URL}/v1/history?${params.toString()}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        }
-    });
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to fetch history: ${response.status} - ${errText.slice(0, 100)}`);
-    }
-    return await response.json();
+    return apiFetch(`/history?${params.toString()}`, { apiKey });
 }
 
 export async function runClipping(apiKey, params) {

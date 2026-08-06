@@ -12,14 +12,14 @@ export const metadata = {
   description: 'Generate AI images and videos using 200+ models — Flux, Midjourney, Kling, Veo, Seedance and more.',
 };
 
-import ToastContainer from '@/src/components/ToastContainer';
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.variable}>
         <Providers>
-          <ToastContainer />
+          <Toaster position="bottom-right" />
           <main className="h-full w-full">
             {children}
           </main>

@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { generateVideo, generateI2V, processV2V, uploadFile } from "../apiClient.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
+import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
 import DrawModal from "./DrawModal.jsx";
 import MobileGenerationActions, {
   GenerationCopyButtons,
@@ -333,93 +334,30 @@ export default function VideoStudio({
     [],
   );
 
-  // ── Persistence: Load ────────────────────────────────────────────────────
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(PERSIST_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.imageMode !== undefined) setImageMode(data.imageMode);
-        if (data.v2vMode !== undefined) setV2vMode(data.v2vMode);
-        if (data.selectedModel) setSelectedModel(data.selectedModel);
-        if (data.selectedModelName) setSelectedModelName(data.selectedModelName);
-        if (data.selectedAr) setSelectedAr(data.selectedAr);
-        if (data.selectedDuration) setSelectedDuration(data.selectedDuration);
-        if (data.selectedResolution) setSelectedResolution(data.selectedResolution);
-        if (data.selectedQuality) setSelectedQuality(data.selectedQuality);
-        if (data.selectedMode) setSelectedMode(data.selectedMode);
-        if (data.selectedEffect) setSelectedEffect(data.selectedEffect);
-        if (data.uploadedImageUrl) setUploadedImageUrl(data.uploadedImageUrl);
-        if (data.uploadedImageUrls) {
-          setUploadedImageUrls(data.uploadedImageUrls);
-        } else if (data.uploadedImageUrl) {
-          setUploadedImageUrls([data.uploadedImageUrl]);
-        }
-        if (data.uploadedVideoUrl) setUploadedVideoUrl(data.uploadedVideoUrl);
-        if (data.uploadedVideoName) setUploadedVideoName(data.uploadedVideoName);
-        if (data.prompt) setPrompt(data.prompt);
-        if (data.localHistory) setLocalHistory(data.localHistory);
-
-        // Update control visibility based on restored model/mode
-        applyControlsForModel(
-          data.selectedModel || defaultModel.id,
-          !!data.imageMode,
-          !!data.v2vMode
-        );
-      }
-    } catch (err) {
-      console.warn("Failed to load VideoStudio persistence:", err);
-    } finally {
-      hasRestored.current = true;
+  // ── Persistence ──────────────────────────────────────────────────────────
+  useStudioPersistedState(
+    PERSIST_KEY,
+    {
+      imageMode, v2vMode, selectedModel, selectedModelName, selectedAr,
+      selectedDuration, selectedResolution, selectedQuality, selectedMode,
+      selectedEffect, uploadedImageUrl, uploadedImageUrls, uploadedVideoUrl,
+      uploadedVideoName, prompt, localHistory,
+    },
+    {
+      imageMode: setImageMode, v2vMode: setV2vMode, selectedModel: setSelectedModel,
+      selectedModelName: setSelectedModelName, selectedAr: setSelectedAr,
+      selectedDuration: setSelectedDuration, selectedResolution: setSelectedResolution,
+      selectedQuality: setSelectedQuality, selectedMode: setSelectedMode,
+      selectedEffect: setSelectedEffect, uploadedImageUrl: setUploadedImageUrl,
+      uploadedImageUrls: setUploadedImageUrls, uploadedVideoUrl: setUploadedVideoUrl,
+      uploadedVideoName: setUploadedVideoName, prompt: setPrompt,
+      localHistory: setLocalHistory,
     }
-  }, [applyControlsForModel, defaultModel.id]);
+  );
 
-  // ── Persistence: Save ────────────────────────────────────────────────────
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const state = {
-          imageMode,
-          v2vMode,
-          selectedModel,
-          selectedModelName,
-          selectedAr,
-          selectedDuration,
-          selectedResolution,
-          selectedQuality,
-          selectedMode,
-          selectedEffect,
-          uploadedImageUrl,
-          uploadedImageUrls,
-          uploadedVideoUrl,
-          uploadedVideoName,
-          prompt,
-          localHistory,
-        };
-        localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
-      } catch (err) {
-        console.warn("Failed to save VideoStudio persistence:", err);
-      }
-    }, 500); // 500ms debounce
-    return () => clearTimeout(timer);
-  }, [
-    imageMode,
-    v2vMode,
-    selectedModel,
-    selectedModelName,
-    selectedAr,
-    selectedDuration,
-    selectedResolution,
-    selectedQuality,
-    selectedMode,
-    selectedEffect,
-    uploadedImageUrl,
-    uploadedImageUrls,
-    uploadedVideoUrl,
-    uploadedVideoName,
-    prompt,
-    localHistory,
-  ]);
+    applyControlsForModel(selectedModel, imageMode, v2vMode);
+  }, [selectedModel, imageMode, v2vMode, applyControlsForModel]);
 
   // ── Derived UI values ────────────────────────────────────────────────────
 

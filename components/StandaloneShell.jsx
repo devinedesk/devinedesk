@@ -4,9 +4,22 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { ImageStudio, VideoStudio, ClippingStudio, VibeMotionStudio, LipSyncStudio, RecastStudio, CinemaStudio, AudioStudio, MarketingStudio, WorkflowStudio, AgentStudio, AppsStudio, AiInfluencerStudio, getUserBalance, SettingsModal, SettingsProvider, useSettings } from 'studio';
+import { getUserBalance, SettingsModal, SettingsProvider, useSettings } from 'studio';
 
-
+const loadingFallback = () => <div className="p-8 text-center text-white/50 flex flex-col items-center justify-center h-full"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>Loading Studio...</div>;
+const ImageStudio = dynamic(() => import('studio').then(mod => mod.ImageStudio), { ssr: false, loading: loadingFallback });
+const VideoStudio = dynamic(() => import('studio').then(mod => mod.VideoStudio), { ssr: false, loading: loadingFallback });
+const ClippingStudio = dynamic(() => import('studio').then(mod => mod.ClippingStudio), { ssr: false, loading: loadingFallback });
+const VibeMotionStudio = dynamic(() => import('studio').then(mod => mod.VibeMotionStudio), { ssr: false, loading: loadingFallback });
+const LipSyncStudio = dynamic(() => import('studio').then(mod => mod.LipSyncStudio), { ssr: false, loading: loadingFallback });
+const RecastStudio = dynamic(() => import('studio').then(mod => mod.RecastStudio), { ssr: false, loading: loadingFallback });
+const CinemaStudio = dynamic(() => import('studio').then(mod => mod.CinemaStudio), { ssr: false, loading: loadingFallback });
+const AudioStudio = dynamic(() => import('studio').then(mod => mod.AudioStudio), { ssr: false, loading: loadingFallback });
+const MarketingStudio = dynamic(() => import('studio').then(mod => mod.MarketingStudio), { ssr: false, loading: loadingFallback });
+const WorkflowStudio = dynamic(() => import('studio').then(mod => mod.WorkflowStudio), { ssr: false, loading: loadingFallback });
+const AgentStudio = dynamic(() => import('studio').then(mod => mod.AgentStudio), { ssr: false, loading: loadingFallback });
+const AppsStudio = dynamic(() => import('studio').then(mod => mod.AppsStudio), { ssr: false, loading: loadingFallback });
+const AiInfluencerStudio = dynamic(() => import('studio').then(mod => mod.AiInfluencerStudio), { ssr: false, loading: loadingFallback });
 
 const TABS = [
   {
@@ -361,10 +374,12 @@ function StandaloneShellInner() {
 
   const pushNotification = useCallback((notif) => {
     const now = Date.now();
-    const id = `notif-${Date.now()}-${Math.random()}`;
+    const id = notif.id || `notif-${Date.now()}-${Math.random()}`;
     const ttl = 12000;
     const entry = { ...notif, id, expiresAt: now + ttl };
     setNotifications((previous) => {
+      // Prevent duplicate notifications by ID
+      if (previous.some(n => n.id === id)) return previous;
       const next = [
         ...previous.filter((notification) => notification.expiresAt > now),
         entry,
@@ -373,6 +388,42 @@ function StandaloneShellInner() {
       return next;
     });
   }, []);
+
+  // Poll database for real-time notifications
+  useEffect(() => {
+    let interval;
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch('/api/notifications');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.length > 0) {
+          data.forEach(n => {
+            pushNotification({
+              id: n.id,
+              type: n.type || 'info',
+              message: n.message,
+              label: n.title,
+            });
+          });
+          // Mark as read
+          await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: data.map(n => n.id) })
+          });
+        }
+      } catch (err) {
+        // Silent fail for polling
+      }
+    };
+
+    if (session?.user) {
+      fetchNotifications();
+      interval = setInterval(fetchNotifications, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [session?.user, pushNotification]);
 
   const dismissNotification = useCallback((id) => {
     setNotifications((previous) => {
@@ -629,7 +680,7 @@ function StandaloneShellInner() {
 
       {/* Header */}
       {isHeaderVisible && (
-        <header className="flex-shrink-0 h-14 border-b border-white/[0.05] flex items-center justify-between px-4 bg-black/40 backdrop-blur-xl z-50 gap-4">
+        <header className="flex-shrink-0 h-14 border-b border-white/[0.08] flex items-center justify-between px-4 bg-app-bg/80 backdrop-blur-2xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] z-50 gap-4 transition-all duration-300">
           {/* Left: Mobile menu toggle + Logo + Desktop Sidebar Toggle */}
           <div className="flex items-center gap-3">
             {/* Mobile drawer toggle */}
@@ -700,7 +751,7 @@ function StandaloneShellInner() {
 
             <button
               onClick={() => setShowSettings(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-white/10 bg-white/5 text-[13px] font-bold text-white/80 hover:text-white hover:bg-white/10 hover:border-white/20 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-white/10 bg-white/5 text-[13px] font-bold text-white/80 hover:text-primary hover:bg-primary/10 hover:border-primary/30 active:scale-95 hover:shadow-glow transition-all duration-300"
               aria-label="Settings"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -727,7 +778,7 @@ function StandaloneShellInner() {
         {isHeaderVisible && (
           <aside
             className={`
-              fixed top-14 bottom-0 left-0 md:static md:h-full z-30 bg-black/40 backdrop-blur-xl border-r border-white/[0.06] flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 select-none
+              fixed top-14 bottom-0 left-0 md:static md:h-full z-30 bg-panel-bg/70 backdrop-blur-2xl border-r border-white/[0.08] flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 select-none shadow-[2px_0_20px_rgba(0,0,0,0.3)]
               ${isMobileOpen ? 'translate-x-0 w-60 z-50' : '-translate-x-full md:translate-x-0'}
               ${isSidebarCollapsed ? 'md:w-16' : 'md:w-52'}
             `}
@@ -750,13 +801,13 @@ function StandaloneShellInner() {
                         aria-controls={isCollapsed ? undefined : categoryPanelId}
                         title={isCollapsed ? category.label : undefined}
                         className={`
-                          group relative flex items-center rounded-xl transition-all duration-150 font-semibold
+                          group relative flex items-center rounded-xl transition-all duration-300 font-semibold
                           ${isCollapsed ? 'h-11 w-11 justify-center mx-auto' : 'px-3 py-2.5 w-full gap-3 text-left'}
                           ${isCategoryActive
                             ? 'bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.08)]'
                             : isCategoryOpen
-                              ? 'bg-white/[0.06] text-white border border-white/[0.08]'
-                              : 'text-white/60 hover:text-white hover:bg-white/[0.04] border border-transparent'
+                              ? 'bg-white/[0.06] text-white border border-white/[0.08] hover:translate-x-1'
+                              : 'text-white/60 hover:text-white hover:bg-white/[0.06] border border-transparent hover:translate-x-1'
                           }
                         `}
                       >
@@ -810,10 +861,10 @@ function StandaloneShellInner() {
                                 onClick={(event) => handleNavigationItemClick(event, tab.id)}
                                 aria-current={isActive ? 'page' : undefined}
                                 className={`
-                                  group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-150
+                                  group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300
                                   ${isActive
-                                    ? 'bg-primary/12 text-primary border border-primary/20'
-                                    : 'text-white/55 hover:text-white hover:bg-white/[0.04] border border-transparent'
+                                    ? 'bg-primary/12 text-primary border border-primary/20 shadow-[0_0_10px_rgba(34,211,238,0.15)]'
+                                    : 'text-white/55 hover:text-white hover:bg-white/[0.06] border border-transparent hover:translate-x-1'
                                   }
                                 `}
                               >

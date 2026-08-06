@@ -1,21 +1,23 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { UserService } from '@/src/lib/services/userService';
 import bcrypt from 'bcryptjs';
+import { withApiAuth } from '@/src/lib/apiHandler';
+import { z } from 'zod';
 
-const prisma = new PrismaClient();
+const registerSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(6),
+    name: z.string().optional()
+});
 
-export async function POST(request) {
-    try {
-        const { email, password, name } = await request.json();
-
-        if (!email || !password) {
-            return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
-        }
+export const POST = withApiAuth({
+    requireAuth: false,
+    schema: registerSchema,
+    handler: async (request, { body }) => {
+        const { email, password, name } = body;
 
         // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: { email }
-        });
+        const existingUser = await UserService.getUserByEmail(email);
 
         if (existingUser) {
             return NextResponse.json({ error: "User already exists with this email" }, { status: 400 });
@@ -25,21 +27,15 @@ export async function POST(request) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create user
-        const user = await prisma.user.create({
-            data: {
-                email,
-                name: name || email.split('@')[0],
-                password: hashedPassword
-            }
+        const user = await UserService.createUser({
+            email,
+            name: name || email.split('@')[0],
+            password: hashedPassword
         });
 
         // Return user without password
         const { password: _, ...userWithoutPassword } = user;
         
         return NextResponse.json(userWithoutPassword, { status: 201 });
-        
-    } catch (error) {
-        console.error("[REGISTER_ERROR]", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
-}
+});

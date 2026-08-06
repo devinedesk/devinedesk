@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { generateImage, uploadFile } from "../apiClient.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
+import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
 import MobileGenerationActions, {
   CopyContentIcon,
 } from "./MobileGenerationActions.jsx";
@@ -603,40 +604,17 @@ export default function CinemaStudio({
     setUploadedImage(null);
   };
 
-  // ── Persistence: Load ────────────────────────────────────────────────────
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(PERSIST_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.settings) setSettings(data.settings);
-        if (data.resolution) setResolution(data.resolution);
-        if (data.internalHistory) setInternalHistory(data.internalHistory);
-        if (data.uploadedImage) setUploadedImage(data.uploadedImage);
-      }
-    } catch (err) {
-      console.warn("Failed to load CinemaStudio persistence:", err);
+  // ── Persistence ──────────────────────────────────────────────────────────
+  useStudioPersistedState(
+    PERSIST_KEY,
+    { settings, resolution, internalHistory, uploadedImage },
+    {
+      settings: setSettings,
+      resolution: setResolution,
+      internalHistory: setInternalHistory,
+      uploadedImage: setUploadedImage,
     }
-  }, []);
-
-  // ── Adjust height on load ────────────────────────────────────────────────
-  // ── Persistence: Save ────────────────────────────────────────────────────
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const state = {
-          settings,
-          resolution,
-          internalHistory,
-          uploadedImage,
-        };
-        localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
-      } catch (err) {
-        console.warn("Failed to save CinemaStudio persistence:", err);
-      }
-    }, 500); // 500ms debounce
-    return () => clearTimeout(timer);
-  }, [settings, resolution, internalHistory, uploadedImage]);
+  );
 
   // Derive effective history (prop wins over internal)
   const history = historyItems != null ? historyItems : internalHistory;

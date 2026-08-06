@@ -10,14 +10,12 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/stats')
-      .then(res => res.json())
-      .then(json => {
-        if (json.error) throw new Error(json.error);
-        setData(json);
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+    import('@/src/lib/apiClient').then(({ apiClient }) => {
+      apiClient.get('/admin/stats')
+        .then(data => setData(data))
+        .catch(err => setError(err.message || 'Failed to load admin stats'))
+        .finally(() => setLoading(false));
+    });
   }, []);
 
   if (loading) {

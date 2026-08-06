@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { cn } from '@/src/lib/utils';
 
 export const Input = forwardRef(({ 
   className = '', 
@@ -17,7 +18,7 @@ export const Input = forwardRef(({
   const widthStyles = fullWidth ? 'w-full' : '';
 
   return (
-    <div className={`flex flex-col gap-1.5 ${widthStyles}`}>
+    <div className={cn('flex flex-col gap-1.5', widthStyles)}>
       {label && (
         <label htmlFor={inputId} className="text-sm font-medium text-secondary">
           {label}
@@ -26,7 +27,7 @@ export const Input = forwardRef(({
       <input
         id={inputId}
         ref={ref}
-        className={`${baseStyles} ${stateStyles} ${className}`}
+        className={cn(baseStyles, stateStyles, className)}
         {...props}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}

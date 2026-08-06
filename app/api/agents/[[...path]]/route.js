@@ -1,279 +1,167 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../api/auth/[...nextauth]/route";
-import { PrismaClient } from '@prisma/client';
+import { withApiAuth } from '@/src/lib/apiHandler';
+import { AgentService } from '@/src/lib/services/agentService';
+import { env } from "@/src/lib/env";
+import { z } from 'zod';
+import { BillingService } from '@/src/lib/services/billingService';
 
-const prisma = new PrismaClient();
+const createAgentSchema = z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+    system_prompt: z.string().optional(),
+});
 
-export async function GET(request, { params }) {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-        return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-    }
+const chatAgentSchema = z.object({
+    conversation_id: z.string().optional(),
+    message: z.string().min(1)
+});
 
-    const segments = params.path || [];
-    const url = new URL(request.url);
-    const searchParams = url.searchParams;
+export const GET = withApiAuth({
+    handler: async (request, { auth, params }) => {
+        const slug = await params;
+        const segments = slug.path || [];
+        const url = new URL(request.url);
+        const searchParams = url.searchParams;
 
-    if (segments.length === 0 || (segments[0] === 'user' && segments[1] === 'agents')) {
-        // GET /api/agents or GET /api/agents/user/agents
-        const isTemplate = searchParams.get('is_template') === 'true';
-        if (isTemplate) {
-            return NextResponse.json({ agents: [] }); // No templates for now
-        }
-        const agents = await prisma.agent.findMany({
-            where: { userId: session.user.id },
-            orderBy: { createdAt: 'desc' }
-        });
-        return NextResponse.json({ agents });
-    }
-
-    if (segments[0] === 'featured' && segments[1] === 'agents') {
-        return NextResponse.json({ agents: [] });
-    }
-
-    if (segments[0] === 'user' && segments[1] === 'conversations') {
-        const conversations = await prisma.conversation.findMany({
-            where: { userId: session.user.id },
-            include: { agent: true },
-            orderBy: { createdAt: 'desc' }
-        });
-        return NextResponse.json(conversations);
-    }
-
-    if (segments[0] === 'by-slug' && segments[1] && segments[2]) {
-        // GET /api/agents/by-slug/:slug/:conversationId
-        const slug = segments[1];
-        const conversationId = segments[2];
-        const conversation = await prisma.conversation.findUnique({
-            where: { id: conversationId, userId: session.user.id },
-            include: { messages: true }
-        });
-        if (!conversation) return NextResponse.json({ detail: "Not found" }, { status: 404 });
-        return NextResponse.json(conversation);
-    }
-
-    if (segments[0] === 'by-slug' && segments[1]) {
-        // GET /api/agents/by-slug/:slug
-        const slug = segments[1];
-        const agent = await prisma.agent.findUnique({
-            where: { slug }
-        });
-        if (!agent) return NextResponse.json({ detail: "Not found" }, { status: 404 });
-        
-        // Also fetch conversations for this agent/user
-        const conversations = await prisma.conversation.findMany({
-            where: { agentId: agent.id, userId: session.user.id },
-            include: { messages: true },
-            orderBy: { createdAt: 'desc' }
-        });
-
-        return NextResponse.json({ ...agent, conversations });
-    }
-
-    if (segments[0] === 'templates') {
-        return NextResponse.json({ agents: [] });
-    }
-
-    // Note: The /requests endpoint is deprecated since Next.js serverless functions
-    // handle agent chats synchronously and no longer return request_ids for polling.
-    if (segments[0] === 'requests' && segments[1]) {
-        return NextResponse.json({ detail: "Polling deprecated on this backend" }, { status: 404 });
-    }
-
-    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
-}
-
-export async function POST(request, { params }) {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-        return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
-    }
-
-    const segments = params.path || [];
-    
-    if (segments[0] === 'create') {
-        // POST /api/agents/create
-        const body = await request.json();
-        
-        const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        // Ensure slug is unique
-        const existing = await prisma.agent.findUnique({ where: { slug } });
-        const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
-
-        const newAgent = await prisma.agent.create({
-            data: {
-                userId: session.user.id,
-                slug: finalSlug,
-                name: body.name,
-                description: body.description || "",
-                systemPrompt: body.system_prompt || "",
-                model: "meta-llama/llama-3.1-8b-instruct:free"
+        if (segments.length === 0 || (segments[0] === 'user' && segments[1] === 'agents')) {
+            const isTemplate = searchParams.get('is_template') === 'true';
+            if (isTemplate) {
+                return NextResponse.json({ agents: [] }); 
             }
-        });
-        
-        return NextResponse.json({ ...newAgent, system_prompt: newAgent.systemPrompt });
-    }
-
-    if (segments[0] === 'by-slug' && segments[2] === 'chat') {
-        // POST /api/agents/by-slug/:slug/chat
-        const slug = segments[1];
-        const body = await request.json();
-        
-        const agent = await prisma.agent.findUnique({ where: { slug } });
-        if (!agent) return NextResponse.json({ detail: "Agent not found" }, { status: 404 });
-
-        let conversationId = body.conversation_id;
-        
-        let conversation;
-        if (!conversationId) {
-            conversation = await prisma.conversation.create({
-                data: {
-                    userId: session.user.id,
-                    agentId: agent.id
-                }
-            });
-            conversationId = conversation.id;
-        } else {
-            conversation = await prisma.conversation.findUnique({
-                where: { id: conversationId }
-            });
-            if (!conversation) {
-                conversation = await prisma.conversation.create({
-                    data: {
-                        id: conversationId,
-                        userId: session.user.id,
-                        agentId: agent.id
-                    }
-                });
-            }
+            const agents = await AgentService.getAgents(auth.user.id);
+            return NextResponse.json({ agents });
         }
 
-        // Add user message
-        await prisma.message.create({
-            data: {
-                conversationId: conversation.id,
-                role: 'user',
-                content: body.message
-            }
-        });
-
-        // Get all messages
-        const allMessages = await prisma.message.findMany({
-            where: { conversationId: conversation.id },
-            orderBy: { createdAt: 'asc' }
-        });
-
-        const messagesForLLM = [
-            { role: 'system', content: agent.systemPrompt || "You are a helpful AI assistant." },
-            ...allMessages.map(m => ({ role: m.role, content: m.content }))
-        ];
-
-        const cost = 5; // Standard cost per agent message
-        const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-        if (!user || user.credits < cost) {
-            return NextResponse.json({ detail: "Insufficient credits to chat with agent." }, { status: 402 });
+        if (segments[0] === 'featured' && segments[1] === 'agents') {
+            return NextResponse.json({ agents: [] });
         }
 
-        let aiContent = "I am a custom local agent! You have not configured your OpenRouter API key yet in Settings.";
-        const apiKey = process.env.OPENROUTER_API_KEY;
-        const modelUsed = agent.model || 'meta-llama/llama-3.1-8b-instruct:free';
-        
-        if (apiKey) {
+        if (segments[0] === 'user' && segments[1] === 'conversations') {
+            const conversations = await AgentService.getConversations(auth.user.id);
+            return NextResponse.json(conversations);
+        }
+
+        if (segments[0] === 'by-slug' && segments[1] && segments[2]) {
+            const slugVal = segments[1];
+            const conversationId = segments[2];
+            const conversation = await AgentService.getConversation(conversationId, auth.user.id);
+            if (!conversation) return NextResponse.json({ detail: "Not found" }, { status: 404 });
+            return NextResponse.json(conversation);
+        }
+
+        if (segments[0] === 'by-slug' && segments[1]) {
+            const slugVal = segments[1];
+            const agent = await AgentService.getAgentBySlug(slugVal);
+            if (!agent) return NextResponse.json({ detail: "Not found" }, { status: 404 });
+            
+            const conversations = await AgentService.getAgentConversations(agent.id, auth.user.id);
+
+            return NextResponse.json({ ...agent, conversations });
+        }
+
+        if (segments[0] === 'templates') {
+            return NextResponse.json({ agents: [] });
+        }
+
+        if (segments[0] === 'requests' && segments[1]) {
+            return NextResponse.json({ detail: "Polling deprecated on this backend" }, { status: 404 });
+        }
+
+        return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
+    }
+});
+
+export const POST = withApiAuth({
+    handler: async (request, { auth, body, params }) => {
+        // Fallback for body parsing if undefined
+        let payload = body;
+        if (!payload) {
             try {
-                const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: modelUsed,
-                        messages: messagesForLLM
-                    })
-                });
-                const data = await resp.json();
-                if (data.choices && data.choices[0]) {
-                    aiContent = data.choices[0].message.content;
-                } else {
-                    console.error("OpenRouter error:", data);
-                }
+                payload = await request.clone().json();
             } catch (e) {
-                console.error("Fetch error:", e);
-                aiContent = "Error reaching AI provider.";
+                payload = {};
             }
         }
 
-        // Save AI message, deduct credits, and record history atomically
-        let aiMsg;
-        await prisma.$transaction(async (tx) => {
-            aiMsg = await tx.message.create({
-                data: {
-                    conversationId: conversation.id,
-                    role: 'assistant',
-                    content: aiContent
+        const slug = await params;
+        const segments = slug.path || [];
+        
+        if (segments[0] === 'create' || segments.length === 0) {
+            const parsed = createAgentSchema.safeParse(payload);
+            if (!parsed.success) {
+                return NextResponse.json({ error: "Invalid payload", details: parsed.error.issues }, { status: 400 });
+            }
+            const data = parsed.data;
+
+            const newAgent = await AgentService.createAgent(auth.user.id, data);
+            
+            return NextResponse.json({ ...newAgent, system_prompt: newAgent.systemPrompt });
+        }
+
+        if (segments[0] === 'by-slug' && segments[2] === 'chat') {
+            const parsed = chatAgentSchema.safeParse(payload);
+            if (!parsed.success) {
+                return NextResponse.json({ error: "Invalid payload", details: parsed.error.issues }, { status: 400 });
+            }
+            const chatData = parsed.data;
+
+            const slugVal = segments[1];
+            const agent = await AgentService.getAgentBySlug(slugVal);
+            if (!agent) return NextResponse.json({ detail: "Agent not found" }, { status: 404 });
+
+            const conversation = await AgentService.getOrCreateConversation(chatData.conversation_id, auth.user.id, agent.id);
+
+            // Add user message
+            await AgentService.addMessage(conversation.id, 'user', chatData.message);
+
+            const cost = 5; 
+            if (auth.method === 'session') {
+                try {
+                    await BillingService.queueGeneration(auth.user.id, cost, 'agent_chat');
+                } catch (err) {
+                    const status = err.message.includes('User not found') ? 404 : 402;
+                    return NextResponse.json({ detail: err.message }, { status });
                 }
+            }
+
+            const { generateQueue } = await import('@/src/lib/queue');
+            const job = await generateQueue.add('agent_chat', {
+                action: 'agent_chat',
+                params: {
+                    agentId: agent.id,
+                    conversationId: conversation.id,
+                    message: chatData.message,
+                    model: agent.model || 'meta-llama/llama-3.1-8b-instruct:free',
+                    systemPrompt: agent.systemPrompt,
+                    agentSlug: agent.slug
+                },
+                userId: auth.method === 'session' ? auth.user.id : null,
+                cost: cost,
+                authMethod: auth.method
+            }, {
+                attempts: 1,
+                backoff: { type: 'exponential', delay: 2000 }
             });
-
-            if (apiKey) {
-                await tx.user.update({
-                    where: { id: session.user.id },
-                    data: { credits: { decrement: cost } }
+            
+            const { QueueEvents } = await import('bullmq');
+            const queueEvents = new QueueEvents('generate-queue', { connection: generateQueue.opts.connection });
+            
+            try {
+                // Wait for the worker to process the job inline (timeout is handled by worker or Vercel)
+                const result = await job.waitUntilFinished(queueEvents);
+                return NextResponse.json({
+                    is_complete: true,
+                    conversation_id: conversation.id,
+                    messages: result.messages || [],
+                    reply: result.reply || "No response received.",
+                    suggestions: []
                 });
-
-                await tx.transaction.create({
-                    data: {
-                        userId: session.user.id,
-                        amount: -cost,
-                        type: 'usage',
-                        description: `Agent chat response: ${agent.slug}`,
-                    }
-                });
-
-                await tx.generation.create({
-                    data: {
-                        userId: session.user.id,
-                        type: 'agent_chat',
-                        prompt: body.message,
-                        model: modelUsed,
-                        parameters: JSON.stringify({ agentId: agent.id, conversationId: conversation.id }),
-                        resultUrl: aiContent,
-                        status: 'completed'
-                    }
-                });
+            } catch (err) {
+                console.error("Job wait error:", err);
+                return NextResponse.json({ detail: "Failed to process chat" }, { status: 500 });
             }
-        });
+        }
 
-        return NextResponse.json({
-            is_complete: true,
-            conversation_id: conversation.id,
-            messages: [...allMessages, aiMsg].map(m => ({ role: m.role, content: m.content })),
-            suggestions: []
-        });
+        return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
     }
-
-    if (segments.length === 0) {
-        // POST /api/agents (handled by create for simplicity, assuming generic agent creation form falls back here)
-        const body = await request.json();
-        
-        const slug = body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        // Ensure slug is unique
-        const existing = await prisma.agent.findUnique({ where: { slug } });
-        const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
-
-        const newAgent = await prisma.agent.create({
-            data: {
-                userId: session.user.id,
-                slug: finalSlug,
-                name: body.name,
-                description: body.description || "",
-                systemPrompt: body.system_prompt || "",
-                model: "meta-llama/llama-3.1-8b-instruct:free"
-            }
-        });
-        
-        return NextResponse.json({ ...newAgent, system_prompt: newAgent.systemPrompt });
-    }
-
-    return NextResponse.json({ error: "Endpoint not found" }, { status: 404 });
-}
+});

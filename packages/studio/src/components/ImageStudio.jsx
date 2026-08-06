@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { generateImage, generateI2I, uploadFile } from "../apiClient.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
+import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
 import DrawModal from "./DrawModal.jsx";
 import MobileGenerationActions, {
   GenerationCopyButtons,
@@ -188,93 +189,29 @@ export default function ImageStudio({
     return () => window.removeEventListener("click", handler);
   }, [dropdownOpen]);
 
-  // ── Persistence: Load ────────────────────────────────────────────────────
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(PERSIST_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.imageMode !== undefined) setImageMode(data.imageMode);
-        if (data.selectedModelId) setSelectedModelId(data.selectedModelId);
-        if (data.selectedModelName) setSelectedModelName(data.selectedModelName);
-        if (data.selectedAr) setSelectedAr(data.selectedAr);
-        if (data.selectedQuality) setSelectedQuality(data.selectedQuality);
-        if (data.selectedEffect) setSelectedEffect(data.selectedEffect);
-        if (data.maxImages) setMaxImages(data.maxImages);
-        if (data.prompt) setPrompt(data.prompt);
-        if (data.uploadedImageUrls) setUploadedImageUrls(data.uploadedImageUrls);
-        if (data.uploadHistory) setUploadHistory(data.uploadHistory);
-        if (data.batchSize) setBatchSize(data.batchSize);
-        if (data.localHistory) setLocalHistory(data.localHistory);
-        if (data.useLocalModel !== undefined) setUseLocalModel(data.useLocalModel);
-        if (data.selectedLocalModel) setSelectedLocalModel(data.selectedLocalModel);
-        if (data.negativePrompt !== undefined) setNegativePrompt(data.negativePrompt);
-        if (data.guidanceScale !== undefined) setGuidanceScale(data.guidanceScale);
-        if (data.steps !== undefined) setSteps(data.steps);
-        if (data.seed !== undefined) setSeed(data.seed);
-        if (data.selectedStyle) setSelectedStyle(data.selectedStyle);
-        if (data.customWidth !== undefined) setCustomWidth(data.customWidth);
-        if (data.customHeight !== undefined) setCustomHeight(data.customHeight);
-        if (data.referenceStrength !== undefined) setReferenceStrength(data.referenceStrength);
-        if (data.selectedLora) setSelectedLora(data.selectedLora);
-        if (data.loraWeight !== undefined) setLoraWeight(data.loraWeight);
-      }
-    } catch (err) {
-      console.warn("Failed to load ImageStudio persistence:", err);
+  // ── Persistence ──────────────────────────────────────────────────────────
+  useStudioPersistedState(
+    PERSIST_KEY,
+    {
+      imageMode, selectedModelId, selectedModelName, selectedAr, selectedQuality,
+      selectedEffect, maxImages, prompt, uploadedImageUrls, uploadHistory,
+      batchSize, localHistory, useLocalModel, selectedLocalModel, negativePrompt,
+      guidanceScale, steps, seed, selectedStyle, customWidth, customHeight,
+      referenceStrength, selectedLora, loraWeight,
+    },
+    {
+      imageMode: setImageMode, selectedModelId: setSelectedModelId, selectedModelName: setSelectedModelName,
+      selectedAr: setSelectedAr, selectedQuality: setSelectedQuality, selectedEffect: setSelectedEffect,
+      maxImages: setMaxImages, prompt: setPrompt, uploadedImageUrls: setUploadedImageUrls,
+      uploadHistory: setUploadHistory, batchSize: setBatchSize, localHistory: setLocalHistory,
+      useLocalModel: setUseLocalModel, selectedLocalModel: setSelectedLocalModel, negativePrompt: setNegativePrompt,
+      guidanceScale: setGuidanceScale, steps: setSteps, seed: setSeed, selectedStyle: setSelectedStyle,
+      customWidth: setCustomWidth, customHeight: setCustomHeight, referenceStrength: setReferenceStrength,
+      selectedLora: setSelectedLora, loraWeight: setLoraWeight,
     }
-  }, []);
+  );
 
   // ── Adjust height on load ────────────────────────────────────────────────
-  // ── Persistence: Save ────────────────────────────────────────────────────
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const state = {
-          imageMode,
-          selectedModelId,
-          selectedModelName,
-          selectedAr,
-          selectedQuality,
-          selectedEffect,
-          maxImages,
-          prompt,
-          uploadedImageUrls,
-          uploadHistory,
-          batchSize,
-          localHistory,
-          useLocalModel,
-          selectedLocalModel,
-          negativePrompt,
-          guidanceScale,
-          steps,
-          seed,
-          selectedStyle,
-          customWidth,
-          customHeight,
-          referenceStrength,
-          selectedLora,
-          loraWeight,
-        };
-        localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
-      } catch (err) {
-        console.warn("Failed to save ImageStudio persistence:", err);
-      }
-    }, 500); // 500ms debounce
-    return () => clearTimeout(timer);
-  }, [
-    imageMode,
-    selectedModelId,
-    selectedModelName,
-    selectedAr,
-    selectedQuality,
-    selectedEffect,
-    maxImages,
-    prompt,
-    uploadedImageUrls,
-    uploadHistory,
-    batchSize,
-    localHistory,
-  ]);
 
   const processDroppedImages = async (files) => {
     const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB

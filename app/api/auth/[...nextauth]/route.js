@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import prisma from '@/src/lib/prisma';
+import { UserService } from '@/src/lib/services/userService';
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
+import { env } from "@/src/lib/env";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -20,9 +20,7 @@ export const authOptions = {
           throw new Error("Missing credentials");
         }
         
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
+        const user = await UserService.getUserByEmail(credentials.email);
 
         if (!user || !user.password) {
           throw new Error("No user found");
@@ -72,7 +70,7 @@ export const authOptions = {
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

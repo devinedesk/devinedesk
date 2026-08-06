@@ -3,6 +3,8 @@ import { LocalModelManager } from './LocalModelManager.jsx';
 import { isLocalAIAvailable } from '../../../../src/lib/localInferenceClient.js';
 import { t } from '../../../../src/lib/i18n.js';
 import { useSettings } from '../contexts/SettingsContext.jsx';
+import { Button } from '../../../../components/ui/Button.jsx';
+import { Input } from '../../../../components/ui/Input.jsx';
 
 export function SettingsModal({ onClose }) {
   const [activeTab, setActiveTab] = useState('api');
@@ -69,16 +71,14 @@ export function SettingsModal({ onClose }) {
               {[
                 { id: 'platform_api_key', label: 'Platform API Key (Legacy Standalone)', placeholder: 'Enter Platform API Key' },
               ].map(field => (
-                <div key={field.id} className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-secondary">{field.label}</label>
-                  <input
-                    type={field.type || 'password'}
-                    value={keys[field.id] || ''}
-                    onChange={handleChange(field.id)}
-                    placeholder={field.placeholder}
-                    className="w-full bg-card-bg border border-muted focus:border-secondary focus:ring-1 focus:ring-secondary rounded-xl px-4 py-2.5 text-sm text-white placeholder-muted outline-none transition-colors"
-                  />
-                </div>
+                <Input
+                  key={field.id}
+                  label={field.label}
+                  type={field.type || 'password'}
+                  value={keys[field.id] || ''}
+                  onChange={handleChange(field.id)}
+                  placeholder={field.placeholder}
+                />
               ))}
               <p className="text-sm text-secondary mt-2">
                 API operations now securely use platform-level credentials and your account credits.
@@ -95,18 +95,18 @@ export function SettingsModal({ onClose }) {
         {activeTab === 'api' && (
           <div className="p-5 border-t border-muted bg-card-bg shrink-0">
             <div className="flex justify-end gap-3">
-              <button
+              <Button
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl border border-muted text-secondary text-sm font-semibold hover:text-white hover:bg-panel-bg transition-colors"
+                variant="secondary"
               >
                 {t('common.cancel') || 'Cancel'}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSave}
-                className="px-6 py-2.5 rounded-xl bg-primary text-black text-sm font-semibold hover:bg-primary-hover shadow-glow transition-colors"
+                variant="primary"
               >
                 {t('common.save') || 'Save'}
-              </button>
+              </Button>
             </div>
           </div>
         )}

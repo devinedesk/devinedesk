@@ -6,6 +6,9 @@ import axios from "axios";
 import { Bot, Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { useAppStore } from "@/src/store/useAppStore";
 
 export default function AgentEditClient({ userData, agentId }) {
   const router = useRouter();
@@ -16,12 +19,15 @@ export default function AgentEditClient({ userData, agentId }) {
     description: "",
     systemPrompt: ""
   });
+  
+  const setActiveAgentId = useAppStore(state => state.setActiveAgentId);
 
   useEffect(() => {
     // Fetch existing agent data (simplified for this rewrite)
     // Normally you'd pass it as a prop from the server component
+    setActiveAgentId(agentId);
     setIsLoading(false);
-  }, [agentId]);
+  }, [agentId, setActiveAgentId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +35,6 @@ export default function AgentEditClient({ userData, agentId }) {
     
     setIsSubmitting(true);
     try {
-      // Typically posts to /api/agents/edit/[id] or similar
       await axios.put(`/api/agents/edit/${agentId}`, formData);
       toast.success("Agent updated successfully!");
       router.push(`/agents/${agentId}`);
@@ -56,56 +61,48 @@ export default function AgentEditClient({ userData, agentId }) {
           </Link>
           <div>
             <h1 className="text-2xl font-medium text-white flex items-center gap-3">
-              <Bot className="w-6 h-6 text-cyan-400" />
+              <Bot className="w-6 h-6 text-primary" />
               Edit Agent
             </h1>
-            <p className="text-white/40">Modify your AI persona configuration.</p>
+            <p className="text-secondary">Modify your AI persona configuration.</p>
           </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 bg-panel-bg p-8 rounded-2xl border border-white/5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white/60">Agent Name</label>
-            <input 
-              type="text" 
-              value={formData.name}
-              onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
-              className="w-full bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
-              placeholder="e.g. Design Assistant"
-            />
-          </div>
+          <Input 
+            label="Agent Name"
+            value={formData.name}
+            onChange={e => setFormData(f => ({ ...f, name: e.target.value }))}
+            placeholder="e.g. Design Assistant"
+          />
+
+          <Input 
+            label="Description"
+            value={formData.description}
+            onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
+            placeholder="Brief summary of capabilities"
+          />
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/60">Description</label>
-            <input 
-              type="text" 
-              value={formData.description}
-              onChange={e => setFormData(f => ({ ...f, description: e.target.value }))}
-              className="w-full bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors"
-              placeholder="Brief summary of capabilities"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white/60">System Prompt</label>
+            <label className="text-sm font-medium text-secondary">System Prompt</label>
             <textarea 
               value={formData.systemPrompt}
               onChange={e => setFormData(f => ({ ...f, systemPrompt: e.target.value }))}
-              className="w-full h-32 bg-app-bg border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400/50 transition-colors resize-none"
+              className="w-full h-32 bg-card-bg border border-muted hover:border-secondary rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-app-bg transition-colors resize-none"
               placeholder="You are a helpful assistant..."
             />
           </div>
 
           <div className="pt-4 flex justify-end">
-            <button 
+            <Button 
               type="submit"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-400/10 text-cyan-400 font-medium hover:bg-cyan-400/20 disabled:opacity-50 transition-colors"
+              isLoading={isSubmitting}
+              className="flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               {isSubmitting ? "Saving..." : "Save Changes"}
-            </button>
+            </Button>
           </div>
         </form>
 

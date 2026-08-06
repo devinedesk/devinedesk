@@ -1,10 +1,12 @@
 import React from 'react';
+import { cn } from '@/src/lib/utils';
 
 export function Button({ 
   children, 
   variant = 'primary', 
   size = 'md', 
   isLoading = false, 
+  fullWidth = false,
   className = '', 
   disabled, 
   ...props 
@@ -31,10 +33,11 @@ export function Button({
   
   const variantStyles = variants[variant] || variants.primary;
   const sizeStyles = sizes[size] || sizes.md;
+  const widthStyles = fullWidth ? 'w-full' : '';
 
   return (
     <button 
-      className={`${baseStyles} ${variantStyles} ${sizeStyles} ${stateStyles} ${className}`}
+      className={cn(baseStyles, variantStyles, sizeStyles, stateStyles, widthStyles, className)}
       disabled={isDisabled}
       {...props}
     >

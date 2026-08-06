@@ -1,18 +1,19 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import prisma from '@/src/lib/prisma';
+import { env } from '@/src/lib/env';
+import { BillingService } from '@/src/lib/services/billingService';
 
 export async function POST(req) {
   try {
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('mock')) {
+    if (!env.STRIPE_SECRET_KEY || env.STRIPE_SECRET_KEY.includes('mock')) {
       return NextResponse.json({ error: 'Stripe configuration is missing or invalid for production environment' }, { status: 500 });
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
       apiVersion: '2023-10-16',
     });
 
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
       return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 400 });
@@ -38,21 +39,15 @@ export async function POST(req) {
 
       if (userId && credits) {
         try {
-          await prisma.$transaction([
-            prisma.user.update({
-              where: { id: userId },
-              data: { credits: { increment: credits } },
-            }),
-            prisma.transaction.create({
-              data: {
-                userId: userId,
-                amount: credits,
-                type: 'purchase',
-                description: `Purchased ${credits} credits via Stripe`,
-                stripePaymentId: paymentId,
-              }
-            })
-          ]);
+          // Check for idempotency
+          const isProcessed = await BillingService.checkTransactionProcessed(paymentId);
+          
+          if (isProcessed) {
+            console.log(`Transaction ${paymentId} already processed. Skipping.`);
+            return NextResponse.json({ received: true });
+          }
+
+          await BillingService.addCredits(userId, credits, `Purchased ${credits} credits via Stripe`, paymentId);
           console.log(`Successfully credited ${credits} to user ${userId}`);
         } catch (dbErr) {
           console.error('Database error updating credits after webhook:', dbErr);

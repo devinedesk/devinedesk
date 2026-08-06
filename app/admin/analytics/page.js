@@ -22,14 +22,12 @@ export default function AnalyticsDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/analytics')
-      .then(res => res.json())
-      .then(json => {
-        if (json.error) throw new Error(json.error);
-        setData(json);
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+    import('@/src/lib/apiClient').then(({ apiClient }) => {
+      apiClient.get('/admin/analytics')
+        .then(data => setData(data))
+        .catch(err => setError(err.message || 'Failed to load analytics data'))
+        .finally(() => setLoading(false));
+    });
   }, []);
 
   if (loading) {

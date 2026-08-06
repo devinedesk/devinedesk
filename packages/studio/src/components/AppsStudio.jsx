@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { registerAppInterest, getAppInterests } from '../apiClient.js';
 import toast, { Toaster } from 'react-hot-toast';
+import { Button } from '../../../../components/ui/Button.jsx';
 
 const templateApps = [
   {
@@ -254,19 +255,26 @@ export default function AppsStudio({ apiKey }) {
             </div>
 
             <div className="space-y-3">
-              <button 
+              <Button 
                 onClick={handleRequestAccess}
                 disabled={isRequesting}
-                className="w-full py-4 bg-primary text-black rounded-md text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                variant="primary"
+                fullWidth
+                size="lg"
+                className="font-black uppercase tracking-widest shadow-lg"
+                isLoading={isRequesting}
               >
                 {isRequesting ? 'Sending Details...' : 'Get Template'}
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={() => setSelectedApp(null)}
-                className="w-full py-4 bg-white/5 border border-white/10 text-white/60 rounded-md text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
+                variant="ghost"
+                fullWidth
+                size="lg"
+                className="font-bold uppercase tracking-widest border border-white/10"
               >
                 Maybe Later
-              </button>
+              </Button>
             </div>
           </div>
         </div>

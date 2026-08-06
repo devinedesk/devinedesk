@@ -33,6 +33,33 @@ export const aimlapiAdapter = {
         throw new Error('AIMLAPI Generation timed out.');
     },
     
+    generateImage: async function(params) {
+        const key = this.getKey(params);
+        const url = 'https://api.aimlapi.com/images/generations';
+
+        const payload = {
+            model: params.model,
+            prompt: params.prompt
+        };
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`AIMLAPI Image Error: ${err}`);
+        }
+
+        const data = await response.json();
+        return { url: data?.data?.[0]?.url || data.url || "" };
+    },
+    
     generateVideo: async function(params) {
         const key = this.getKey(params);
         const url = 'https://api.aimlapi.com/v2/generate/video';

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { generateQueue } from '@/src/lib/queue';
-import { validateRequest } from '../../auth-check';
+import { withApiAuth } from '@/src/lib/apiHandler';
+import { z } from 'zod';
 
-export async function GET(request, { params }) {
-    try {
-        const auth = await validateRequest(request);
-        if (!auth.authorized) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+const jobSchema = z.object({
+    jobId: z.string().min(1)
+});
 
+export const GET = withApiAuth({
+    handler: async (request, { params }) => {
         const { jobId } = await params;
         
         if (!jobId) {
@@ -30,8 +30,5 @@ export async function GET(request, { params }) {
         } else {
             return NextResponse.json({ status: state, progress: job.progress });
         }
-    } catch (error) {
-        console.error("API Generate Status Error:", error);
-        return NextResponse.json({ error: error.message || 'Failed to get job status' }, { status: 500 });
     }
-}
+});

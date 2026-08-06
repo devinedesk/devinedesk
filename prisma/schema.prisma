@@ -36,6 +36,7 @@ model User {
   transactions  Transaction[]
   conversations Conversation[]
   appInterests  AppInterest[]
+  notifications Notification[]
 }
 
 model Transaction {
@@ -48,6 +49,8 @@ model Transaction {
   createdAt       DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Account {
@@ -108,6 +111,8 @@ model Generation {
   resultUrl  String?
   status     String   @default("completed")
   createdAt  DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Workflow {
@@ -122,6 +127,8 @@ model Workflow {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   runs        WorkflowRun[]
+
+  @@index([userId])
 }
 
 model WorkflowRun {
@@ -137,6 +144,9 @@ model WorkflowRun {
 
   workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([userId])
 }
 
 model Agent {
@@ -152,6 +162,8 @@ model Agent {
   updatedAt    DateTime @updatedAt
 
   conversations Conversation[]
+
+  @@index([userId])
 }
 
 model Conversation {
@@ -163,6 +175,9 @@ model Conversation {
   messages  Message[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([agentId])
 }
 
 model Message {
@@ -172,6 +187,8 @@ model Message {
   role           String // 'user' or 'assistant'
   content        String
   createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
 }
 
 model Asset {
@@ -182,6 +199,21 @@ model Asset {
   url       String
   metadata  String? // JSON string
   createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("info") // 'info', 'success', 'error', 'warning'
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 

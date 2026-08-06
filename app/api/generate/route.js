@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { processGenerationRequest } from '@/src/services/generationService.js';
-import { validateRequest } from '../auth-check';
-import prisma from '@/src/lib/prisma';
+import { withApiAuth } from '@/src/lib/apiHandler';
+import { z } from 'zod';
+import { BillingService } from '@/src/lib/services/billingService';
 
-// Define cost per generation action
 const COST_MAP = {
     'flux-schnell': 5,
     'flux-pro': 15,
@@ -11,33 +10,31 @@ const COST_MAP = {
     'default': 10
 };
 
-export async function POST(request) {
-    try {
-        const auth = await validateRequest(request);
-        if (!auth.authorized) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+// Define the expected schema for the generate payload
+const generateSchema = z.object({
+    action: z.string().min(1),
+    params: z.object({
+        prompt: z.string().optional(),
+        model: z.string().optional(),
+        // other params can be arbitrary depending on the model, so we allow pass-through
+    }).passthrough().optional().default({}),
+});
 
-        const body = await request.json();
+export const POST = withApiAuth({
+    schema: generateSchema,
+    handler: async (request, { auth, body }) => {
         const { action, params } = body;
         
         let cost = COST_MAP[action] || COST_MAP['default'];
 
         // If it's a web user, verify credits and deduct immediately to prevent spam
         if (auth.method === 'session') {
-            const user = await prisma.user.findUnique({ where: { id: auth.user.id } });
-            if (!user) {
-                return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            try {
+                await BillingService.queueGeneration(auth.user.id, cost, action);
+            } catch (err) {
+                const status = err.message.includes('User not found') ? 404 : 402;
+                return NextResponse.json({ error: err.message }, { status });
             }
-            if (user.credits < cost) {
-                return NextResponse.json({ error: 'Insufficient credits. Please top up.' }, { status: 402 });
-            }
-            
-            // Deduct immediately. (Worker will refund if job fails)
-            await prisma.user.update({
-                where: { id: auth.user.id },
-                data: { credits: { decrement: cost } }
-            });
         }
 
         const { generateQueue } = await import('@/src/lib/queue');
@@ -47,11 +44,14 @@ export async function POST(request) {
             userId: auth.method === 'session' ? auth.user.id : null,
             cost,
             authMethod: auth.method
+        }, {
+            attempts: 3,
+            backoff: {
+                type: 'exponential',
+                delay: 2000
+            }
         });
 
         return NextResponse.json({ jobId: job.id, status: 'queued' });
-    } catch (error) {
-        console.error("API Generate Route Error:", error);
-        return NextResponse.json({ error: error.message || 'Generation failed' }, { status: 500 });
     }
-}
+});

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from 'react';
+import { cn } from '@/src/lib/utils';
 
 export function Modal({ 
   isOpen, 
   onClose, 
   title, 
   children, 
-  maxWidth = 'max-w-md'
+  maxWidth = 'max-w-md',
+  className
 }) {
   const overlayRef = useRef(null);
 
@@ -42,9 +44,13 @@ export function Modal({
       role="dialog"
     >
       <div 
-        className={`w-full ${maxWidth} bg-panel-bg border border-muted rounded-2xl shadow-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200`}
+        className={cn(
+          "w-full bg-white/[0.03] backdrop-blur-[12px] border border-white/[0.08] rounded-xl shadow-3xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200",
+          maxWidth,
+          className
+        )}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-muted bg-card-bg">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-transparent shrink-0">
           <h2 className="text-xl font-semibold text-white">{title}</h2>
           <button 
             onClick={onClose}

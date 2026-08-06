@@ -1,57 +1,43 @@
 import { NextResponse } from 'next/server';
-import { validateRequest } from '../../auth-check';
-import prisma from '@/src/lib/prisma';
+import { withApiAuth } from '@/src/lib/apiHandler';
+import { z } from 'zod';
+import { AppService } from '@/src/lib/services/appService';
 
-export async function GET(request) {
-    const auth = await validateRequest(request);
-    if (!auth.authorized) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export const GET = withApiAuth({
+    handler: async (request, { auth }) => {
+        const { searchParams } = new URL(request.url);
+        const appName = searchParams.get('app_name');
 
-    try {
-        const interests = await prisma.appInterest.findMany({
-            where: { userId: auth.user.id },
-            orderBy: { createdAt: 'desc' }
-        });
-
-        // The UI expects an array of app names
-        return NextResponse.json(interests.map(i => i.appName));
-    } catch (error) {
-        console.error('Fetch app interests err:', error);
-        return NextResponse.json({ error: 'Failed to fetch app interests' }, { status: 500 });
-    }
-}
-
-export async function POST(request) {
-    const auth = await validateRequest(request);
-    if (!auth.authorized) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    try {
-        const { appName } = await request.json();
-
-        if (!appName) {
-            return NextResponse.json({ error: 'App name is required' }, { status: 400 });
+        if (appName) {
+            const interest = await AppService.getInterest(auth.user.id, appName);
+            return NextResponse.json({ interested: !!interest });
         }
 
-        await prisma.appInterest.upsert({
-            where: {
-                userId_appName: {
-                    userId: auth.user.id,
-                    appName: appName
-                }
-            },
-            update: {}, // Do nothing if it exists
-            create: {
-                userId: auth.user.id,
-                appName: appName
-            }
-        });
-
-        return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Save app interest err:', error);
-        return NextResponse.json({ error: 'Failed to save app interest' }, { status: 500 });
+        const interests = await AppService.getInterests(auth.user.id);
+        // The UI expects an array of app names
+        return NextResponse.json(interests.map(i => i.appName));
     }
-}
+});
+
+const interestSchema = z.object({
+    app_name: z.string().min(1).max(100).optional(),
+    appName: z.string().min(1).max(100).optional()
+}).refine(data => data.app_name || data.appName, {
+    message: "Either app_name or appName must be provided"
+});
+
+export const POST = withApiAuth({
+    schema: interestSchema,
+    handler: async (request, { auth, body }) => {
+        // Support both app_name and appName
+        const appName = body.app_name || body.appName;
+
+        if (!appName) {
+            return NextResponse.json({ error: 'app_name is required' }, { status: 400 });
+        }
+
+        const interest = await AppService.addInterest(auth.user.id, appName);
+
+        return NextResponse.json({ success: true, interest });
+    }
+});

@@ -8,6 +8,7 @@ import { signIn } from "next-auth/react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { apiClient } from "@/src/lib/apiClient";
 
 export default function Register() {
   const router = useRouter();
@@ -23,16 +24,7 @@ export default function Register() {
     setError("");
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Registration failed");
-      }
+      await apiClient.post("/auth/register", { name, email, password });
 
       // Automatically sign in after successful registration
       const signInRes = await signIn("credentials", {
@@ -48,7 +40,7 @@ export default function Register() {
         router.refresh();
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }

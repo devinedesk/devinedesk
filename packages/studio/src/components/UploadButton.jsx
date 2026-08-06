@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { uploadFile } from "../apiClient.js";
 import { PromptPopover, promptMediaButtonClassName } from "./prompt/PromptComposer.jsx";
+import { Button } from "../../../../components/ui/Button.jsx";
 
 export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls = [], label = null, persistedHistory = null, onHistoryChange = null, accept = "image/*" }) {
   const [panelOpen, setPanelOpen] = useState(false);
@@ -316,13 +317,15 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
             </div>
             <div className="flex items-center gap-2">
               {isMulti && hasSelection && (
-                <button
+                <Button
                   type="button"
                   onClick={handleDone}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-primary text-black rounded-xl text-xs font-black transition-all hover:scale-105"
+                  variant="primary"
+                  size="sm"
+                  className="font-black"
                 >
                   ✓ Done ({count})
-                </button>
+                </Button>
               )}
               <button
                 type="button"
@@ -461,13 +464,15 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
               <span className="text-xs text-secondary">
                 {count} of {maxImages} selected
               </span>
-              <button
+              <Button
                 type="button"
                 onClick={handleDone}
-                className="px-4 py-1.5 bg-primary text-black rounded-xl text-xs font-black transition-all hover:scale-105"
+                variant="primary"
+                size="sm"
+                className="font-black"
               >
                 Use Selected
-              </button>
+              </Button>
             </div>
           )}
         </PromptPopover>

@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { generateAudio, uploadFile } from "../apiClient.js";
 import { formatErrorMessage } from "../utils/formatError.js";
 import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
+import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
 import { audioModels, getAudioModelById } from "../models.js";
 import { StudioGallery } from "./shared/StudioGallery.jsx";
 import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
@@ -542,43 +543,17 @@ export default function AudioStudio({
     setParams(initial);
   }, [selectedModelId]); // Only reset when model ID changes
 
-  // ── Persistence: Load ────────────────────────────────────────────────────
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(PERSIST_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.selectedModelId) setSelectedModelId(data.selectedModelId);
-        if (data.params) setParams(data.params);
-        if (data.internalHistory) setInternalHistory(data.internalHistory);
-        if (data.activeResultUrl) setActiveResultUrl(data.activeResultUrl);
-        if (data.activeResultTitle) setActiveResultTitle(data.activeResultTitle);
-        if (data.view) setView(data.view);
-      }
-    } catch (err) {
-      console.warn("Failed to load AudioStudio persistence:", err);
+  // ── Persistence ──────────────────────────────────────────────────────────
+  useStudioPersistedState(
+    PERSIST_KEY,
+    {
+      selectedModelId, params, internalHistory, activeResultUrl, activeResultTitle, view
+    },
+    {
+      selectedModelId: setSelectedModelId, params: setParams, internalHistory: setInternalHistory,
+      activeResultUrl: setActiveResultUrl, activeResultTitle: setActiveResultTitle, view: setView
     }
-  }, []);
-
-  // ── Persistence: Save ────────────────────────────────────────────────────
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const state = {
-          selectedModelId,
-          params,
-          internalHistory,
-          activeResultUrl,
-          activeResultTitle,
-          view,
-        };
-        localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
-      } catch (err) {
-        console.warn("Failed to save AudioStudio persistence:", err);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [selectedModelId, params, internalHistory, activeResultUrl, activeResultTitle, view]);
+  );
 
   // ── Handle Dropped Files ────────────────────────────────────────────────
   useEffect(() => {
