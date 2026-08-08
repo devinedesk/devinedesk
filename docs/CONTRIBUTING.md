@@ -1,33 +1,32 @@
-# Contribution Guide
+# Contributing to DevineDesk
 
-Thank you for your interest in contributing to DevineDesk! 
+We love your input! We want to make contributing to this project as easy and transparent as possible.
 
-## Branching Strategy
-We use a standard Git Flow branching model:
-- `main`: Production-ready code.
-- `develop`: Integration branch for upcoming features.
-- `feat/*`: Feature branches (e.g., `feat/auth-update`).
-- `fix/*`: Bug fix branches (e.g., `fix/redis-timeout`).
+## Development Setup
 
-## Development Workflow
-1. Fork the repository and clone locally.
-2. Checkout a new branch from `develop`.
-3. Make your changes.
-4. Run the code quality suite:
+1. **Clone the repo**
    ```bash
-   npm run lint
-   npm run format
-   npm run test
+   git clone https://github.com/devinedesk/devinedesk.git
+   cd devinedesk
    ```
-5. Commit your changes using Conventional Commits format (e.g., `feat(ui): add new dark mode toggle`).
-6. Push to your fork and open a Pull Request against the `develop` branch.
 
-## Pull Request Requirements
-- **Tests:** Any new backend logic or complex frontend state must be accompanied by a Vitest unit test.
-- **Documentation:** If you add an API endpoint, it must be documented via Zod OpenAPI registry in `src/lib/openapi-registry.js`.
-- **Review:** All PRs require at least 1 approval from a core maintainer before merging.
+2. **Install dependencies**
+   ```bash
+   npm run setup
+   ```
 
-## Code Style
-- We use ESLint and Prettier. Run `npm run format` before committing.
-- Use `lucide-react` for icons.
-- Use Tailwind CSS for styling. Avoid writing custom CSS classes in globals.css unless absolutely necessary.
+3. **Database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+4. **Run the local dev server**
+   ```bash
+   npm run dev
+   ```
+
+## Pull Request Process
+1. Ensure your code follows the established formatting (`npm run format`).
+2. Update the README.md with details of changes to the interface.
+3. You may merge the Pull Request in once you have the sign-off of at least one other developer.

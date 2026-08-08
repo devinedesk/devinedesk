@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { env } from '@/src/lib/env';
 import prisma from '@/src/lib/prisma';
+import { createHash } from 'crypto';
 
 /**
  * Validates either a valid NextAuth session OR a database-backed API key.
@@ -38,9 +39,11 @@ export async function validateRequest(request) {
   }
 
   if (token) {
-    // Note: In production, hash the incoming token to compare
+    // Hash the incoming token to compare with stored SHA256 hash
+    const hashedKey = createHash('sha256').update(token).digest('hex');
+
     const apiKey = await prisma.aPIKey.findUnique({
-      where: { key: token },
+      where: { key: hashedKey },
       include: { user: true },
     });
 

@@ -75,13 +75,32 @@ export async function POST(req) {
         const customerId = session.customer;
 
         if (userId) {
-          // Update user in DB
+          // Update user's stripeCustomerId
           await prisma.user.update({
             where: { id: userId },
-            data: {
-              stripeCustomerId: customerId,
+            data: { stripeCustomerId: customerId },
+          });
+
+          // Fetch subscription details from Stripe
+          const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId);
+
+          // Upsert Subscription record
+          await prisma.subscription.upsert({
+            where: { stripeSubscriptionId: subscriptionId },
+            update: {
+              status: subscriptionData.status,
+              currentPeriodStart: new Date(subscriptionData.current_period_start * 1000),
+              currentPeriodEnd: new Date(subscriptionData.current_period_end * 1000),
+              cancelAtPeriodEnd: subscriptionData.cancel_at_period_end,
+            },
+            create: {
+              userId: userId,
               stripeSubscriptionId: subscriptionId,
-              isPro: true,
+              stripePriceId: subscriptionData.items.data[0].price.id,
+              status: subscriptionData.status,
+              currentPeriodStart: new Date(subscriptionData.current_period_start * 1000),
+              currentPeriodEnd: new Date(subscriptionData.current_period_end * 1000),
+              cancelAtPeriodEnd: subscriptionData.cancel_at_period_end,
             },
           });
 
@@ -145,11 +164,12 @@ export async function POST(req) {
       });
 
       if (user) {
-        await prisma.user.update({
-          where: { id: user.id },
+        // Find and update the corresponding Subscription record
+        await prisma.subscription.updateMany({
+          where: { stripeSubscriptionId: subscription.id },
           data: {
-            isPro: false,
-            stripeSubscriptionId: null,
+            status: 'canceled',
+            cancelAtPeriodEnd: true,
           },
         });
 

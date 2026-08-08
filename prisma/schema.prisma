@@ -90,6 +90,7 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
+  isBanned         Boolean   @default(false)
 
   accounts        Account[]
   sessions        Session[]
@@ -567,4 +568,34 @@ model FeatureFlag {
 
   @@index([key])
   @@index([env])
+}
+
+model RateLimit {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  tokens    Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([expiresAt])
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  queueName   String
+  jobName     String
+  data        Json? // JSON object of job payload
+  status      String    @default("pending") // pending, processing, completed, failed
+  progress    Int       @default(0)
+  result      Json?
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([queueName, status])
+  @@index([createdAt])
 }

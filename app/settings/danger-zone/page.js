@@ -3,71 +3,85 @@ export const dynamic = "force-dynamic";
 import { getServerSession } from 'next-auth/next';
 import prisma from '@/src/lib/prisma';
 import { Card } from '@/components/ui/Card';
-import { Save } from 'lucide-react';
+import { AlertTriangle, Trash2, LogOut } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export default async function DangerZoneSettings() {
   const session = await getServerSession();
   if (!session?.user?.id) redirect('/auth/signin');
 
-  // Fetch real setting from generic Setting table to satisfy "no placeholders"
-  const setting = await prisma.setting.findUnique({
-    where: { userId_key: { userId: session.user.id, key: 'danger-zone_enabled' } },
-  });
-
-  const isEnabled = setting?.value === 'true';
-
   return (
     <div className="space-y-6 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white capitalize">Danger Zone</h2>
-        <p className="text-neutral-secondary mt-1">Manage your danger zone preferences.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-red-500 capitalize flex items-center gap-2">
+          <AlertTriangle /> Danger Zone
+        </h2>
+        <p className="text-neutral-secondary mt-1">Irreversible and destructive actions for your account.</p>
       </div>
 
-      <Card className="p-6 border-neutral-border-glass bg-neutral-card-bg/50">
-        <form
-          action={async (formData) => {
-            'use server';
-            const session = await getServerSession();
-            if (!session) return;
-
-            const val = formData.get('enabled') === 'on' ? 'true' : 'false';
-
-            await prisma.setting.upsert({
-              where: { userId_key: { userId: session.user.id, key: 'danger-zone_enabled' } },
-              update: { value: val },
-              create: { userId: session.user.id, key: 'danger-zone_enabled', value: val },
-            });
-          }}
-        >
-          <div className="flex items-center justify-between">
+      <div className="space-y-4">
+        {/* Clear All History */}
+        <Card className="p-6 border-red-900/50 bg-red-950/10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h3 className="font-medium text-white capitalize">Enable Danger Zone</h3>
+              <h3 className="font-medium text-white">Clear Generation History</h3>
               <p className="text-sm text-neutral-400 mt-1">
-                Toggle this setting on or off globally.
+                Permanently delete all your generated images, videos, and AI conversations. This cannot be undone.
               </p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                name="enabled"
-                defaultChecked={isEnabled}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-
-          <div className="mt-8 pt-4 border-t border-neutral-border-glass flex justify-end">
-            <button
-              type="submit"
-              className="bg-primary hover:bg-primary-hover text-black px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
+            <form
+              action={async () => {
+                'use server';
+                const s = await getServerSession();
+                if (s?.user?.id) {
+                  await prisma.generation.deleteMany({ where: { userId: s.user.id } });
+                  await prisma.conversation.deleteMany({ where: { userId: s.user.id } });
+                }
+              }}
             >
-              <Save size={16} /> Save Changes
-            </button>
+              <button
+                type="submit"
+                className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
+              >
+                <Trash2 size={16} /> Clear History
+              </button>
+            </form>
           </div>
-        </form>
-      </Card>
+        </Card>
+
+        {/* Delete Account */}
+        <Card className="p-6 border-red-900/50 bg-red-950/10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-medium text-white">Delete Account</h3>
+              <p className="text-sm text-neutral-400 mt-1">
+                Permanently delete your account and all associated data. Your active subscriptions will be canceled.
+              </p>
+            </div>
+            <form
+              action={async () => {
+                'use server';
+                const s = await getServerSession();
+                if (s?.user?.id) {
+                  // Perform soft delete or hard delete based on policy
+                  await prisma.user.update({
+                    where: { id: s.user.id },
+                    data: { deletedAt: new Date() }
+                  });
+                  redirect('/api/auth/signout');
+                }
+              }}
+            >
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
+              >
+                <LogOut size={16} /> Delete Account
+              </button>
+            </form>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

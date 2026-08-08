@@ -16,14 +16,6 @@ export default async function AdminUsersPage({ searchParams }) {
 
   const { users, total, totalPages } = await AdminService.getUsersList({ page, search });
 
-  // Get ban statuses (simplified using settings table)
-  const userIds = users.map((u) => u.id);
-  const banSettings = await prisma.setting.findMany({
-    where: { userId: { in: userIds }, key: 'account_banned' },
-  });
-
-  const bannedSet = new Set(banSettings.filter((s) => s.value === 'true').map((s) => s.userId));
-
   return (
     <div className="space-y-6 max-w-6xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
@@ -48,7 +40,7 @@ export default async function AdminUsersPage({ searchParams }) {
             </thead>
             <tbody className="divide-y divide-neutral-border-glass">
               {users.map((user) => {
-                const isBanned = bannedSet.has(user.id);
+                const isBanned = user.isBanned;
                 return (
                   <tr key={user.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">

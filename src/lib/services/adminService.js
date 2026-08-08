@@ -134,7 +134,7 @@ export class AdminService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, email: true, role: true, credits: true, createdAt: true },
+        select: { id: true, name: true, email: true, role: true, credits: true, createdAt: true, isBanned: true },
       }),
       prisma.user.count({ where }),
     ]);
@@ -154,16 +154,12 @@ export class AdminService {
   }
 
   /**
-   * Ban/Unban user (soft delete / suspend)
-   * Note: implementing simply by adding a flag to user in a real app,
-   * but since our schema might not have 'isBanned', we'll simulate or use a setting.
-   * We'll use a user setting for 'isBanned' since schema modifications require a migration.
+   * Ban/Unban user
    */
   static async setUserBanStatus(userId, isBanned) {
-    return prisma.setting.upsert({
-      where: { userId_key: { userId, key: 'account_banned' } },
-      update: { value: isBanned ? 'true' : 'false' },
-      create: { userId, key: 'account_banned', value: isBanned ? 'true' : 'false' },
+    return prisma.user.update({
+      where: { id: userId },
+      data: { isBanned },
     });
   }
 
@@ -197,11 +193,11 @@ export class AdminService {
     const ping = Date.now() - start;
 
     const activeApiKeys = await prisma.aPIKey.count({
-      where: { isActive: true },
+      where: { deletedAt: null },
     });
 
     const activeWorkflows = await prisma.workflow.count({
-      where: { status: 'ACTIVE' },
+      where: { deletedAt: null },
     });
 
     return {
@@ -293,6 +289,16 @@ export class AdminService {
   static async getPerformanceMetrics() {
     const os = require('os');
     const mem = process.memoryUsage();
+    
+    const start = performance.now();
+    await prisma.$queryRaw`SELECT 1`;
+    const dbLatency = performance.now() - start;
+
+    const [activeUsers, activeWorkflows] = await Promise.all([
+      prisma.user.count(),
+      prisma.workflow.count()
+    ]);
+
     return {
       system: {
         cpuLoad: [os.loadavg()[0]],
@@ -305,7 +311,13 @@ export class AdminService {
           rss: mem.rss,
         },
       },
-      slowEndpoints: [],
+      db: {
+        latencyMs: dbLatency.toFixed(1)
+      },
+      stats: {
+        activeUsers,
+        activeWorkflows
+      }
     };
   }
 
