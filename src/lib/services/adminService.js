@@ -268,7 +268,7 @@ export class AdminService {
 
   static async getSecurityMetrics() {
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const [auditLogs, failedLogins, activeThreats, apiKeysIssued] = await Promise.all([
+    const [auditLogs, failedLogins, activeThreats, apiKeysIssued, totalUsers, mfaUsers] = await Promise.all([
       prisma.auditLog.findMany({
         take: 50,
         orderBy: { createdAt: 'desc' },
@@ -277,12 +277,15 @@ export class AdminService {
       prisma.auditLog.count({ where: { action: 'LOGIN_FAILED', createdAt: { gte: last24h } } }),
       prisma.auditLog.count({ where: { action: 'SECURITY_THREAT', createdAt: { gte: last24h } } }),
       prisma.aPIKey.count(),
+      prisma.user.count(),
+      prisma.user.count({ where: { twoFactorEnabled: true } }),
     ]);
+    const mfaAdoption = totalUsers > 0 ? Math.round((mfaUsers / totalUsers) * 100) : 0;
     return {
       auditLogs,
       activeThreats,
       failedLogins,
-      mfaAdoption: 64, // Mocked for now since it's not in schema
+      mfaAdoption,
       apiKeysIssued,
     };
   }
@@ -302,25 +305,38 @@ export class AdminService {
           rss: mem.rss,
         },
       },
-      slowEndpoints: [
-        { path: '/api/generate', avgLatency: '2.4s', p95: '4.1s', calls: '14,291', status: 'warning' },
-        { path: '/api/webhooks/stripe', avgLatency: '800ms', p95: '1.2s', calls: '1,204', status: 'good' },
-        { path: '/api/workspaces', avgLatency: '150ms', p95: '300ms', calls: '45,192', status: 'good' },
-        { path: '/api/history', avgLatency: '1.1s', p95: '2.8s', calls: '8,491', status: 'warning' },
-        { path: '/api/analytics', avgLatency: '3.2s', p95: '5.4s', calls: '1,102', status: 'critical' },
-      ],
+      slowEndpoints: [],
     };
   }
 
   static async getOperationsMetrics() {
     const os = require('os');
+    const { generateQueue, webhookQueue } = require('@/src/lib/queue');
     const pendingJobs = await prisma.workflowRun.count({ where: { status: 'PROCESSING' } });
+    
+    let activeWorkers = 0;
+    try {
+      const genWorkers = await generateQueue.getWorkers();
+      const webWorkers = await webhookQueue.getWorkers();
+      activeWorkers = genWorkers.length + webWorkers.length;
+    } catch (e) {
+      // Ignore if redis is unavailable
+    }
+
+    let dbSize = 0;
+    try {
+      const dbSizeResult = await prisma.$queryRaw`SELECT pg_database_size(current_database()) as size`;
+      dbSize = Number(dbSizeResult[0]?.size) || 0;
+    } catch (e) {
+      // Ignore if unsupported db
+    }
+
     return {
       uptime: os.uptime(),
-      activeWorkers: 42,
-      totalWorkers: 50,
+      activeWorkers,
+      totalWorkers: activeWorkers,
       pendingJobs,
-      dbSize: 1024 * 1024 * 420, // 420MB approx
+      dbSize,
     };
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { validateRequest } from '@/app/api/auth-check';
+import { validateRequest } from '@/src/lib/auth-check';
 import { z } from 'zod';
 import { RateLimitService } from '@/src/lib/services/rateLimitService';
 import * as Sentry from '@sentry/nextjs';
