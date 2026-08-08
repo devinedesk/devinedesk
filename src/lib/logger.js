@@ -15,3 +15,11 @@ export const logger = pino({
       }
     : undefined,
 });
+
+export const logInfo = (msg, obj) => {
+  logger.info(obj || {}, msg);
+};
+
+export const logError = (msg, err) => {
+  logger.error(err || {}, msg);
+};

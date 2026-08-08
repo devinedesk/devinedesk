@@ -8,13 +8,17 @@ export const openRouterAdapter = {
     return key;
   },
 
-  generateImage: async function (params) {
+  generateText: async function (params) {
     const key = this.getKey(params);
     const url = 'https://openrouter.ai/api/v1/chat/completions';
 
+    // If messages are passed directly (like in agent chat), use them.
+    // Otherwise, wrap the prompt in a user message.
+    const messages = params.messages || [{ role: 'user', content: params.prompt }];
+
     const payload = {
-      model: params.model,
-      messages: [{ role: 'user', content: params.prompt }],
+      model: params.model || 'meta-llama/llama-3.1-8b-instruct:free',
+      messages,
       temperature: params.temperature || 0.7,
       top_p: params.top_p || 1,
       seed: params.seed,
@@ -44,8 +48,13 @@ export const openRouterAdapter = {
     const content = data.choices?.[0]?.message?.content;
 
     return {
-      url: content,
+      text: content,
+      url: content, // fallback for legacy logic
     };
+  },
+
+  generateImage: async function (params) {
+    throw new Error('Image generation not supported by OpenRouter.');
   },
 
   generateI2I: async function (params) {

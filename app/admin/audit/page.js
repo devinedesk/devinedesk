@@ -22,7 +22,7 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import prisma from '@/src/lib/prisma';
 import { formatDistanceToNow } from 'date-fns';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default async function AuditDashboard() {
   const auditLogs = await prisma.auditLog.findMany({

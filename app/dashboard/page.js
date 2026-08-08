@@ -14,7 +14,7 @@ import {
 import prisma from '@/src/lib/prisma';
 import { getServerSession } from 'next-auth/next';
 import { ActivityChart } from '@/components/dashboard/ActivityChart';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton';
 
 async function DashboardContent() {
@@ -143,8 +143,8 @@ async function DashboardContent() {
             <div className="pt-8">
               <EmptyState
                 icon={ActivityIcon}
-                title="No Recent Activity"
-                description="You haven't generated any assets yet. Create an image or video to see your activity graph."
+                title="Welcome to Devinedesk"
+                description="You haven't generated any assets yet. Use the Quick Actions panel to get started."
               />
             </div>
           ) : (
@@ -152,7 +152,7 @@ async function DashboardContent() {
           )}
         </Card>
 
-        <Card className="col-span-1 p-6 border-neutral-border-glass bg-neutral-card-bg/50 backdrop-blur-md tour-step-actions">
+        <Card className={`col-span-1 p-6 border-neutral-border-glass bg-neutral-card-bg/50 backdrop-blur-md tour-step-actions ${generationsCount === 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-neutral-900 animate-pulse' : ''}`}>
           <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <Link

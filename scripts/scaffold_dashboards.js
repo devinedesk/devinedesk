@@ -46,7 +46,7 @@ DASHBOARD_PAGES.forEach((page) => {
 
   const content = `import { Card } from "@/components/ui/Card";
 import { getServerSession } from "next-auth/next";
-import { EmptyState } from "@/components/states/EmptyState";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Activity } from "lucide-react";
 
 export default async function ${componentName}() {

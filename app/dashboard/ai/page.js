@@ -22,7 +22,7 @@ import {
   CheckCircle,
   Database,
 } from 'lucide-react';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default async function AIDashboard() {
   const session = await getServerSession(authOptions);

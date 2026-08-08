@@ -57,6 +57,7 @@ export async function executeWithFallback(modelInfo, prompt, options = {}, maxRe
         let methodName = 'generateImage';
         if (['video', 'i2v', 'v2v'].includes(options.type)) methodName = 'generateVideo';
         else if (options.type === 'lipsync') methodName = 'generateVideo'; // Fallback for lipsync
+        else if (['text', 'chat'].includes(options.type)) methodName = 'generateText';
 
         if (typeof adapter[methodName] !== 'function') {
           throw new Error(`Method ${methodName} not supported by this provider.`);

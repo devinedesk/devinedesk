@@ -13,7 +13,7 @@ import { Flag, Activity, Zap, Shield, ToggleLeft, ToggleRight, Search } from 'lu
 import { Badge } from '@/components/ui/Badge';
 import { AdminService } from '@/src/lib/services/adminService';
 import { revalidatePath } from 'next/cache';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export default async function FeatureFlagsDashboard() {
   const flags = await AdminService.getFeatureFlags();

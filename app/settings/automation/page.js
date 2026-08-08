@@ -1,73 +1,50 @@
 export const dynamic = "force-dynamic";
 
 import { getServerSession } from 'next-auth/next';
-import prisma from '@/src/lib/prisma';
-import { Card } from '@/components/ui/Card';
-import { Save } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { SettingsService } from '@/src/lib/services/settingsService';
+import { DynamicSettingsForm } from '@/components/settings/DynamicSettingsForm';
 
 export default async function AutomationSettings() {
   const session = await getServerSession();
   if (!session?.user?.id) redirect('/auth/signin');
 
-  // Fetch real setting from generic Setting table to satisfy "no placeholders"
-  const setting = await prisma.setting.findUnique({
-    where: { userId_key: { userId: session.user.id, key: 'automation_enabled' } },
-  });
+  const settingsMap = await SettingsService.getSettings(session.user.id);
 
-  const isEnabled = setting?.value === 'true';
+  const schema = [
+    {
+      key: 'automation_auto_retry',
+      label: 'Auto-Retry Failed Jobs',
+      description: 'Automatically retry failed generation tasks up to 3 times.',
+      type: 'toggle',
+    },
+    {
+      key: 'automation_webhook_alerts',
+      label: 'Webhook Alerting',
+      description: 'Fire configured webhooks on automation errors.',
+      type: 'toggle',
+    },
+    {
+      key: 'automation_schedule_timezone',
+      label: 'Schedule Timezone',
+      description: 'Default timezone for scheduled automation runs.',
+      type: 'select',
+      defaultValue: 'UTC',
+      options: [
+        { label: 'UTC', value: 'UTC' },
+        { label: 'America/New_York (EST)', value: 'America/New_York' },
+        { label: 'America/Los_Angeles (PST)', value: 'America/Los_Angeles' },
+        { label: 'Europe/London (GMT)', value: 'Europe/London' },
+      ],
+    }
+  ];
 
   return (
-    <div className="space-y-6 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white capitalize">Automation</h2>
-        <p className="text-neutral-secondary mt-1">Manage your automation preferences.</p>
-      </div>
-
-      <Card className="p-6 border-neutral-border-glass bg-neutral-card-bg/50">
-        <form
-          action={async (formData) => {
-            'use server';
-            const session = await getServerSession();
-            if (!session) return;
-
-            const val = formData.get('enabled') === 'on' ? 'true' : 'false';
-
-            await prisma.setting.upsert({
-              where: { userId_key: { userId: session.user.id, key: 'automation_enabled' } },
-              update: { value: val },
-              create: { userId: session.user.id, key: 'automation_enabled', value: val },
-            });
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium text-white capitalize">Enable Automation</h3>
-              <p className="text-sm text-neutral-400 mt-1">
-                Toggle this setting on or off globally.
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                name="enabled"
-                defaultChecked={isEnabled}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
-
-          <div className="mt-8 pt-4 border-t border-neutral-border-glass flex justify-end">
-            <button
-              type="submit"
-              className="bg-primary hover:bg-primary-hover text-black px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
-            >
-              <Save size={16} /> Save Changes
-            </button>
-          </div>
-        </form>
-      </Card>
-    </div>
+    <DynamicSettingsForm 
+      title="Automation"
+      description="Configure global settings for automated workflows and scheduled tasks."
+      schema={schema}
+      initialData={settingsMap}
+    />
   );
 }

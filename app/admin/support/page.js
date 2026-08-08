@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { AdminService } from '@/src/lib/services/adminService';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 const getStatusColor = (status) => {
   switch (status) {

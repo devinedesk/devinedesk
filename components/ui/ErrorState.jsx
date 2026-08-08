@@ -5,10 +5,15 @@ import Link from 'next/link';
 export function ErrorState({
   code = '500',
   title = 'Something went wrong',
-  message = 'An unexpected error occurred. Please try again later.',
+  message,
+  error,
   showHome = true,
   onRetry = null,
+  reset = null,
 }) {
+  const displayMessage = error?.message || message || 'An unexpected error occurred. Please try again later.';
+  const retryFn = reset || onRetry;
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center animate-in fade-in zoom-in-95 duration-500">
       <div className="relative">
@@ -23,12 +28,12 @@ export function ErrorState({
       </div>
 
       <h2 className="text-2xl font-bold text-white mt-4">{title}</h2>
-      <p className="text-neutral-secondary max-w-md mt-2 mb-8">{message}</p>
+      <p className="text-neutral-secondary max-w-md mt-2 mb-8">{displayMessage}</p>
 
       <div className="flex gap-4">
-        {onRetry && (
+        {retryFn && (
           <button
-            onClick={onRetry}
+            onClick={retryFn}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-medium transition-colors border border-neutral-700"
           >
             <RefreshCw size={18} /> Try Again

@@ -4,10 +4,8 @@ import { QueueService } from '@/src/lib/queue';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { withApiAuth } from '@/src/lib/apiHandler';
+import { executeWorkflowSchema } from '@/src/lib/openapi-registry';
 
-const executeWorkflowSchema = z.object({
-  inputs: z.record(z.any()).optional().default({}),
-});
 
 export const POST = withApiAuth({
   schema: executeWorkflowSchema,

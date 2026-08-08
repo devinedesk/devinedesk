@@ -2,10 +2,12 @@
 
 import { useEffect } from 'react';
 import { ErrorState } from '@/components/ui/ErrorState';
+import * as Sentry from '@sentry/nextjs';
 
 export default function GlobalError({ error, reset }) {
   useEffect(() => {
     console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (

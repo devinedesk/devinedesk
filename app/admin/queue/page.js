@@ -12,7 +12,7 @@ import {
 import { Activity, Clock, Server, Play, Pause, RefreshCw, AlertCircle, Layers } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { AdminService } from '@/src/lib/services/adminService';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ListFilter } from 'lucide-react';
 
 const getStatusColor = (status) => {

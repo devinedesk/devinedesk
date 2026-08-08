@@ -4,13 +4,8 @@ import { QueueService } from '@/src/lib/queue';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { withApiAuth } from '@/src/lib/apiHandler';
+import { generateSchema } from '@/src/lib/openapi-registry';
 
-const generateSchema = z.object({
-  prompt: z.string().min(1, 'Missing required parameter: prompt'),
-  model: z.string().optional(),
-  parameters: z.record(z.any()).optional().default({}),
-  type: z.string().optional().default('t2i'),
-});
 
 export const POST = withApiAuth({
   schema: generateSchema,

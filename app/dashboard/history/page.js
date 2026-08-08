@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 import { Card } from '@/components/ui/Card';
 import prisma from '@/src/lib/prisma';
 import { getServerSession } from 'next-auth/next';
-import { EmptyState } from '@/components/states/EmptyState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
   History,
   Image as ImageIcon,

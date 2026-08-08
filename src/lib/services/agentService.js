@@ -129,26 +129,26 @@ export class AgentService {
 
     if (apiKey) {
       try {
-        const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: model || 'meta-llama/llama-3.1-8b-instruct:free',
+        const { executeWithFallback } = await import('../providerRouter.js');
+        const result = await executeWithFallback(
+          { provider: 'openrouter', id: model || 'meta-llama/llama-3.1-8b-instruct:free' },
+          null,
+          {
+            type: 'chat',
             messages: messagesForLLM,
-          }),
-        });
-        const data = await resp.json();
-        if (data.choices && data.choices[0]) {
-          aiContent = data.choices[0].message.content;
+            _apiKey: apiKey,
+          }
+        );
+
+        if (result && result.text) {
+          aiContent = result.text;
         } else {
-          console.error('OpenRouter error:', data);
+          console.error('AI execution returned unexpected format:', result);
+          aiContent = 'Error: Received unexpected format from AI provider.';
         }
       } catch (e) {
-        console.error('Fetch error:', e);
-        aiContent = 'Error reaching AI provider.';
+        console.error('AI Execution error:', e);
+        aiContent = `Error reaching AI provider: ${e.message}`;
       }
     }
 

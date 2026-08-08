@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { validateRequest } from '@/app/api/auth-check';
 import { z } from 'zod';
 import { RateLimitService } from '@/src/lib/services/rateLimitService';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * A wrapper for API routes to standardize authentication, validation, and error handling.
@@ -9,9 +10,12 @@ import { RateLimitService } from '@/src/lib/services/rateLimitService';
  * @param {Object} options
  * @param {z.ZodSchema} [options.schema] - Optional Zod schema to validate request body
  * @param {Function} options.handler - The main route handler: (req, { auth, body, params }) => Promise<NextResponse>
+ * @param {boolean} [options.requireAuth=true]
+ * @param {boolean} [options.requireAdmin=false]
+ * @param {number} [options.rateLimitOverride=null]
  * @returns {Function} Next.js route handler
  */
-export function withApiAuth({ schema, handler, requireAuth = true, requireAdmin = false }) {
+export function withApiAuth({ schema, handler, requireAuth = true, requireAdmin = false, rateLimitOverride = null }) {
   return async (request, context) => {
     try {
       // 1. Check Authentication
@@ -35,9 +39,20 @@ export function withApiAuth({ schema, handler, requireAuth = true, requireAdmin 
         );
       }
 
-      // Rate Limiting (60 requests per minute)
+      // 1.5 Rate Limiting
+      let limit = 60; // default for authenticated users
+      if (rateLimitOverride !== null) {
+        limit = rateLimitOverride;
+      } else if (!auth.user) {
+        limit = 20; // stricter limit for anonymous
+      } else if (auth.user.role === 'SUPER_ADMIN') {
+        limit = 1000;
+      } else if (auth.user.role === 'ADMIN') {
+        limit = 300;
+      }
+
       const identifier = auth.user?.id || request.headers.get('x-forwarded-for') || 'anonymous';
-      const isLimited = await RateLimitService.isRateLimited(identifier, 60, 60);
+      const isLimited = await RateLimitService.isRateLimited(identifier, limit, 60);
       if (isLimited) {
         return NextResponse.json(
           { error: 'Too Many Requests', code: 'RATE_LIMIT_EXCEEDED' },
@@ -104,6 +119,7 @@ export function withApiAuth({ schema, handler, requireAuth = true, requireAdmin 
       return await handler(request, { auth, body, ...context });
     } catch (error) {
       console.error('[API Error]:', error);
+      Sentry.captureException(error);
       return NextResponse.json(
         { error: error.message || 'Internal Server Error', code: 'INTERNAL_SERVER_ERROR' },
         { status: 500 }

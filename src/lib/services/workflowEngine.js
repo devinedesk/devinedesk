@@ -122,32 +122,20 @@ export async function executeDAG(runId, workflow, userInputs, userId) {
 // NODE EXECUTION LOGIC
 // ----------------------------------------------------------------------------
 
-/**
- * Wraps an async function with exponential backoff retries.
- * Ideal for resilient API calls to LLM/AI providers.
- */
-async function withRetry(operation, maxRetries = 3, baseDelayMs = 1000) {
+// We rely on the global `executeWithFallback` for retries, but retain a minimal retry 
+// for internal systems (like billing or non-AI APIs).
+async function internalRetry(operation, maxRetries = 2, baseDelayMs = 1000) {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error;
-      // Don't retry on clear user/billing errors (400, 401, 402, 403)
-      const status = error?.status || error?.response?.status;
-      if (status && status >= 400 && status < 500 && status !== 429) {
-        throw error;
-      }
-
       const delay = baseDelayMs * Math.pow(2, i);
-      console.warn(
-        `[Retry ${i + 1}/${maxRetries}] AI operation failed, retrying in ${delay}ms...`,
-        error.message
-      );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
-  throw new Error(`Operation failed after ${maxRetries} retries. Last error: ${lastError.message}`);
+  throw new Error(`Internal Operation failed after ${maxRetries} retries. Last error: ${lastError.message}`);
 }
 export async function executeNode(node, incomingData, userInputs, userId, nodeOutputsContext) {
   const formValues = node.data?.formValues || {};
@@ -256,15 +244,13 @@ export async function executeNode(node, incomingData, userInputs, userId, nodeOu
     const modelUsed = formValues.model || 'meta-llama/llama-3.1-8b-instruct:free';
 
     try {
-      const adapter = getAdapterForModel({ id: modelUsed, provider: 'openrouter' }, 't2i');
-      const result = await withRetry(() =>
-        adapter.generateImage({
-          prompt: prompt,
-          model: modelUsed,
-          _apiKey: apiKey,
-        })
+      const { executeWithFallback } = await import('../providerRouter.js');
+      const result = await executeWithFallback(
+        { id: modelUsed, provider: 'openrouter' },
+        prompt,
+        { type: 'text', _apiKey: apiKey }
       );
-      const resultText = result.url || 'No output from LLM';
+      const resultText = result.text || result.url || 'No output from LLM';
 
       await recordBillingAndHistory('workflow_text', prompt, modelUsed, formValues, resultText);
       return { type: 'text', value: resultText };
@@ -284,13 +270,11 @@ export async function executeNode(node, incomingData, userInputs, userId, nodeOu
     const modelUsed = formValues.model || 'stabilityai/stable-diffusion-xl-base-1.0';
 
     try {
-      const adapter = getAdapterForModel({ id: modelUsed, provider: 'aimlapi' }, 't2i');
-      const result = await withRetry(() =>
-        adapter.generateImage({
-          prompt: prompt,
-          model: modelUsed,
-          _apiKey: apiKey,
-        })
+      const { executeWithFallback } = await import('../providerRouter.js');
+      const result = await executeWithFallback(
+        { id: modelUsed, provider: 'aimlapi' },
+        prompt,
+        { type: 't2i', _apiKey: apiKey }
       );
       const resultUrl = result.url || '';
 
@@ -312,14 +296,11 @@ export async function executeNode(node, incomingData, userInputs, userId, nodeOu
     const modelUsed = formValues.model || 'minimax/video-01';
 
     try {
-      const adapter = getAdapterForModel({ id: modelUsed, provider: 'aimlapi' }, 'video');
-      const result = await withRetry(() =>
-        adapter.generateVideo({
-          prompt: prompt,
-          image_url: image || undefined,
-          model: modelUsed,
-          _apiKey: apiKey,
-        })
+      const { executeWithFallback } = await import('../providerRouter.js');
+      const result = await executeWithFallback(
+        { id: modelUsed, provider: 'aimlapi' },
+        prompt,
+        { type: 'video', image_url: image || undefined, _apiKey: apiKey }
       );
       const resultUrl = result.url || '';
 
@@ -340,14 +321,11 @@ export async function executeNode(node, incomingData, userInputs, userId, nodeOu
     const modelUsed = formValues.model || 'suno/suno-v3.5';
 
     try {
-      const adapter = getAdapterForModel({ id: modelUsed, provider: 'aimlapi' }, 'audio');
-      const result = await withRetry(() =>
-        adapter.generateAudio({
-          prompt: prompt,
-          model: modelUsed,
-          make_instrumental: false,
-          _apiKey: apiKey,
-        })
+      const { executeWithFallback } = await import('../providerRouter.js');
+      const result = await executeWithFallback(
+        { id: modelUsed, provider: 'aimlapi' },
+        prompt,
+        { type: 'audio', make_instrumental: false, _apiKey: apiKey }
       );
       const clipUrl = result.url || '';
 
@@ -437,14 +415,11 @@ export async function executeNode(node, incomingData, userInputs, userId, nodeOu
     const modelUsed = formValues.model || 'fal-ai/sync-lips';
 
     try {
-      const adapter = getAdapterForModel({ id: modelUsed, provider: 'falai' }, 'lipsync');
-      const result = await withRetry(() =>
-        adapter.processLipSync({
-          audio_url: audioUrl,
-          image_url: imageUrl,
-          model: modelUsed,
-          _apiKey: apiKey,
-        })
+      const { executeWithFallback } = await import('../providerRouter.js');
+      const result = await executeWithFallback(
+        { id: modelUsed, provider: 'falai' },
+        '',
+        { type: 'lipsync', audio_url: audioUrl, image_url: imageUrl, _apiKey: apiKey }
       );
       const resultUrl = result.url || '';
 
@@ -472,14 +447,11 @@ export async function executeNode(node, incomingData, userInputs, userId, nodeOu
     const modelUsed = formValues.model || 'stabilityai/stable-fast-3d';
 
     try {
-      const adapter = getAdapterForModel({ id: modelUsed, provider: 'huggingface' }, '3d');
-      const result = await withRetry(() =>
-        adapter.generate3D({
-          prompt: prompt,
-          image_url: imageUrl || undefined,
-          model: modelUsed,
-          _apiKey: apiKey,
-        })
+      const { executeWithFallback } = await import('../providerRouter.js');
+      const result = await executeWithFallback(
+        { id: modelUsed, provider: 'huggingface' },
+        prompt,
+        { type: '3d', image_url: imageUrl || undefined, _apiKey: apiKey }
       );
       const resultUrl = result.url || '';
 
