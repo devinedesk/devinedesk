@@ -1,21 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Handle, Position, useReactFlow, useStore, useUpdateNodeInternals } from "reactflow";
-import { getRunId, getWorkflowId } from "./WorkflowStore";
-import { toast } from "react-hot-toast";
-import { IoClose } from "react-icons/io5";
-import { concatModels } from "./utility";
-import { TbArrowMerge } from "react-icons/tb";
-import NodeOptionsMenu from "./NodeOptionsMenu";
+import React, { useEffect, useRef, useState } from 'react';
+import { Handle, Position, useReactFlow, useStore, useUpdateNodeInternals } from 'reactflow';
+import { getRunId, getWorkflowId } from './WorkflowStore';
+import { toast } from 'react-hot-toast';
+import { IoClose } from 'react-icons/io5';
+import { concatModels } from './utility';
+import { TbArrowMerge } from 'react-icons/tb';
+import NodeOptionsMenu from './NodeOptionsMenu';
 
-const inputHandles = [
-  "concatInput",
-];
+const inputHandles = ['concatInput'];
 
-const outputHandles = [
-  "concatOutput",
-];
+const outputHandles = ['concatOutput'];
 
-const PromptConcate = ({ id, data, selected }) => {  
+const PromptConcate = ({ id, data, selected }) => {
   const [selectedModel, setSelectedModel] = useState(concatModels[0]);
   const [connectedInputs, setConnectedInputs] = useState({});
   const [connectedOutputs, setConnectedOutputs] = useState({});
@@ -35,8 +31,8 @@ const PromptConcate = ({ id, data, selected }) => {
     const fieldEntries = Object.entries(schemaProperties || {});
 
     fieldEntries.forEach(([fieldName, fieldSchema]) => {
-      if (fieldSchema.type === "array") {
-        if (fieldSchema.items?.type === "object") {
+      if (fieldSchema.type === 'array') {
+        if (fieldSchema.items?.type === 'object') {
           const examples = fieldSchema.examples;
           if (Array.isArray(examples) && examples.length > 0) {
             initialData[fieldName] = examples.map((ex) => ({ ...ex }));
@@ -46,35 +42,31 @@ const PromptConcate = ({ id, data, selected }) => {
         } else {
           initialData[fieldName] = fieldSchema.examples || [];
         }
-
-      } else if (fieldSchema.type === "object") {
+      } else if (fieldSchema.type === 'object') {
         const nestedProps = fieldSchema.properties || {};
         initialData[fieldName] = initializeFormData(nestedProps);
-
       } else if (fieldSchema.default !== undefined) {
         initialData[fieldName] = fieldSchema.default;
-
       } else if (fieldSchema.examples && fieldSchema.examples.length > 0) {
         initialData[fieldName] = fieldSchema.examples[0];
-
       } else {
         switch (fieldSchema.type) {
-          case "boolean":
+          case 'boolean':
             initialData[fieldName] = false;
             break;
-          case "int":
-          case "number":
+          case 'int':
+          case 'number':
             initialData[fieldName] = 0;
             break;
           default:
-            initialData[fieldName] = "";
+            initialData[fieldName] = '';
         }
       }
     });
 
     return initialData;
   };
-  
+
   useEffect(() => {
     const defaults = initializeFormData(properties);
 
@@ -88,7 +80,7 @@ const PromptConcate = ({ id, data, selected }) => {
       (acc, [key, val]) => {
         const meta = properties[key];
         if (meta?.enum && !meta.enum?.includes(val)) {
-          acc[key] = meta.default ?? meta.enum[0] ?? "";
+          acc[key] = meta.default ?? meta.enum[0] ?? '';
         } else {
           acc[key] = val;
         }
@@ -98,7 +90,7 @@ const PromptConcate = ({ id, data, selected }) => {
     );
 
     // Preserve UI-only flags that are not part of the model schema
-    const UI_KEYS = ["make_output", "make_input"];
+    const UI_KEYS = ['make_output', 'make_input'];
     UI_KEYS.forEach((k) => {
       if (data.formValues?.[k] !== undefined) merged[k] = data.formValues[k];
     });
@@ -126,15 +118,15 @@ const PromptConcate = ({ id, data, selected }) => {
 
   useEffect(() => {
     if (!data?.onDataChange) return;
-    
+
     const currentData = {
-      formValues: data.formValues
+      formValues: data.formValues,
     };
-    
+
     const newData = {
-      formValues
+      formValues,
     };
-    
+
     if (JSON.stringify(currentData) !== JSON.stringify(newData)) {
       data.onDataChange(id, newData);
     }
@@ -145,16 +137,14 @@ const PromptConcate = ({ id, data, selected }) => {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
       toast.success(`Deleted node ${id}`);
-    };
+    }
   };
 
-  const hasPrompt = properties && "prompt" in properties;
+  const hasPrompt = properties && 'prompt' in properties;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const validHandles = [
-        hasPrompt && "concatInput",
-      ].filter(Boolean);
+      const validHandles = [hasPrompt && 'concatInput'].filter(Boolean);
 
       setEdges((prevEdges) =>
         prevEdges.filter((edge) => {
@@ -169,16 +159,12 @@ const PromptConcate = ({ id, data, selected }) => {
   useEffect(() => {
     const connectedInputs = {};
     inputHandles.forEach((h) => {
-      connectedInputs[h] = edges.some(
-        (e) => e.target === id && e.targetHandle === h
-      );
+      connectedInputs[h] = edges.some((e) => e.target === id && e.targetHandle === h);
     });
 
     const connectedOutputs = {};
     outputHandles.forEach((h) => {
-      connectedOutputs[h] = edges.some(
-        (e) => e.source === id && e.sourceHandle === h
-      );
+      connectedOutputs[h] = edges.some((e) => e.source === id && e.sourceHandle === h);
     });
 
     setConnectedInputs(connectedInputs);
@@ -188,38 +174,40 @@ const PromptConcate = ({ id, data, selected }) => {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "0px";
+      textarea.style.height = '0px';
       const scrollHeight = textarea.scrollHeight;
       textarea.style.height = `${Math.max(scrollHeight, 210)}px`;
     }
   }, [formValues, selectedModel.name]);
 
   return (
-    <div 
-      style={{ minHeight: 280, '--loader-color': '#2563eb' }} 
+    <div
+      style={{ minHeight: 280, '--loader-color': '#2563eb' }}
       className={`
         nowheel group flex flex-col flex-1 w-80 
         rounded-2xl border-2 relative transition-all duration-300 ease-in-out 
-        ${selected 
-          ? "border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20" 
-          : "border-zinc-800 hover:border-zinc-700 shadow-lg"} 
+        ${
+          selected
+            ? 'border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20'
+            : 'border-zinc-800 hover:border-zinc-700 shadow-lg'
+        } 
         bg-[#0c0d0f]/95 backdrop-blur-sm
       `}
     >
       <h3 className="absolute -top-5 left-0 text-zinc-400 text-[10px] font-medium tracking-wider uppercase">
-        Prompt Concatenator {id.replace(/^\D+/g, "")}
+        Prompt Concatenator {id.replace(/^\D+/g, '')}
       </h3>
       <div className="flex flex-col">
         <div className="flex items-center justify-between bg-gradient-to-r from-panel-bg to-card-bg rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
-            <div className={`p-1.5 rounded-lg ${selected ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
+            <div
+              className={`p-1.5 rounded-lg ${selected ? 'bg-cyan-500 text-white' : 'bg-zinc-800 text-zinc-400'} transition-colors`}
+            >
               <TbArrowMerge size={14} className="rotate-90" />
             </div>
-            <h3 className="text-xs font-bold text-zinc-100">
-              {selectedModel.name}
-            </h3>
+            <h3 className="text-xs font-bold text-zinc-100">{selectedModel.name}</h3>
           </div>
-          <NodeOptionsMenu 
+          <NodeOptionsMenu
             nodeId={id}
             onDuplicate={data.duplicateNode}
             onDelete={handleDeleteNode}
@@ -231,69 +219,69 @@ const PromptConcate = ({ id, data, selected }) => {
           type="text"
           ref={textareaRef}
           readOnly
-          value={formValues?.prompt || ""}
+          value={formValues?.prompt || ''}
           className="w-full h-full max-h-96 text-xs leading-relaxed outline-none bg-transparent resize-none text-zinc-100 font-medium placeholder:italic placeholder:opacity-50"
         />
       </div>
       {hasPrompt && (
         <>
-          <Handle  
-            type="target" 
-            position={Position.Left} 
-            id="concatInput" 
-            style={{ 
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="concatInput"
+            style={{
               top: 100,
               width: 12,
               height: 12,
               transition: 'all 0.2s ease-in-out',
-            }} 
+            }}
             className={`!rounded-full !border-2 transition-all duration-200 !left-[-7px]
-              ${connectedInputs.concatInput 
-                ? '!bg-cyan-400 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]' 
-                : '!bg-black !border-cyan-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+              ${
+                connectedInputs.concatInput
+                  ? '!bg-cyan-400 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]'
+                  : '!bg-black !border-cyan-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
               }
               hover:!scale-125 hover:shadow-[0_0_20px_rgba(59,130,246,1)]
             `}
             data-type="blue"
           />
-          <p 
+          <p
             className={`absolute -left-7 top-[100px] text-xs text-cyan-400 transition-opacity duration-200 ${
-              data.activeHandleColor === "blue" 
-                ? "opacity-100" 
-                : "opacity-0 group-hover:opacity-100"
+              data.activeHandleColor === 'blue'
+                ? 'opacity-100'
+                : 'opacity-0 group-hover:opacity-100'
             }`}
-          > 
-            Text 
+          >
+            Text
           </p>
         </>
       )}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
-        id="concatOutput" 
-        style={{ 
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="concatOutput"
+        style={{
           top: 100,
           width: 12,
           height: 12,
           transition: 'all 0.2s ease-in-out',
-        }} 
+        }}
         className={`!rounded-full !border-2 transition-all duration-200 !right-[-7px]
-          ${connectedOutputs.concatOutput 
-            ? '!bg-cyan-400 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]' 
-            : '!bg-black !border-cyan-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+          ${
+            connectedOutputs.concatOutput
+              ? '!bg-cyan-400 !border-white shadow-[0_0_20px_rgba(59,130,246,1)]'
+              : '!bg-black !border-cyan-400 shadow-[0_0_20px_rgba(59,130,246,0.5)]'
           }
           hover:!scale-125 hover:shadow-[0_0_20px_rgba(59,130,246,1)]
         `}
         data-type="blue"
       />
-      <p 
+      <p
         className={`absolute -right-7 top-[100px] text-xs text-cyan-400 transition-opacity duration-200 ${
-          data.activeHandleColor === "blue" 
-            ? "opacity-100" 
-            : "opacity-0 group-hover:opacity-100"
+          data.activeHandleColor === 'blue' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}
-      > 
-        Text 
+      >
+        Text
       </p>
     </div>
   );

@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import React from "react";
-import { ReactFlowProvider } from "reactflow";
-import NodeFlow from "./components/NodeFlow";
+import React from 'react';
+import { ReactFlowProvider } from 'reactflow';
+import NodeFlow from './components/NodeFlow';
 
 export default function Home({
   apiKey,

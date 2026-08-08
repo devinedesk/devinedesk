@@ -3,7 +3,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
-  title: "Agent Chat — devinedesk",
+  title: 'Agent Chat — devinedesk',
 };
 
 export default async function AgentsLayout({ children }) {
@@ -12,9 +12,5 @@ export default async function AgentsLayout({ children }) {
     redirect('/auth/login');
   }
 
-  return (
-    <div className="h-screen w-full overflow-hidden bg-app-bg">
-      {children}
-    </div>
-  );
+  return <div className="h-screen w-full overflow-hidden bg-app-bg">{children}</div>;
 }

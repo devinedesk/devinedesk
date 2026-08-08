@@ -4,7 +4,7 @@ const SettingsContext = createContext();
 
 export function SettingsProvider({ children }) {
   const [keys, setKeys] = useState({
-    platform_api_key: '' // Kept for legacy standalone testing
+    platform_api_key: '', // Kept for legacy standalone testing
   });
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -12,7 +12,7 @@ export function SettingsProvider({ children }) {
   useEffect(() => {
     // 1. Initial load from localStorage (fast sync)
     const localKeys = {
-      platform_api_key: localStorage.getItem('platform_api_key') || ''
+      platform_api_key: localStorage.getItem('platform_api_key') || '',
     };
     setKeys(localKeys);
 
@@ -46,14 +46,14 @@ export function SettingsProvider({ children }) {
     } else {
       localStorage.removeItem(keyName);
     }
-    setKeys(prev => ({ ...prev, [keyName]: trimmed }));
-    
+    setKeys((prev) => ({ ...prev, [keyName]: trimmed }));
+
     // Sync to DB
     fetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [keyName]: trimmed })
-    }).catch(err => console.error('Failed to save setting to DB', err));
+      body: JSON.stringify({ [keyName]: trimmed }),
+    }).catch((err) => console.error('Failed to save setting to DB', err));
   };
 
   const updateMultipleKeys = (newKeys) => {
@@ -75,8 +75,8 @@ export function SettingsProvider({ children }) {
     fetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(err => console.error('Failed to save settings to DB', err));
+      body: JSON.stringify(payload),
+    }).catch((err) => console.error('Failed to save settings to DB', err));
   };
 
   return (

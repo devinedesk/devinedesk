@@ -18,7 +18,7 @@ export function SettingsModal({ onClose }) {
   }, [contextKeys]);
 
   const handleChange = (key) => (e) => {
-    setKeys(prev => ({ ...prev, [key]: e.target.value }));
+    setKeys((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
   const handleSave = () => {
@@ -31,12 +31,21 @@ export function SettingsModal({ onClose }) {
       <div className="bg-panel-bg border border-muted rounded-2xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden shadow-3xl animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-muted bg-card-bg shrink-0">
-          <h2 className="text-xl font-bold text-white m-0 tracking-tight">{t('settings.title') || 'Settings'}</h2>
+          <h2 className="text-xl font-bold text-white m-0 tracking-tight">
+            {t('settings.title') || 'Settings'}
+          </h2>
           <button
             onClick={onClose}
             className="text-secondary hover:text-white rounded-full p-2 transition-colors hover:bg-muted/30"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -47,7 +56,9 @@ export function SettingsModal({ onClose }) {
           <button
             onClick={() => setActiveTab('api')}
             className={`px-4 py-2.5 text-sm font-semibold rounded-t-lg transition-all ${
-              activeTab === 'api' ? 'bg-panel-bg border-t border-x border-muted text-white' : 'text-secondary hover:text-white hover:bg-muted/10'
+              activeTab === 'api'
+                ? 'bg-panel-bg border-t border-x border-muted text-white'
+                : 'text-secondary hover:text-white hover:bg-muted/10'
             }`}
           >
             {t('settings.apiKey') || 'API Keys'}
@@ -56,7 +67,9 @@ export function SettingsModal({ onClose }) {
             <button
               onClick={() => setActiveTab('local')}
               className={`px-4 py-2.5 text-sm font-semibold rounded-t-lg transition-all ${
-                activeTab === 'local' ? 'bg-panel-bg border-t border-x border-muted text-white' : 'text-secondary hover:text-white hover:bg-muted/10'
+                activeTab === 'local'
+                  ? 'bg-panel-bg border-t border-x border-muted text-white'
+                  : 'text-secondary hover:text-white hover:bg-muted/10'
               }`}
             >
               {t('settings.localModels') || 'Local Models'}
@@ -83,16 +96,10 @@ export function SettingsModal({ onClose }) {
         {activeTab === 'api' && (
           <div className="p-5 border-t border-muted bg-card-bg shrink-0">
             <div className="flex justify-end gap-3">
-              <Button
-                onClick={onClose}
-                variant="secondary"
-              >
+              <Button onClick={onClose} variant="secondary">
                 {t('common.cancel') || 'Cancel'}
               </Button>
-              <Button
-                onClick={handleSave}
-                variant="primary"
-              >
+              <Button onClick={handleSave} variant="primary">
                 {t('common.save') || 'Save'}
               </Button>
             </div>

@@ -22,9 +22,9 @@ Here are some guidelines to help you get started:
 
 ## Development Workflow
 
--   **Frontend**: Run `npm run dev:app` to start the Next.js app.
--   **Library**: Run `npm run build:lib` to rebuild the `workflow-builder` package.
--   **Backend**: Navigate to `server/` and run the FastAPI server.
+- **Frontend**: Run `npm run dev:app` to start the Next.js app.
+- **Library**: Run `npm run build:lib` to rebuild the `workflow-builder` package.
+- **Backend**: Navigate to `server/` and run the FastAPI server.
 
 ## Submission Guidelines
 

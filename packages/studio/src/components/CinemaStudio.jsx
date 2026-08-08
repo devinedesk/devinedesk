@@ -1,12 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { generateImage, uploadFile } from "../apiClient.js";
-import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
-import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
-import MobileGenerationActions, {
-  CopyContentIcon,
-} from "./MobileGenerationActions.jsx";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { generateImage, uploadFile } from '../apiClient.js';
+import { scopedPersistKey, migrateLegacyPersistKey } from '../persistKey.js';
+import { useStudioPersistedState } from '../hooks/useStudioPersistedState.js';
+import MobileGenerationActions, { CopyContentIcon } from './MobileGenerationActions.jsx';
 import {
   PromptAspectRatioIcon,
   PromptAction,
@@ -21,34 +19,34 @@ import {
   PromptTextarea,
   promptControlClassName,
   promptMediaButtonClassName,
-} from "./prompt/PromptComposer.jsx";
-import DrawModal from "./DrawModal.jsx";
-import { StudioGallery } from "./shared/StudioGallery.jsx";
-import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
+} from './prompt/PromptComposer.jsx';
+import DrawModal from './DrawModal.jsx';
+import { StudioGallery } from './shared/StudioGallery.jsx';
+import { EmptyStateHero } from './shared/EmptyStateHero.jsx';
 
 // ─── Constants (inlined from promptUtils) ───────────────────────────────────
 
 const CAMERA_MAP = {
-  "Modular 8K Digital": "modular 8K digital cinema camera",
-  "Full-Frame Cine Digital": "full-frame digital cinema camera",
-  "Grand Format 70mm Film": "grand format 70mm film camera",
-  "Studio Digital S35": "Super 35 studio digital camera",
-  "Classic 16mm Film": "classic 16mm film camera",
-  "Premium Large Format Digital": "premium large-format digital cinema camera",
+  'Modular 8K Digital': 'modular 8K digital cinema camera',
+  'Full-Frame Cine Digital': 'full-frame digital cinema camera',
+  'Grand Format 70mm Film': 'grand format 70mm film camera',
+  'Studio Digital S35': 'Super 35 studio digital camera',
+  'Classic 16mm Film': 'classic 16mm film camera',
+  'Premium Large Format Digital': 'premium large-format digital cinema camera',
 };
 
 const LENS_MAP = {
-  "Creative Tilt Lens": "creative tilt lens effect",
-  "Compact Anamorphic": "compact anamorphic lens",
-  "Extreme Macro": "extreme macro lens",
-  "70s Cinema Prime": "1970s cinema prime lens",
-  "Classic Anamorphic": "classic anamorphic lens",
-  "Premium Modern Prime": "premium modern prime lens",
-  "Warm Cinema Prime": "warm-toned cinema prime lens",
-  "Swirl Bokeh Portrait": "swirl bokeh portrait lens",
-  "Vintage Prime": "vintage prime lens",
-  "Halation Diffusion": "halation diffusion filter",
-  "Clinical Sharp Prime": "ultra-sharp clinical prime lens",
+  'Creative Tilt Lens': 'creative tilt lens effect',
+  'Compact Anamorphic': 'compact anamorphic lens',
+  'Extreme Macro': 'extreme macro lens',
+  '70s Cinema Prime': '1970s cinema prime lens',
+  'Classic Anamorphic': 'classic anamorphic lens',
+  'Premium Modern Prime': 'premium modern prime lens',
+  'Warm Cinema Prime': 'warm-toned cinema prime lens',
+  'Swirl Bokeh Portrait': 'swirl bokeh portrait lens',
+  'Vintage Prime': 'vintage prime lens',
+  'Halation Diffusion': 'halation diffusion filter',
+  'Clinical Sharp Prime': 'ultra-sharp clinical prime lens',
 };
 
 async function fetchImageAsPngBlob(url) {
@@ -58,34 +56,31 @@ async function fetchImageAsPngBlob(url) {
   }
 
   const sourceBlob = await response.blob();
-  if (sourceBlob.type === "image/png") return sourceBlob;
+  if (sourceBlob.type === 'image/png') return sourceBlob;
 
   const objectUrl = URL.createObjectURL(sourceBlob);
   try {
     const image = await new Promise((resolve, reject) => {
       const element = new Image();
       element.onload = () => resolve(element);
-      element.onerror = () => reject(new Error("Could not decode the image."));
+      element.onerror = () => reject(new Error('Could not decode the image.'));
       element.src = objectUrl;
     });
 
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
 
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext('2d');
     if (!context) {
-      throw new Error("Could not create an image clipboard canvas.");
+      throw new Error('Could not create an image clipboard canvas.');
     }
 
     context.drawImage(image, 0, 0);
     return await new Promise((resolve, reject) => {
       canvas.toBlob(
-        (blob) =>
-          blob
-            ? resolve(blob)
-            : reject(new Error("Could not convert the image to PNG.")),
-        "image/png",
+        (blob) => (blob ? resolve(blob) : reject(new Error('Could not convert the image to PNG.'))),
+        'image/png'
       );
     });
   } finally {
@@ -94,79 +89,68 @@ async function fetchImageAsPngBlob(url) {
 }
 
 const FOCAL_PERSPECTIVE = {
-  8: "ultra-wide perspective",
-  14: "wide-angle perspective",
-  24: "wide-angle dynamic perspective",
-  35: "natural cinematic perspective",
-  50: "standard portrait perspective",
-  85: "classic portrait perspective",
+  8: 'ultra-wide perspective',
+  14: 'wide-angle perspective',
+  24: 'wide-angle dynamic perspective',
+  35: 'natural cinematic perspective',
+  50: 'standard portrait perspective',
+  85: 'classic portrait perspective',
 };
 
 const APERTURE_EFFECT = {
-  "f/1.4": "shallow depth of field, creamy bokeh",
-  "f/4": "balanced depth of field",
-  "f/11": "deep focus clarity, sharp foreground to background",
+  'f/1.4': 'shallow depth of field, creamy bokeh',
+  'f/4': 'balanced depth of field',
+  'f/11': 'deep focus clarity, sharp foreground to background',
 };
 
 const ASSET_URLS = {
-  "Modular 8K Digital": "/assets/cinema/modular_8k_digital.webp",
-  "Full-Frame Cine Digital": "/assets/cinema/full_frame_cine_digital.webp",
-  "Grand Format 70mm Film": "/assets/cinema/grand_format_70mm_film.webp",
-  "Studio Digital S35": "/assets/cinema/studio_digital_s35.webp",
-  "Classic 16mm Film": "/assets/cinema/classic_16mm_film.webp",
-  "Premium Large Format Digital":
-    "/assets/cinema/premium_large_format_digital.webp",
-  "Creative Tilt Lens": "/assets/cinema/creative_tilt_lens.webp",
-  "Compact Anamorphic": "/assets/cinema/compact_anamorphic.webp",
-  "Extreme Macro": "/assets/cinema/extreme_macro.webp",
-  "70s Cinema Prime": "/assets/cinema/70s_cinema_prime.webp",
-  "Classic Anamorphic": "/assets/cinema/classic_anamorphic.webp",
-  "Premium Modern Prime": "/assets/cinema/premium_modern_prime.webp",
-  "Warm Cinema Prime": "/assets/cinema/warm_cinema_prime.webp",
-  "Swirl Bokeh Portrait": "/assets/cinema/swirl_bokeh_portrait.webp",
-  "Vintage Prime": "/assets/cinema/vintage_prime.webp",
-  "Halation Diffusion": "/assets/cinema/halation_diffusion.webp",
-  "Clinical Sharp Prime": "/assets/cinema/clinical_sharp_prime.webp",
-  "f/1.4": "/assets/cinema/f_1_4.webp",
-  "f/4": "/assets/cinema/f_4.webp",
-  "f/11": "/assets/cinema/f_11.webp",
+  'Modular 8K Digital': '/assets/cinema/modular_8k_digital.webp',
+  'Full-Frame Cine Digital': '/assets/cinema/full_frame_cine_digital.webp',
+  'Grand Format 70mm Film': '/assets/cinema/grand_format_70mm_film.webp',
+  'Studio Digital S35': '/assets/cinema/studio_digital_s35.webp',
+  'Classic 16mm Film': '/assets/cinema/classic_16mm_film.webp',
+  'Premium Large Format Digital': '/assets/cinema/premium_large_format_digital.webp',
+  'Creative Tilt Lens': '/assets/cinema/creative_tilt_lens.webp',
+  'Compact Anamorphic': '/assets/cinema/compact_anamorphic.webp',
+  'Extreme Macro': '/assets/cinema/extreme_macro.webp',
+  '70s Cinema Prime': '/assets/cinema/70s_cinema_prime.webp',
+  'Classic Anamorphic': '/assets/cinema/classic_anamorphic.webp',
+  'Premium Modern Prime': '/assets/cinema/premium_modern_prime.webp',
+  'Warm Cinema Prime': '/assets/cinema/warm_cinema_prime.webp',
+  'Swirl Bokeh Portrait': '/assets/cinema/swirl_bokeh_portrait.webp',
+  'Vintage Prime': '/assets/cinema/vintage_prime.webp',
+  'Halation Diffusion': '/assets/cinema/halation_diffusion.webp',
+  'Clinical Sharp Prime': '/assets/cinema/clinical_sharp_prime.webp',
+  'f/1.4': '/assets/cinema/f_1_4.webp',
+  'f/4': '/assets/cinema/f_4.webp',
+  'f/11': '/assets/cinema/f_11.webp',
 };
 
-const ASPECT_RATIOS = ["16:9", "21:9", "9:16", "1:1", "4:5"];
-const RESOLUTIONS = ["1K", "2K", "4K"];
+const ASPECT_RATIOS = ['16:9', '21:9', '9:16', '1:1', '4:5'];
+const RESOLUTIONS = ['1K', '2K', '4K'];
 const CAMERAS = Object.keys(CAMERA_MAP);
 const LENSES = Object.keys(LENS_MAP);
 const FOCAL_LENGTHS = Object.keys(FOCAL_PERSPECTIVE).map((k) => parseInt(k));
 const APERTURES = Object.keys(APERTURE_EFFECT);
 
-function buildNanoBananaPrompt(
-  basePrompt,
-  camera,
-  lens,
-  focalLength,
-  aperture,
-) {
+function buildNanoBananaPrompt(basePrompt, camera, lens, focalLength, aperture) {
   const cameraDesc = CAMERA_MAP[camera] || camera;
   const lensDesc = LENS_MAP[lens] || lens;
-  const perspective = FOCAL_PERSPECTIVE[focalLength] || "";
-  const depthEffect = APERTURE_EFFECT[aperture] || "";
-  const qualityTags = [
-    "professional photography",
-    "ultra-detailed",
-    "8K resolution",
-  ];
+  const perspective = FOCAL_PERSPECTIVE[focalLength] || '';
+  const depthEffect = APERTURE_EFFECT[aperture] || '';
+  const qualityTags = ['professional photography', 'ultra-detailed', '8K resolution'];
   const parts = [
     basePrompt,
     `shot on a ${cameraDesc}`,
-    `using a ${lensDesc} at ${focalLength}mm ${perspective ? `(${perspective})` : ""}`,
+    `using a ${lensDesc} at ${focalLength}mm ${perspective ? `(${perspective})` : ''}`,
     `aperture ${aperture}`,
     depthEffect,
-    "cinematic lighting",
-    "natural color science",
-    "high dynamic range",
-    qualityTags.join(", "),
+    'cinematic lighting',
+    'natural color science',
+    'high dynamic range',
+    qualityTags.join(', '),
   ];
-  return parts.filter((p) => p && p.trim() !== "").join(", ");
+  return parts.filter((p) => p && p.trim() !== '').join(', ');
 }
 
 // ─── Dropdown ────────────────────────────────────────────────────────────────
@@ -185,29 +169,27 @@ function Dropdown({ title, items, selected, onSelect, triggerRef, onClose }) {
         onClose();
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, [onClose, triggerRef]);
 
   return (
-    <PromptPopover
-      ref={menuRef}
-    >
+    <PromptPopover ref={menuRef}>
       <PromptPopoverHeader>{title}</PromptPopoverHeader>
       <PromptMenuList>
-      {items.map((item) => (
-        <PromptMenuItem
-          key={item}
-          selected={item === selected}
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(item);
-            onClose();
-          }}
-        >
-          {item}
-        </PromptMenuItem>
-      ))}
+        {items.map((item) => (
+          <PromptMenuItem
+            key={item}
+            selected={item === selected}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(item);
+              onClose();
+            }}
+          >
+            {item}
+          </PromptMenuItem>
+        ))}
       </PromptMenuList>
     </PromptPopover>
   );
@@ -227,9 +209,9 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
 
     const timer = setTimeout(() => {
       const target = Array.from(list.children).find(
-        (child) => child.dataset.value === String(value),
+        (child) => child.dataset.value === String(value)
       );
-      if (target) target.scrollIntoView({ block: "center" });
+      if (target) target.scrollIntoView({ block: 'center' });
     }, 100);
 
     return () => clearTimeout(timer);
@@ -240,9 +222,7 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
     if (!list) return;
 
     const centerY = list.scrollTop + list.clientHeight / 2;
-    const children = Array.from(list.children).filter(
-      (child) => child.dataset.value,
-    );
+    const children = Array.from(list.children).filter((child) => child.dataset.value);
     let closest = null;
     let minimumDistance = Infinity;
 
@@ -258,14 +238,12 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
     children.forEach((child) => {
       const selected = child === closest;
       child.dataset.selected = String(selected);
-      child.setAttribute("aria-selected", String(selected));
+      child.setAttribute('aria-selected', String(selected));
     });
 
     if (closest) {
       const nextValue =
-        columnKey === "focal"
-          ? parseInt(closest.dataset.value, 10)
-          : closest.dataset.value;
+        columnKey === 'focal' ? parseInt(closest.dataset.value, 10) : closest.dataset.value;
       if (String(nextValue) !== String(value)) onChange(nextValue);
     }
   }, [columnKey, onChange, value]);
@@ -274,11 +252,11 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
     const list = listRef.current;
     if (!list) return undefined;
 
-    list.addEventListener("scroll", handleScroll);
+    list.addEventListener('scroll', handleScroll);
     const timer = setTimeout(handleScroll, 150);
 
     return () => {
-      list.removeEventListener("scroll", handleScroll);
+      list.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
     };
   }, [handleScroll]);
@@ -288,8 +266,8 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
     if (!list) return;
 
     isDragging.current = true;
-    list.classList.add("cursor-grabbing");
-    list.classList.remove("snap-y");
+    list.classList.add('cursor-grabbing');
+    list.classList.remove('snap-y');
     startY.current = event.pageY - list.offsetTop;
     scrollTopStart.current = list.scrollTop;
     event.preventDefault();
@@ -299,8 +277,8 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
     const list = listRef.current;
     isDragging.current = false;
     if (!list) return;
-    list.classList.remove("cursor-grabbing");
-    list.classList.add("snap-y");
+    list.classList.remove('cursor-grabbing');
+    list.classList.add('snap-y');
   };
 
   const handleMouseMove = (event) => {
@@ -316,10 +294,8 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
     const list = listRef.current;
     if (!list) return;
 
-    const target = Array.from(list.children).find(
-      (child) => child.dataset.value === String(item),
-    );
-    if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
+    const target = Array.from(list.children).find((child) => child.dataset.value === String(item));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   return (
@@ -344,7 +320,7 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
           onMouseUp={stopDragging}
           onMouseMove={handleMouseMove}
         >
-          <div aria-hidden="true" style={{ height: "calc(50% - 41px)" }} />
+          <div aria-hidden="true" style={{ height: 'calc(50% - 41px)' }} />
           {items.map((item) => {
             const imageUrl = ASSET_URLS[item];
             const selected = String(item) === String(value);
@@ -363,24 +339,20 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
                 <span
                   className={`flex shrink-0 items-center justify-center font-semibold transition-colors ${
                     imageUrl
-                      ? "h-10 w-10"
-                      : "text-base text-white/55 group-data-[selected=true]:text-primary"
+                      ? 'h-10 w-10'
+                      : 'text-base text-white/55 group-data-[selected=true]:text-primary'
                   }`}
                 >
                   {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt=""
-                      className="h-full w-full object-contain"
-                    />
+                    <img src={imageUrl} alt="" className="h-full w-full object-contain" />
                   ) : (
                     <>
                       {item}
-                      {columnKey === "focal" ? "mm" : ""}
+                      {columnKey === 'focal' ? 'mm' : ''}
                     </>
                   )}
                 </span>
-                {columnKey !== "focal" && (
+                {columnKey !== 'focal' && (
                   <span className="line-clamp-2 min-w-0 text-[10px] font-medium leading-snug text-white/60 transition-colors group-data-[selected=true]:text-white">
                     {item}
                   </span>
@@ -388,20 +360,14 @@ function ScrollColumn({ title, items, columnKey, value, onChange }) {
               </button>
             );
           })}
-          <div aria-hidden="true" style={{ height: "calc(50% - 41px)" }} />
+          <div aria-hidden="true" style={{ height: 'calc(50% - 41px)' }} />
         </div>
       </div>
-
     </section>
   );
 }
 
-function CameraControlsOverlay({
-  isOpen,
-  onClose,
-  settings,
-  onSettingsChange,
-}) {
+function CameraControlsOverlay({ isOpen, onClose, settings, onSettingsChange }) {
   const backdropRef = useRef(null);
 
   const handleBackdropClick = (e) => {
@@ -416,11 +382,11 @@ function CameraControlsOverlay({
     if (!isOpen) return undefined;
 
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === 'Escape') onClose();
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -467,8 +433,8 @@ function CameraControlsOverlay({
               id="camera-config-description"
               className="mt-1.5 max-w-2xl text-xs leading-relaxed text-white/45 md:text-sm"
             >
-              Build a consistent cinematic look by choosing the camera, lens,
-              focal length, and depth of field.
+              Build a consistent cinematic look by choosing the camera, lens, focal length, and
+              depth of field.
             </p>
           </div>
           <button
@@ -498,28 +464,28 @@ function CameraControlsOverlay({
               items={CAMERAS}
               columnKey="camera"
               value={settings.camera}
-              onChange={updateSetting("camera")}
+              onChange={updateSetting('camera')}
             />
             <ScrollColumn
               title="Lens"
               items={LENSES}
               columnKey="lens"
               value={settings.lens}
-              onChange={updateSetting("lens")}
+              onChange={updateSetting('lens')}
             />
             <ScrollColumn
               title="Focal length"
               items={FOCAL_LENGTHS}
               columnKey="focal"
               value={settings.focal}
-              onChange={updateSetting("focal")}
+              onChange={updateSetting('focal')}
             />
             <ScrollColumn
               title="Aperture"
               items={APERTURES}
               columnKey="aperture"
               value={settings.aperture}
-              onChange={updateSetting("aperture")}
+              onChange={updateSetting('aperture')}
             />
           </div>
         </div>
@@ -538,7 +504,7 @@ export default function CinemaStudio({
   onGenerationError,
   historyItems,
 }) {
-  const LEGACY_PERSIST_KEY = "hg_cinema_studio_persistent";
+  const LEGACY_PERSIST_KEY = 'hg_cinema_studio_persistent';
   const PERSIST_KEY = scopedPersistKey(LEGACY_PERSIST_KEY, apiKey);
   useEffect(() => {
     migrateLegacyPersistKey(LEGACY_PERSIST_KEY, PERSIST_KEY);
@@ -546,14 +512,14 @@ export default function CinemaStudio({
 
   // ── Settings state ──
   const [settings, setSettings] = useState({
-    prompt: "",
-    aspect_ratio: "16:9",
+    prompt: '',
+    aspect_ratio: '16:9',
     camera: CAMERAS[0],
     lens: LENSES[0],
     focal: 35,
-    aperture: "f/1.4",
+    aperture: 'f/1.4',
   });
-  const [resolution, setResolution] = useState("2K");
+  const [resolution, setResolution] = useState('2K');
 
   // ── UI state ──
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -592,11 +558,11 @@ export default function CinemaStudio({
       });
       if (url) setUploadedImage(url);
     } catch (err) {
-      console.error("Image upload failed:", err);
+      console.error('Image upload failed:', err);
     } finally {
       setIsUploadingImage(false);
       setImageUploadProgress(0);
-      if (imageInputRef.current) imageInputRef.current.value = "";
+      if (imageInputRef.current) imageInputRef.current.value = '';
     }
   };
 
@@ -624,8 +590,7 @@ export default function CinemaStudio({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyItems]);
 
-  const formatSummaryValue = () =>
-    `${settings.lens}, ${settings.focal}mm, ${settings.aperture}`;
+  const formatSummaryValue = () => `${settings.lens}, ${settings.focal}mm, ${settings.aperture}`;
 
   // ── Textarea auto-height ──
   // ── Generate ──
@@ -641,16 +606,16 @@ export default function CinemaStudio({
       settings.camera,
       settings.lens,
       settings.focal,
-      settings.aperture,
+      settings.aperture
     );
 
     try {
       const res = await generateImage(apiKey, {
-        model: uploadedImage ? "nano-banana-pro-edit" : "nano-banana-pro",
+        model: uploadedImage ? 'nano-banana-pro-edit' : 'nano-banana-pro',
         prompt: finalPrompt,
         aspect_ratio: settings.aspect_ratio,
         resolution: resolution.toLowerCase(),
-        negative_prompt: "blurry, low quality, distortion, bad composition",
+        negative_prompt: 'blurry, low quality, distortion, bad composition',
         images_list: uploadedImage ? [uploadedImage] : [],
       });
 
@@ -679,17 +644,17 @@ export default function CinemaStudio({
         if (onGenerationComplete) {
           onGenerationComplete({
             url: res.url,
-            model: "nano-banana-pro",
+            model: 'nano-banana-pro',
             prompt: basePrompt,
-            type: "cinema",
+            type: 'cinema',
           });
         }
       } else {
-        throw new Error("No data returned");
+        throw new Error('No data returned');
       }
     } catch (e) {
       console.error(e);
-      onGenerationError?.(e.message?.slice(0, 120) || "Cinema generation failed");
+      onGenerationError?.(e.message?.slice(0, 120) || 'Cinema generation failed');
     } finally {
       setIsGenerating(false);
       onGenerationEnd?.();
@@ -720,7 +685,7 @@ export default function CinemaStudio({
       const response = await fetch(canvasUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = blobUrl;
       a.download = `cinema-shot-${Date.now()}.jpg`;
       document.body.appendChild(a);
@@ -728,18 +693,17 @@ export default function CinemaStudio({
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch {
-      window.open(canvasUrl, "_blank");
+      window.open(canvasUrl, '_blank');
     }
   }, [canvasUrl]);
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
-      
       {/* ── CENTRAL GALLERY AREA ── */}
       <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto custom-scrollbar pb-40 lg:pb-32 px-2">
         {history.length > 0 ? (
-          <StudioGallery 
+          <StudioGallery
             history={history}
             onSelectFullscreen={setFullscreenUrl}
             onDownload={async (entry, idx) => {
@@ -747,7 +711,7 @@ export default function CinemaStudio({
                 const response = await fetch(entry.url);
                 const blob = await response.blob();
                 const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement("a");
+                const a = document.createElement('a');
                 a.href = blobUrl;
                 a.download = `cinema-shot-${entry.id || idx}.jpg`;
                 document.body.appendChild(a);
@@ -755,15 +719,17 @@ export default function CinemaStudio({
                 document.body.removeChild(a);
                 URL.revokeObjectURL(blobUrl);
               } catch {
-                window.open(entry.url, "_blank");
+                window.open(entry.url, '_blank');
               }
             }}
-            onDelete={(entry, idx) => setInternalHistory(prev => prev.filter((_, i) => i !== idx))}
+            onDelete={(entry, idx) =>
+              setInternalHistory((prev) => prev.filter((_, i) => i !== idx))
+            }
             onCopyError={onGenerationError}
             studioName="Cinema Studio"
           />
         ) : (
-          <EmptyStateHero 
+          <EmptyStateHero
             selectedModelName="CINEMA STUDIO"
             title="START CREATING WITH"
             subtitle="What would you shoot with infinite budget? Control cameras, lighting, lenses, and prompt high-end cinematic scenes."
@@ -776,183 +742,185 @@ export default function CinemaStudio({
         positionClassName="absolute bottom-4 left-4 right-4 md:left-0 md:right-0 md:mx-auto md:max-w-[95%] lg:max-w-4xl z-30 transition-all duration-700 animate-fade-in-up"
         style={null}
       >
-          {/* Upper Row: Image Upload & Textarea */}
-          <div className="flex items-start gap-4 w-full px-1">
-            {/* Image Upload Button */}
-            <div className="relative pt-0.5">
-              <input
-                type="file"
-                ref={imageInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-              
-              <button
-                onClick={() =>
-                  uploadedImage
-                    ? removeImage()
-                    : imageInputRef.current?.click()
-                }
-                disabled={isUploadingImage}
-                className={promptMediaButtonClassName({
-                  active: Boolean(uploadedImage),
-                })}
-              >
-                {isUploadingImage ? (
-                  <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
-                    <svg className="w-8 h-8 -rotate-90">
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="14"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="transparent"
-                        className="text-white/10"
-                      />
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="14"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="transparent"
-                        strokeDasharray={88}
-                        strokeDashoffset={88 - (88 * imageUploadProgress) / 100}
-                        className="text-primary transition-all duration-300"
-                      />
-                    </svg>
-                    <span className="absolute text-[8px] font-bold text-white">
-                      {imageUploadProgress}%
-                    </span>
-                  </div>
-                ) : uploadedImage ? (
-                  <div className="relative w-full h-full group">
-                    <img
-                      src={uploadedImage}
-                      alt="Reference"
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-white">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </div>
-                  </div>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <polyline points="21 15 16 10 5 21" />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            <PromptTextarea
-              ref={textareaRef}
-              value={settings.prompt}
-              onChange={(e) =>
-                setSettings((prev) => ({ ...prev, prompt: e.target.value }))
-              }
-              placeholder="Describe your cinema scene..."
+        {/* Upper Row: Image Upload & Textarea */}
+        <div className="flex items-start gap-4 w-full px-1">
+          {/* Image Upload Button */}
+          <div className="relative pt-0.5">
+            <input
+              type="file"
+              ref={imageInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleImageUpload}
             />
+
+            <button
+              onClick={() => (uploadedImage ? removeImage() : imageInputRef.current?.click())}
+              disabled={isUploadingImage}
+              className={promptMediaButtonClassName({
+                active: Boolean(uploadedImage),
+              })}
+            >
+              {isUploadingImage ? (
+                <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
+                  <svg className="w-8 h-8 -rotate-90">
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      className="text-white/10"
+                    />
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      strokeDasharray={88}
+                      strokeDashoffset={88 - (88 * imageUploadProgress) / 100}
+                      className="text-primary transition-all duration-300"
+                    />
+                  </svg>
+                  <span className="absolute text-[8px] font-bold text-white">
+                    {imageUploadProgress}%
+                  </span>
+                </div>
+              ) : uploadedImage ? (
+                <div className="relative w-full h-full group">
+                  <img
+                    src={uploadedImage}
+                    alt="Reference"
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className="text-white"
+                    >
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </div>
+                </div>
+              ) : (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="text-white/60 group-hover:text-primary transition-colors"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              )}
+            </button>
           </div>
 
-          {/* Bottom Row: Controls & Generate */}
-          <PromptFooter>
-            <PromptControls>
-              {/* Aspect Ratio Button */}
-              <div className="relative">
-                <button
-                  ref={arBtnRef}
-                  className={promptControlClassName({
-                    active: openDropdown === "ar",
-                    className: "text-xs font-semibold",
-                  })}
-                  onClick={() =>
-                    setOpenDropdown((d) => (d === "ar" ? null : "ar"))
-                  }
-                >
-                  <PromptAspectRatioIcon />
-                  {settings.aspect_ratio}
-                </button>
-                {openDropdown === "ar" && (
-                  <Dropdown
-                    title="Aspect Ratio"
-                    items={ASPECT_RATIOS}
-                    selected={settings.aspect_ratio}
-                    onSelect={(val) =>
-                      setSettings((prev) => ({ ...prev, aspect_ratio: val }))
-                    }
-                    triggerRef={arBtnRef}
-                    onClose={() => setOpenDropdown(null)}
-                  />
-                )}
-              </div>
+          <PromptTextarea
+            ref={textareaRef}
+            value={settings.prompt}
+            onChange={(e) => setSettings((prev) => ({ ...prev, prompt: e.target.value }))}
+            placeholder="Describe your cinema scene..."
+          />
+        </div>
 
-              {/* Resolution Button */}
-              <div className="relative">
-                <button
-                  ref={resBtnRef}
-                  className={promptControlClassName({
-                    active: openDropdown === "res",
-                    className: "text-xs font-semibold",
-                  })}
-                  onClick={() =>
-                    setOpenDropdown((d) => (d === "res" ? null : "res"))
-                  }
-                >
-                  <PromptQualityIcon />
-                  {resolution}
-                </button>
-                {openDropdown === "res" && (
-                  <Dropdown
-                    title="Resolution"
-                    items={RESOLUTIONS}
-                    selected={resolution}
-                    onSelect={setResolution}
-                    triggerRef={resBtnRef}
-                    onClose={() => setOpenDropdown(null)}
-                  />
-                )}
-              </div>
-
-              {/* Summary Card (triggers overlay) */}
+        {/* Bottom Row: Controls & Generate */}
+        <PromptFooter>
+          <PromptControls>
+            {/* Aspect Ratio Button */}
+            <div className="relative">
               <button
+                ref={arBtnRef}
                 className={promptControlClassName({
-                  className: "text-left overflow-hidden text-xs font-semibold text-white/70 hover:text-white",
+                  active: openDropdown === 'ar',
+                  className: 'text-xs font-semibold',
                 })}
-                onClick={() => setIsOverlayOpen(true)}
+                onClick={() => setOpenDropdown((d) => (d === 'ar' ? null : 'ar'))}
               >
-                <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-lg shadow-primary/20 shrink-0" />
-                <span className="max-w-[120px] truncate text-xs font-semibold text-white/70 group-hover:text-primary transition-colors">
-                  {settings.camera} · {formatSummaryValue()}
-                </span>
+                <PromptAspectRatioIcon />
+                {settings.aspect_ratio}
               </button>
-            </PromptControls>
-
-            {/* Generate Button */}
-            <PromptAction
-              disabled={isGenerating || !settings.prompt.trim()}
-              onClick={handleGenerate}
-            >
-              {isGenerating ? (
-                <>
-                  <span className="animate-spin inline-block text-black">◌</span>
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <span>Shoot ✦ 10</span>
-                </>
+              {openDropdown === 'ar' && (
+                <Dropdown
+                  title="Aspect Ratio"
+                  items={ASPECT_RATIOS}
+                  selected={settings.aspect_ratio}
+                  onSelect={(val) => setSettings((prev) => ({ ...prev, aspect_ratio: val }))}
+                  triggerRef={arBtnRef}
+                  onClose={() => setOpenDropdown(null)}
+                />
               )}
-            </PromptAction>
-          </PromptFooter>
+            </div>
+
+            {/* Resolution Button */}
+            <div className="relative">
+              <button
+                ref={resBtnRef}
+                className={promptControlClassName({
+                  active: openDropdown === 'res',
+                  className: 'text-xs font-semibold',
+                })}
+                onClick={() => setOpenDropdown((d) => (d === 'res' ? null : 'res'))}
+              >
+                <PromptQualityIcon />
+                {resolution}
+              </button>
+              {openDropdown === 'res' && (
+                <Dropdown
+                  title="Resolution"
+                  items={RESOLUTIONS}
+                  selected={resolution}
+                  onSelect={setResolution}
+                  triggerRef={resBtnRef}
+                  onClose={() => setOpenDropdown(null)}
+                />
+              )}
+            </div>
+
+            {/* Summary Card (triggers overlay) */}
+            <button
+              className={promptControlClassName({
+                className:
+                  'text-left overflow-hidden text-xs font-semibold text-white/70 hover:text-white',
+              })}
+              onClick={() => setIsOverlayOpen(true)}
+            >
+              <div className="w-1.5 h-1.5 bg-primary rounded-full shadow-lg shadow-primary/20 shrink-0" />
+              <span className="max-w-[120px] truncate text-xs font-semibold text-white/70 group-hover:text-primary transition-colors">
+                {settings.camera} · {formatSummaryValue()}
+              </span>
+            </button>
+          </PromptControls>
+
+          {/* Generate Button */}
+          <PromptAction disabled={isGenerating || !settings.prompt.trim()} onClick={handleGenerate}>
+            {isGenerating ? (
+              <>
+                <span className="animate-spin inline-block text-black">◌</span>
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <span>Shoot ✦ 10</span>
+              </>
+            )}
+          </PromptAction>
+        </PromptFooter>
       </PromptComposer>
       {fullscreenUrl && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-fade-in"
           onClick={() => setFullscreenUrl(null)}
         >
@@ -964,19 +932,28 @@ export default function CinemaStudio({
               setFullscreenUrl(null);
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <img 
-            src={fullscreenUrl} 
-            alt="Fullscreen Preview" 
-            className="max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl object-contain animate-scale-up" 
+          <img
+            src={fullscreenUrl}
+            alt="Fullscreen Preview"
+            className="max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl object-contain animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
-      )}  
+      )}
       {/* ── Camera Controls Overlay ── */}
       <CameraControlsOverlay
         isOpen={isOverlayOpen}

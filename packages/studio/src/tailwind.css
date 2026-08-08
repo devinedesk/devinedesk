@@ -3,7 +3,18 @@
 @tailwind utilities;
 
 @layer base {
-  body, html, input, button, textarea, select {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  body,
+  html,
+  input,
+  button,
+  textarea,
+  select {
+    font-family:
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
   }
 }

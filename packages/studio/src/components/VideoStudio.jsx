@@ -1,17 +1,15 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { generateVideo, generateI2V, processV2V, uploadFile } from "../apiClient.js";
-import { formatErrorMessage } from "../utils/formatError.js";
-import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
-import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
-import DrawModal from "./DrawModal.jsx";
-import MobileGenerationActions, {
-  GenerationCopyButtons,
-} from "./MobileGenerationActions.jsx";
-import { StudioGallery } from "./shared/StudioGallery.jsx";
-import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { generateVideo, generateI2V, processV2V, uploadFile } from '../apiClient.js';
+import { formatErrorMessage } from '../utils/formatError.js';
+import { scopedPersistKey, migrateLegacyPersistKey } from '../persistKey.js';
+import { useStudioPersistedState } from '../hooks/useStudioPersistedState.js';
+import DrawModal from './DrawModal.jsx';
+import MobileGenerationActions, { GenerationCopyButtons } from './MobileGenerationActions.jsx';
+import { StudioGallery } from './shared/StudioGallery.jsx';
+import { EmptyStateHero } from './shared/EmptyStateHero.jsx';
 import {
   t2vModels,
   i2vModels,
@@ -26,7 +24,7 @@ import {
   getDefaultEffectForI2VModel,
   getModesForModel,
   getMaxImagesForI2VModel,
-} from "../models.js";
+} from '../models.js';
 import {
   PROMPT_CONTROL_LABEL_CLASS,
   PROMPT_MEDIA_PREVIEW_CLASS,
@@ -45,8 +43,8 @@ import {
   PromptTextarea,
   promptControlClassName,
   promptMediaButtonClassName,
-} from "./prompt/PromptComposer.jsx";
-import { ModelDropdown, PROVIDER_LOGOS, invertLogos } from "./ModelDropdown.jsx";
+} from './prompt/PromptComposer.jsx';
+import { ModelDropdown, PROVIDER_LOGOS, invertLogos } from './ModelDropdown.jsx';
 
 // ── tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -60,7 +58,7 @@ async function downloadFile(url, filename) {
     const response = await fetch(url);
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = blobUrl;
     a.download = filename;
     document.body.appendChild(a);
@@ -68,7 +66,7 @@ async function downloadFile(url, filename) {
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
   } catch {
-    window.open(url, "_blank");
+    window.open(url, '_blank');
   }
 }
 
@@ -80,7 +78,8 @@ const CheckSvg = () => (
     height="16"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor" className="text-primary"
+    stroke="currentColor"
+    className="text-primary"
     strokeWidth="4"
   >
     <polyline points="20 6 9 17 4 12" />
@@ -114,7 +113,12 @@ const VideoReadySvg = () => (
   >
     <polygon points="23 7 16 12 23 17 23 7" />
     <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-    <polyline points="7 10 10 13 15 8" stroke="currentColor" className="text-primary" strokeWidth="2.5" />
+    <polyline
+      points="7 10 10 13 15 8"
+      stroke="currentColor"
+      className="text-primary"
+      strokeWidth="2.5"
+    />
   </svg>
 );
 
@@ -130,7 +134,7 @@ export default function VideoStudio({
   droppedFiles,
   onFilesHandled,
 }) {
-  const LEGACY_PERSIST_KEY = "hg_video_studio_persistent";
+  const LEGACY_PERSIST_KEY = 'hg_video_studio_persistent';
   const PERSIST_KEY = scopedPersistKey(LEGACY_PERSIST_KEY, apiKey);
   useEffect(() => {
     migrateLegacyPersistKey(LEGACY_PERSIST_KEY, PERSIST_KEY);
@@ -145,19 +149,19 @@ export default function VideoStudio({
   const [selectedModel, setSelectedModel] = useState(defaultModel.id);
   const [selectedModelName, setSelectedModelName] = useState(defaultModel.name);
   const [selectedAr, setSelectedAr] = useState(
-    defaultModel.inputs?.aspect_ratio?.default || "16:9",
+    defaultModel.inputs?.aspect_ratio?.default || '16:9'
   );
   const [selectedDuration, setSelectedDuration] = useState(
-    defaultModel.inputs?.duration?.default || 5,
+    defaultModel.inputs?.duration?.default || 5
   );
   const [selectedResolution, setSelectedResolution] = useState(
-    defaultModel.inputs?.resolution?.default || "",
+    defaultModel.inputs?.resolution?.default || ''
   );
   const [selectedQuality, setSelectedQuality] = useState(
-    defaultModel.inputs?.quality?.default || "",
+    defaultModel.inputs?.quality?.default || ''
   );
-  const [selectedMode, setSelectedMode] = useState("");
-  const [selectedEffect, setSelectedEffect] = useState("");
+  const [selectedMode, setSelectedMode] = useState('');
+  const [selectedEffect, setSelectedEffect] = useState('');
 
   // ── upload progress ──
   const [imageProgress, setImageProgress] = useState(0);
@@ -201,7 +205,7 @@ export default function VideoStudio({
   const [openDropdown, setOpenDropdown] = useState(null); // 'model'|'ar'|'duration'|'resolution'|'quality'|'mode'|null
 
   // ── prompt ──
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState('');
   const [promptDisabled, setPromptDisabled] = useState(false);
 
   // ── refs ──
@@ -223,134 +227,141 @@ export default function VideoStudio({
   }, [imageMode, v2vMode]);
 
   const getCurrentAspectRatios = useCallback(
-    (id) =>
-      imageMode
-        ? getAspectRatiosForI2VModel(id)
-        : getAspectRatiosForVideoModel(id),
-    [imageMode],
+    (id) => (imageMode ? getAspectRatiosForI2VModel(id) : getAspectRatiosForVideoModel(id)),
+    [imageMode]
   );
 
   const getCurrentDurations = useCallback(
-    (id) =>
-      imageMode ? getDurationsForI2VModel(id) : getDurationsForModel(id),
-    [imageMode],
+    (id) => (imageMode ? getDurationsForI2VModel(id) : getDurationsForModel(id)),
+    [imageMode]
   );
 
   const getCurrentResolutions = useCallback(
-    (id) =>
-      imageMode
-        ? getResolutionsForI2VModel(id)
-        : getResolutionsForVideoModel(id),
-    [imageMode],
+    (id) => (imageMode ? getResolutionsForI2VModel(id) : getResolutionsForVideoModel(id)),
+    [imageMode]
   );
 
   const getCurrentModel = useCallback(
     () => getCurrentModels().find((m) => m.id === selectedModel),
-    [getCurrentModels, selectedModel],
+    [getCurrentModels, selectedModel]
   );
 
-  const isMotionControlSelection = useCallback(
-    (modelId, isV2v) => {
-      if (!isV2v) return false;
-      const m = v2vModels.find((x) => x.id === modelId);
-      return !!m?.imageField;
-    },
-    [],
-  );
+  const isMotionControlSelection = useCallback((modelId, isV2v) => {
+    if (!isV2v) return false;
+    const m = v2vModels.find((x) => x.id === modelId);
+    return !!m?.imageField;
+  }, []);
 
   // ── update controls when model/mode changes ──────────────────────────────
-  const applyControlsForModel = useCallback(
-    (modelId, isImageMode, isV2vMode) => {
-      if (isV2vMode) {
-        setShowAr(false);
-        setShowDuration(false);
-        setShowResolution(false);
-        setShowQuality(false);
-        setShowMode(false);
-        setShowEffect(false);
-        return;
-      }
+  const applyControlsForModel = useCallback((modelId, isImageMode, isV2vMode) => {
+    if (isV2vMode) {
+      setShowAr(false);
+      setShowDuration(false);
+      setShowResolution(false);
+      setShowQuality(false);
+      setShowMode(false);
+      setShowEffect(false);
+      return;
+    }
 
-      const modelList = isImageMode ? i2vModels : t2vModels;
-      const model = modelList.find((m) => m.id === modelId);
+    const modelList = isImageMode ? i2vModels : t2vModels;
+    const model = modelList.find((m) => m.id === modelId);
 
-      const ars = isImageMode
-        ? getAspectRatiosForI2VModel(modelId)
-        : getAspectRatiosForVideoModel(modelId);
-      if (ars.length > 0) {
-        setSelectedAr(ars[0]);
-        setShowAr(true);
-      } else {
-        setShowAr(false);
-      }
+    const ars = isImageMode
+      ? getAspectRatiosForI2VModel(modelId)
+      : getAspectRatiosForVideoModel(modelId);
+    if (ars.length > 0) {
+      setSelectedAr(ars[0]);
+      setShowAr(true);
+    } else {
+      setShowAr(false);
+    }
 
-      const durations = isImageMode
-        ? getDurationsForI2VModel(modelId)
-        : getDurationsForModel(modelId);
-      if (durations.length > 0) {
-        setSelectedDuration(durations[0]);
-        setShowDuration(true);
-      } else {
-        setShowDuration(false);
-      }
+    const durations = isImageMode
+      ? getDurationsForI2VModel(modelId)
+      : getDurationsForModel(modelId);
+    if (durations.length > 0) {
+      setSelectedDuration(durations[0]);
+      setShowDuration(true);
+    } else {
+      setShowDuration(false);
+    }
 
-      const resolutions = isImageMode
-        ? getResolutionsForI2VModel(modelId)
-        : getResolutionsForVideoModel(modelId);
-      if (resolutions.length > 0) {
-        setSelectedResolution(resolutions[0]);
-        setShowResolution(true);
-      } else {
-        setShowResolution(false);
-      }
+    const resolutions = isImageMode
+      ? getResolutionsForI2VModel(modelId)
+      : getResolutionsForVideoModel(modelId);
+    if (resolutions.length > 0) {
+      setSelectedResolution(resolutions[0]);
+      setShowResolution(true);
+    } else {
+      setShowResolution(false);
+    }
 
-      const qualities = getQualitiesForModel(modelList, modelId);
-      if (qualities.length > 0) {
-        setSelectedQuality(model?.inputs?.quality?.default || qualities[0]);
-        setShowQuality(true);
-      } else {
-        setSelectedQuality("");
-        setShowQuality(false);
-      }
+    const qualities = getQualitiesForModel(modelList, modelId);
+    if (qualities.length > 0) {
+      setSelectedQuality(model?.inputs?.quality?.default || qualities[0]);
+      setShowQuality(true);
+    } else {
+      setSelectedQuality('');
+      setShowQuality(false);
+    }
 
-      const modes = getModesForModel(modelId);
-      if (modes.length > 0) {
-        setSelectedMode(model?.inputs?.mode?.default || modes[0]);
-        setShowMode(true);
-      } else {
-        setSelectedMode("");
-        setShowMode(false);
-      }
+    const modes = getModesForModel(modelId);
+    if (modes.length > 0) {
+      setSelectedMode(model?.inputs?.mode?.default || modes[0]);
+      setShowMode(true);
+    } else {
+      setSelectedMode('');
+      setShowMode(false);
+    }
 
-      const effects = isImageMode ? getEffectsForI2VModel(modelId) : [];
-      if (effects.length > 0) {
-        setSelectedEffect(getDefaultEffectForI2VModel(modelId) || effects[0]);
-        setShowEffect(true);
-      } else {
-        setSelectedEffect("");
-        setShowEffect(false);
-      }
-    },
-    [],
-  );
+    const effects = isImageMode ? getEffectsForI2VModel(modelId) : [];
+    if (effects.length > 0) {
+      setSelectedEffect(getDefaultEffectForI2VModel(modelId) || effects[0]);
+      setShowEffect(true);
+    } else {
+      setSelectedEffect('');
+      setShowEffect(false);
+    }
+  }, []);
 
   // ── Persistence ──────────────────────────────────────────────────────────
   useStudioPersistedState(
     PERSIST_KEY,
     {
-      imageMode, v2vMode, selectedModel, selectedModelName, selectedAr,
-      selectedDuration, selectedResolution, selectedQuality, selectedMode,
-      selectedEffect, uploadedImageUrl, uploadedImageUrls, uploadedVideoUrl,
-      uploadedVideoName, prompt, localHistory,
+      imageMode,
+      v2vMode,
+      selectedModel,
+      selectedModelName,
+      selectedAr,
+      selectedDuration,
+      selectedResolution,
+      selectedQuality,
+      selectedMode,
+      selectedEffect,
+      uploadedImageUrl,
+      uploadedImageUrls,
+      uploadedVideoUrl,
+      uploadedVideoName,
+      prompt,
+      localHistory,
     },
     {
-      imageMode: setImageMode, v2vMode: setV2vMode, selectedModel: setSelectedModel,
-      selectedModelName: setSelectedModelName, selectedAr: setSelectedAr,
-      selectedDuration: setSelectedDuration, selectedResolution: setSelectedResolution,
-      selectedQuality: setSelectedQuality, selectedMode: setSelectedMode,
-      selectedEffect: setSelectedEffect, uploadedImageUrl: setUploadedImageUrl,
-      uploadedImageUrls: setUploadedImageUrls, uploadedVideoUrl: setUploadedVideoUrl,
-      uploadedVideoName: setUploadedVideoName, prompt: setPrompt,
+      imageMode: setImageMode,
+      v2vMode: setV2vMode,
+      selectedModel: setSelectedModel,
+      selectedModelName: setSelectedModelName,
+      selectedAr: setSelectedAr,
+      selectedDuration: setSelectedDuration,
+      selectedResolution: setSelectedResolution,
+      selectedQuality: setSelectedQuality,
+      selectedMode: setSelectedMode,
+      selectedEffect: setSelectedEffect,
+      uploadedImageUrl: setUploadedImageUrl,
+      uploadedImageUrls: setUploadedImageUrls,
+      uploadedVideoUrl: setUploadedVideoUrl,
+      uploadedVideoName: setUploadedVideoName,
+      prompt: setPrompt,
       localHistory: setLocalHistory,
     }
   );
@@ -418,26 +429,20 @@ export default function VideoStudio({
       }
       setPromptDisabled(false);
     },
-    [
-      applyControlsForModel,
-      imageMode,
-      isMotionControlSelection,
-      selectedModel,
-      v2vMode,
-    ],
+    [applyControlsForModel, imageMode, isMotionControlSelection, selectedModel, v2vMode]
   );
 
   const handleDrawReference = useCallback(
     (entry) => {
       applyImageReferenceUrl(entry?.url);
     },
-    [applyImageReferenceUrl],
+    [applyImageReferenceUrl]
   );
 
   const uploadImageReference = useCallback(
     async (file) => {
       if (file.size > 10 * 1024 * 1024) {
-        alert("Image exceeds 10MB limit.");
+        alert('Image exceeds 10MB limit.');
         return;
       }
 
@@ -447,20 +452,20 @@ export default function VideoStudio({
         const url = await uploadFile(apiKey, file, setImageProgress);
         applyImageReferenceUrl(url);
       } catch (err) {
-        console.error("[VideoStudio] Image upload failed:", err);
+        console.error('[VideoStudio] Image upload failed:', err);
         alert(`Image upload failed: ${err.message}`);
       } finally {
         setImageUploading(false);
         setImageProgress(0);
       }
     },
-    [apiKey, applyImageReferenceUrl],
+    [apiKey, applyImageReferenceUrl]
   );
 
   const processDroppedVideo = useCallback(
     async (file) => {
       if (file.size > 50 * 1024 * 1024) {
-        alert("Video exceeds 50MB limit.");
+        alert('Video exceeds 50MB limit.');
         return;
       }
       setVideoUploading(true);
@@ -478,7 +483,7 @@ export default function VideoStudio({
         setSelectedModel(firstV2V.id);
         setSelectedModelName(firstV2V.name);
         applyControlsForModel(firstV2V.id, false, true);
-        setPrompt("");
+        setPrompt('');
         setPromptDisabled(true);
       } catch (err) {
         alert(`Video upload failed: ${err.message}`);
@@ -487,15 +492,15 @@ export default function VideoStudio({
         setVideoProgress(0);
       }
     },
-    [apiKey, applyControlsForModel, imageMode],
+    [apiKey, applyControlsForModel, imageMode]
   );
 
   // ── Handle Dropped Files ────────────────────────────────────────────────
   useEffect(() => {
     if (droppedFiles && droppedFiles.length > 0) {
-      const imageFiles = droppedFiles.filter(f => f.type.startsWith('image/'));
-      const videoFiles = droppedFiles.filter(f => f.type.startsWith('video/'));
-      
+      const imageFiles = droppedFiles.filter((f) => f.type.startsWith('image/'));
+      const videoFiles = droppedFiles.filter((f) => f.type.startsWith('video/'));
+
       if (videoFiles.length > 0) {
         processDroppedVideo(videoFiles[0]);
       } else if (imageFiles.length > 0) {
@@ -520,8 +525,8 @@ export default function VideoStudio({
         setOpenDropdown(null);
       }
     };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
   }, [openDropdown]);
 
   const handlePromptInput = (e) => {
@@ -535,7 +540,7 @@ export default function VideoStudio({
     try {
       await uploadImageReference(file);
     } finally {
-      if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+      if (imageFileInputRef.current) imageFileInputRef.current.value = '';
     }
   };
 
@@ -578,7 +583,7 @@ export default function VideoStudio({
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      alert("Image exceeds 10MB limit.");
+      alert('Image exceeds 10MB limit.');
       return;
     }
     setEndImageUploading(true);
@@ -593,7 +598,7 @@ export default function VideoStudio({
     } finally {
       setEndImageUploading(false);
       setEndImageProgress(0);
-      if (endImageFileInputRef.current) endImageFileInputRef.current.value = "";
+      if (endImageFileInputRef.current) endImageFileInputRef.current.value = '';
     }
   };
 
@@ -604,7 +609,7 @@ export default function VideoStudio({
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 50 * 1024 * 1024) {
-      alert("Video exceeds 50MB limit.");
+      alert('Video exceeds 50MB limit.');
       return;
     }
     setVideoUploading(true);
@@ -636,17 +641,17 @@ export default function VideoStudio({
           setSelectedModel(firstV2V.id);
           setSelectedModelName(firstV2V.name);
           applyControlsForModel(firstV2V.id, false, true);
-          setPrompt("");
+          setPrompt('');
           setPromptDisabled(true);
         }
       }
     } catch (err) {
-      console.error("[VideoStudio] Video upload failed:", err);
+      console.error('[VideoStudio] Video upload failed:', err);
       alert(`Video upload failed: ${err.message}`);
     } finally {
       setVideoUploading(false);
       setVideoProgress(0);
-      if (videoFileInputRef.current) videoFileInputRef.current.value = "";
+      if (videoFileInputRef.current) videoFileInputRef.current.value = '';
     }
   };
 
@@ -679,7 +684,7 @@ export default function VideoStudio({
           // Motion-control: prompt is editable, video+image are needed
           setPromptDisabled(false);
         } else {
-          setPrompt("");
+          setPrompt('');
           setPromptDisabled(true);
         }
       } else {
@@ -694,7 +699,7 @@ export default function VideoStudio({
         applyControlsForModel(m.id, imageMode, false);
       }
     },
-    [v2vMode, imageMode, applyControlsForModel],
+    [v2vMode, imageMode, applyControlsForModel]
   );
 
   // ── add to local history ──────────────────────────────────────────────────
@@ -718,40 +723,38 @@ export default function VideoStudio({
 
     if (v2vMode) {
       if (!uploadedVideoUrl) {
-        alert("Please upload a video first.");
+        alert('Please upload a video first.');
         return;
       }
       if (currentModel?.imageField && !uploadedImageUrl) {
-        alert("Please upload a reference image for motion control.");
+        alert('Please upload a reference image for motion control.');
         return;
       }
       if (currentModel?.promptRequired && !trimmedPrompt) {
-        alert("Please describe the motion you want.");
+        alert('Please describe the motion you want.');
         return;
       }
     } else if (isExtendMode) {
       if (!lastGenerationId) {
-        alert(
-          "No Seedance 2.0 generation found to extend. Generate a video first.",
-        );
+        alert('No Seedance 2.0 generation found to extend. Generate a video first.');
         return;
       }
     } else if (imageMode) {
       const maxImgs = getMaxImagesForI2VModel(selectedModel);
       if (maxImgs > 2) {
         if (uploadedImageUrls.length === 0) {
-          alert("Please upload at least one reference image first.");
+          alert('Please upload at least one reference image first.');
           return;
         }
       } else {
         if (!uploadedImageUrl) {
-          alert("Please upload a start frame image first.");
+          alert('Please upload a start frame image first.');
           return;
         }
       }
     } else {
       if (!trimmedPrompt) {
-        alert("Please enter a prompt to generate a video.");
+        alert('Please enter a prompt to generate a video.');
         return;
       }
     }
@@ -779,7 +782,7 @@ export default function VideoStudio({
           v2vParams.prompt = trimmedPrompt;
         }
         res = await processV2V(apiKey, v2vParams);
-        if (!res?.url) throw new Error("No video URL returned by API");
+        if (!res?.url) throw new Error('No video URL returned by API');
 
         const genId = res.id || Date.now().toString();
         setLastGenerationId(null);
@@ -787,7 +790,7 @@ export default function VideoStudio({
         const entry = {
           id: genId,
           url: res.url,
-          prompt: currentModel?.hasPrompt ? trimmedPrompt : "",
+          prompt: currentModel?.hasPrompt ? trimmedPrompt : '',
           model: selectedModel,
           timestamp: new Date().toISOString(),
         };
@@ -797,8 +800,8 @@ export default function VideoStudio({
           onGenerationComplete({
             url: res.url,
             model: selectedModel,
-            prompt: currentModel?.hasPrompt ? trimmedPrompt : "",
-            type: "video",
+            prompt: currentModel?.hasPrompt ? trimmedPrompt : '',
+            type: 'video',
           });
       } else if (imageMode) {
         const maxImgs = getMaxImagesForI2VModel(selectedModel);
@@ -823,10 +826,10 @@ export default function VideoStudio({
         if (showEffect && selectedEffect) i2vParams.name = selectedEffect;
 
         res = await generateI2V(apiKey, i2vParams);
-        if (!res?.url) throw new Error("No video URL returned by API");
+        if (!res?.url) throw new Error('No video URL returned by API');
 
         const genId = res.id || Date.now().toString();
-        if (selectedModel === "seedance-v2.0-i2v") {
+        if (selectedModel === 'seedance-v2.0-i2v') {
           setLastGenerationId(genId);
           setLastGenerationModel(selectedModel);
         } else {
@@ -849,7 +852,7 @@ export default function VideoStudio({
             url: res.url,
             model: selectedModel,
             prompt: trimmedPrompt,
-            type: "video",
+            type: 'video',
           });
       } else {
         // T2V (including extend mode)
@@ -878,13 +881,10 @@ export default function VideoStudio({
         if (selectedMode) params.mode = selectedMode;
 
         res = await generateVideo(apiKey, params);
-        if (!res?.url) throw new Error("No video URL returned by API");
+        if (!res?.url) throw new Error('No video URL returned by API');
 
         const genId = res.id || Date.now().toString();
-        if (
-          selectedModel === "seedance-v2.0-t2v" ||
-          selectedModel === "seedance-v2.0-i2v"
-        ) {
+        if (selectedModel === 'seedance-v2.0-t2v' || selectedModel === 'seedance-v2.0-i2v') {
           setLastGenerationId(genId);
           setLastGenerationModel(selectedModel);
         } else {
@@ -907,13 +907,13 @@ export default function VideoStudio({
             url: res.url,
             model: selectedModel,
             prompt: trimmedPrompt,
-            type: "video",
+            type: 'video',
           });
       }
     } catch (e) {
       hadError = true;
-      console.error("[VideoStudio]", e);
-      const errMsg = formatErrorMessage(e, "Video generation failed");
+      console.error('[VideoStudio]', e);
+      const errMsg = formatErrorMessage(e, 'Video generation failed');
       if (onGenerationError) onGenerationError(errMsg);
       else toast.error(errMsg);
     } finally {
@@ -953,7 +953,7 @@ export default function VideoStudio({
 
   const handleNewPrompt = useCallback(() => {
     resetToPromptBar();
-    setPrompt("");
+    setPrompt('');
     setUploadedImageUrl(null);
     setUploadedImageUrls([]);
     setImageMode(false);
@@ -971,20 +971,20 @@ export default function VideoStudio({
   const handleExtend = useCallback(() => {
     if (!lastGenerationId) return;
     resetToPromptBar();
-    setPrompt("");
+    setPrompt('');
     setUploadedImageUrl(null);
     setUploadedImageUrls([]);
     setImageMode(false);
-    setSelectedModel("seedance-v2.0-extend");
-    setSelectedModelName("Seedance 2.0 Extend");
-    applyControlsForModel("seedance-v2.0-extend", false, false);
+    setSelectedModel('seedance-v2.0-extend');
+    setSelectedModelName('Seedance 2.0 Extend');
+    applyControlsForModel('seedance-v2.0-extend', false, false);
     setPromptDisabled(false);
     setTimeout(() => textareaRef.current?.focus(), 50);
   }, [lastGenerationId, resetToPromptBar, applyControlsForModel]);
 
   // ── derived UI values ────────────────────────────────────────────────────
   const isSeedance2Canvas =
-    canvasModel === "seedance-v2.0-t2v" || canvasModel === "seedance-v2.0-i2v";
+    canvasModel === 'seedance-v2.0-t2v' || canvasModel === 'seedance-v2.0-i2v';
   const currentModelObj = getCurrentModel();
   const isExtendMode = currentModelObj?.requiresRequestId;
   const canUploadImageReference =
@@ -994,14 +994,14 @@ export default function VideoStudio({
   const promptPlaceholder = v2vMode
     ? currentModelObj?.imageField
       ? currentModelObj?.promptRequired
-        ? "Describe the motion"
-        : "Describe the motion (optional)"
-      : "Video ready — click Generate to remove watermark"
+        ? 'Describe the motion'
+        : 'Describe the motion (optional)'
+      : 'Video ready — click Generate to remove watermark'
     : imageMode
-      ? "Describe the motion or effect (optional)"
+      ? 'Describe the motion or effect (optional)'
       : isExtendMode
-        ? "Optional: describe how to continue the video..."
-        : "Describe the video you want to create";
+        ? 'Optional: describe how to continue the video...'
+        : 'Describe the video you want to create';
 
   const toggleDropdown = (type) => (e) => {
     e.stopPropagation();
@@ -1017,15 +1017,16 @@ export default function VideoStudio({
       {/* ── CENTRAL GALLERY AREA ── */}
       <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto custom-scrollbar pb-40 lg:pb-32 px-2">
         {history.length > 0 ? (
-          <StudioGallery 
+          <StudioGallery
             history={history}
             onSelectFullscreen={setFullscreenUrl}
             onDownload={(entry, idx) => downloadFile(entry.url, `video-${entry.id || idx}.mp4`)}
-            onDelete={(entry, idx) => setLocalHistory(prev => prev.filter((_, i) => i !== idx))}
+            onDelete={(entry, idx) => setLocalHistory((prev) => prev.filter((_, i) => i !== idx))}
             onCopyError={onGenerationError}
             studioName="Video Studio"
             customActions={(entry) => {
-              const isSeedance2 = entry.model === "seedance-v2.0-t2v" || entry.model === "seedance-v2.0-i2v";
+              const isSeedance2 =
+                entry.model === 'seedance-v2.0-t2v' || entry.model === 'seedance-v2.0-i2v';
               return isSeedance2 ? (
                 <button
                   type="button"
@@ -1037,26 +1038,38 @@ export default function VideoStudio({
                   }}
                   className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-primary hover:text-black transition-all border border-white/10"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 </button>
               ) : null;
             }}
             customMobileActions={(entry) => {
-              const isSeedance2 = entry.model === "seedance-v2.0-t2v" || entry.model === "seedance-v2.0-i2v";
-              return isSeedance2 ? [{
-                kind: "extend",
-                label: "Extend",
-                onSelect: () => {
-                  setLastGenerationId(entry.id);
-                  handleExtend();
-                },
-              }] : [];
+              const isSeedance2 =
+                entry.model === 'seedance-v2.0-t2v' || entry.model === 'seedance-v2.0-i2v';
+              return isSeedance2
+                ? [
+                    {
+                      kind: 'extend',
+                      label: 'Extend',
+                      onSelect: () => {
+                        setLastGenerationId(entry.id);
+                        handleExtend();
+                      },
+                    },
+                  ]
+                : [];
             }}
           />
         ) : (
-          <EmptyStateHero 
+          <EmptyStateHero
             selectedModelName={selectedModelName}
             title="START CREATING WITH"
             subtitle="Animate images into stunning AI videos with motion effects"
@@ -1066,86 +1079,86 @@ export default function VideoStudio({
 
       {/* ── BOTTOM PROMPT BAR ── */}
       <PromptComposer>
-          <div className="flex flex-col gap-3">
-            {/* Inline list of uploaded media files */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {/* Main image preview */}
-              {uploadedImageUrl && (
-                <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
-                  <img src={uploadedImageUrl} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={clearImageUpload}
-                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
+        <div className="flex flex-col gap-3">
+          {/* Inline list of uploaded media files */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* Main image preview */}
+            {uploadedImageUrl && (
+              <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
+                <img src={uploadedImageUrl} alt="" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={clearImageUpload}
+                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
+                >
+                  ×
+                </button>
+              </div>
+            )}
 
-              {/* End frame image preview */}
-              {uploadedEndImageUrl && (
-                <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
-                  <img src={uploadedEndImageUrl} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={clearEndImage}
-                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
-                  >
-                    ×
-                  </button>
-                  <span className="absolute bottom-0.5 left-0.5 px-1 h-3.5 bg-black/60 rounded-md text-[7px] font-black text-primary leading-none flex items-center justify-center pointer-events-none">
-                    END
-                  </span>
-                </div>
-              )}
+            {/* End frame image preview */}
+            {uploadedEndImageUrl && (
+              <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
+                <img src={uploadedEndImageUrl} alt="" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={clearEndImage}
+                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
+                >
+                  ×
+                </button>
+                <span className="absolute bottom-0.5 left-0.5 px-1 h-3.5 bg-black/60 rounded-md text-[7px] font-black text-primary leading-none flex items-center justify-center pointer-events-none">
+                  END
+                </span>
+              </div>
+            )}
 
-              {/* Video preview */}
-              {uploadedVideoUrl && (
-                <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
-                  <video src={uploadedVideoUrl} className="w-full h-full object-cover" muted />
-                  <button
-                    type="button"
-                    onClick={clearVideoUpload}
-                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
+            {/* Video preview */}
+            {uploadedVideoUrl && (
+              <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
+                <video src={uploadedVideoUrl} className="w-full h-full object-cover" muted />
+                <button
+                  type="button"
+                  onClick={clearVideoUpload}
+                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
+                >
+                  ×
+                </button>
+              </div>
+            )}
 
-              {/* Multiple images layout if supported */}
-              {imageMode && getMaxImagesForI2VModel(selectedModel) > 2 && (
-                <>
-                  {uploadedImageUrls.map((url, idx) => (
-                    <div key={url} className={PROMPT_MEDIA_PREVIEW_CLASS}>
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImageAtIndex(idx)}
-                        className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
-                      >
-                        ×
-                      </button>
-                      <span className="absolute bottom-0.5 right-0.5 px-1 h-3.5 bg-black/60 rounded-full text-[8px] font-black text-primary leading-none flex items-center justify-center pointer-events-none">
-                        {idx + 1}
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
+            {/* Multiple images layout if supported */}
+            {imageMode && getMaxImagesForI2VModel(selectedModel) > 2 && (
+              <>
+                {uploadedImageUrls.map((url, idx) => (
+                  <div key={url} className={PROMPT_MEDIA_PREVIEW_CLASS}>
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImageAtIndex(idx)}
+                      className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
+                    >
+                      ×
+                    </button>
+                    <span className="absolute bottom-0.5 right-0.5 px-1 h-3.5 bg-black/60 rounded-full text-[8px] font-black text-primary leading-none flex items-center justify-center pointer-events-none">
+                      {idx + 1}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
 
-              {/* Upload trigger buttons */}
-              {/* Image upload button — shown when the model accepts image input:
+            {/* Upload trigger buttons */}
+            {/* Image upload button — shown when the model accepts image input:
                   • T2V mode: uploading an image auto-switches to the sibling I2V model
                   • I2V mode: uploading the start-frame (multi-image logic applies)
                   • V2V motion-control: reference image is required alongside the video
                   • T2V with inputs.images_list: optional reference images (e.g. Seedance 2.0 Extend)
                   • Hidden in regular V2V mode (watermark remover etc. needs no image)
                   • Hidden for extend-type models without inputs.images_list */}
-              {canUploadImageReference && (
-                getMaxImagesForI2VModel(selectedModel) > 2 ? (
-                  uploadedImageUrls.length < getMaxImagesForI2VModel(selectedModel) && (
+            {canUploadImageReference &&
+              (getMaxImagesForI2VModel(selectedModel) > 2
+                ? uploadedImageUrls.length < getMaxImagesForI2VModel(selectedModel) && (
                     <div className="relative">
                       <input
                         ref={imageFileInputRef}
@@ -1163,7 +1176,15 @@ export default function VideoStudio({
                         {imageUploading ? (
                           <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
                             <svg className="w-8 h-8 -rotate-90">
-                              <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/10" />
+                              <circle
+                                cx="16"
+                                cy="16"
+                                r="14"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="transparent"
+                                className="text-white/10"
+                              />
                               <circle
                                 cx="16"
                                 cy="16"
@@ -1176,10 +1197,20 @@ export default function VideoStudio({
                                 className="text-primary transition-all duration-300"
                               />
                             </svg>
-                            <span className="absolute text-[9px] font-black text-primary leading-none">{imageProgress}%</span>
+                            <span className="absolute text-[9px] font-black text-primary leading-none">
+                              {imageProgress}%
+                            </span>
                           </div>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            className="text-white/60 group-hover:text-primary transition-colors"
+                          >
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
@@ -1187,8 +1218,7 @@ export default function VideoStudio({
                       </button>
                     </div>
                   )
-                ) : (
-                  !uploadedImageUrl && (
+                : !uploadedImageUrl && (
                     <div className="relative">
                       <input
                         ref={imageFileInputRef}
@@ -1206,7 +1236,15 @@ export default function VideoStudio({
                         {imageUploading ? (
                           <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
                             <svg className="w-8 h-8 -rotate-90">
-                              <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/10" />
+                              <circle
+                                cx="16"
+                                cy="16"
+                                r="14"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="transparent"
+                                className="text-white/10"
+                              />
                               <circle
                                 cx="16"
                                 cy="16"
@@ -1219,22 +1257,32 @@ export default function VideoStudio({
                                 className="text-primary transition-all duration-300"
                               />
                             </svg>
-                            <span className="absolute text-[9px] font-black text-primary leading-none">{imageProgress}%</span>
+                            <span className="absolute text-[9px] font-black text-primary leading-none">
+                              {imageProgress}%
+                            </span>
                           </div>
                         ) : (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            className="text-white/60 group-hover:text-primary transition-colors"
+                          >
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />
                           </svg>
                         )}
                       </button>
                     </div>
-                  )
-                )
-              )}
+                  ))}
 
-              {/* End frame image button */}
-              {imageMode && i2vModels.find((m) => m.id === selectedModel)?.lastImageField && !uploadedEndImageUrl && (
+            {/* End frame image button */}
+            {imageMode &&
+              i2vModels.find((m) => m.id === selectedModel)?.lastImageField &&
+              !uploadedEndImageUrl && (
                 <div className="relative">
                   <input
                     ref={endImageFileInputRef}
@@ -1252,7 +1300,15 @@ export default function VideoStudio({
                     {endImageUploading ? (
                       <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
                         <svg className="w-8 h-8 -rotate-90">
-                          <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/10" />
+                          <circle
+                            cx="16"
+                            cy="16"
+                            r="14"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            fill="transparent"
+                            className="text-white/10"
+                          />
                           <circle
                             cx="16"
                             cy="16"
@@ -1265,52 +1321,9 @@ export default function VideoStudio({
                             className="text-primary transition-all duration-300"
                           />
                         </svg>
-                        <span className="absolute text-[9px] font-black text-primary leading-none">{endImageProgress}%</span>
-                      </div>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-white/60 group-hover:text-primary transition-colors">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Video upload button — shown when a V2V model is active, OR when
-                  the current model has inputs.video_files (e.g. Seedance 2.0 Extend). */}
-              {!uploadedVideoUrl && (v2vMode || currentModelObj?.inputs?.video_files) && (
-                <div className="relative">
-                  <input
-                    ref={videoFileInputRef}
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={handleVideoFileChange}
-                  />
-                  <button
-                    type="button"
-                    title="Upload video to remove watermark"
-                    onClick={() => videoFileInputRef.current?.click()}
-                    className={promptMediaButtonClassName()}
-                  >
-                    {videoUploading ? (
-                      <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
-                        <svg className="w-8 h-8 -rotate-90">
-                          <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/10" />
-                          <circle
-                            cx="16"
-                            cy="16"
-                            r="14"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            fill="transparent"
-                            strokeDasharray={88}
-                            strokeDashoffset={88 - (88 * videoProgress) / 100}
-                            className="text-primary transition-all duration-300"
-                          />
-                        </svg>
-                        <span className="absolute text-[9px] font-black text-primary leading-none">{videoProgress}%</span>
+                        <span className="absolute text-[9px] font-black text-primary leading-none">
+                          {endImageProgress}%
+                        </span>
                       </div>
                     ) : (
                       <svg
@@ -1322,280 +1335,202 @@ export default function VideoStudio({
                         strokeWidth="2.5"
                         className="text-white/60 group-hover:text-primary transition-colors"
                       >
-                        <polygon points="23 7 16 12 23 17 23 7" fill="currentColor" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" fill="currentColor" />
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
                       </svg>
                     )}
                   </button>
                 </div>
               )}
-            </div>
 
-            {/* Prompt textarea */}
-            <div className="flex-1 flex flex-col gap-1">
-              <PromptTextarea
-                ref={textareaRef}
-                value={prompt}
-                onChange={handlePromptInput}
-                placeholder={promptPlaceholder}
-                disabled={promptDisabled}
-              />
-            </div>
-          </div>
-
-          {/* Extend banner */}
-          {isExtendMode && (
-            <div className="flex items-center gap-2 px-3 py-1.5 mx-3 bg-primary/5 border border-primary/10 rounded-lg text-[10px] text-primary/80 font-medium tracking-tight">
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-              <span>Extending previous Seedance 2.0 generation</span>
-            </div>
-          )}
-
-          {/* Bottom row: controls + generate */}
-          <PromptFooter>
-            <PromptControls ref={dropdownRef}>
-              {/* Model btn */}
+            {/* Video upload button — shown when a V2V model is active, OR when
+                  the current model has inputs.video_files (e.g. Seedance 2.0 Extend). */}
+            {!uploadedVideoUrl && (v2vMode || currentModelObj?.inputs?.video_files) && (
               <div className="relative">
+                <input
+                  ref={videoFileInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={handleVideoFileChange}
+                />
                 <button
                   type="button"
-                  onClick={toggleDropdown("model")}
-                  className={promptControlClassName({
-                    active: openDropdown === "model",
-                  })}
+                  title="Upload video to remove watermark"
+                  onClick={() => videoFileInputRef.current?.click()}
+                  className={promptMediaButtonClassName()}
                 >
-                  <div className="w-4 h-4 rounded overflow-hidden shrink-0 flex items-center justify-center bg-white/5">
-                    {(() => {
-                      const allCurrentModels = [...t2vModels, ...i2vModels, ...v2vModels];
-                      const selectedModelObj = allCurrentModels.find(m => m.id === selectedModel);
-                      const selectedModelProvider = selectedModelObj?.provider || 'Local API';
-                      return PROVIDER_LOGOS[selectedModelProvider] ? (
-                        <img 
-                          src={PROVIDER_LOGOS[selectedModelProvider]} 
-                          alt="" 
-                          className={`w-full h-full object-contain ${invertLogos.includes(selectedModelProvider) ? "invert" : ""}`} 
+                  {videoUploading ? (
+                    <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/80 z-20 backdrop-blur-[2px]">
+                      <svg className="w-8 h-8 -rotate-90">
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="14"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          fill="transparent"
+                          className="text-white/10"
                         />
-                      ) : (
-                        <span className="text-[9px] font-bold text-black uppercase">V</span>
-                      );
-                    })()}
-                  </div>
-                <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {selectedModelName}
-                  </span>
-                  <PromptChevronIcon />
-                </button>
-                {openDropdown === "model" && (
-                  <PromptPopover
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-[calc(100vw-2rem)] md:w-[480px] max-w-md md:max-w-none max-h-[70vh]"
-                  >
-                    <PromptPopoverHeader>Model</PromptPopoverHeader>
-                    <ModelDropdown
-                      models={imageMode ? i2vModels : t2vModels}
-                      toolsModels={v2vModels}
-                      selectedModel={selectedModel}
-                      onSelect={handleModelSelect}
-                      onClose={() => setOpenDropdown(null)}
-                      modelType="Generation Models"
-                      toolsType="Video-to-Video Tools"
-                    />
-                  </PromptPopover>
-                )}
-              </div>
-
-              {/* Aspect ratio btn */}
-              {showAr && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleDropdown("ar")}
-                    className={promptControlClassName({
-                      active: openDropdown === "ar",
-                    })}
-                  >
-                    <PromptAspectRatioIcon />
-                    <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                      {selectedAr}
-                    </span>
-                  </button>
-                  {openDropdown === "ar" && (
-                    <PromptPopover
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <PromptPopoverHeader>
-                        Aspect Ratio
-                      </PromptPopoverHeader>
-                      <PromptMenuList>
-                        {getCurrentAspectRatios(selectedModel).map((r) => (
-                          <PromptMenuItem
-                            key={r}
-                            selected={selectedAr === r}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedAr(r);
-                              setOpenDropdown(null);
-                            }}
-                          >
-                            {r}
-                          </PromptMenuItem>
-                        ))}
-                      </PromptMenuList>
-                    </PromptPopover>
-                  )}
-                </div>
-              )}
-
-              {/* Effect btn */}
-              {showEffect && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleDropdown("effect")}
-                    className={promptControlClassName({
-                      active: openDropdown === "effect",
-                    })}
-                  >
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="14"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          fill="transparent"
+                          strokeDasharray={88}
+                          strokeDashoffset={88 - (88 * videoProgress) / 100}
+                          className="text-primary transition-all duration-300"
+                        />
+                      </svg>
+                      <span className="absolute text-[9px] font-black text-primary leading-none">
+                        {videoProgress}%
+                      </span>
+                    </div>
+                  ) : (
                     <svg
                       width="16"
                       height="16"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
-                      className="opacity-40 text-white"
+                      strokeWidth="2.5"
+                      className="text-white/60 group-hover:text-primary transition-colors"
                     >
-                      <path d="M5 3l14 9-14 9V3z" />
+                      <polygon points="23 7 16 12 23 17 23 7" fill="currentColor" />
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" fill="currentColor" />
                     </svg>
-                    <span className={`${PROMPT_CONTROL_LABEL_CLASS} max-w-[140px] truncate`}>
-                      {selectedEffect || "Effect"}
-                    </span>
-                  </button>
-                  {openDropdown === "effect" && (
-                    <PromptPopover
-                      onClick={(e) => e.stopPropagation()}
-                      className="min-w-[200px]"
-                    >
-                      <PromptPopoverHeader>
-                        Effect Type
-                      </PromptPopoverHeader>
-                      <PromptMenuList>
-                        {getEffectsForI2VModel(selectedModel).map((eff) => (
-                          <PromptMenuItem
-                            key={eff}
-                            selected={selectedEffect === eff}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedEffect(eff);
-                              setOpenDropdown(null);
-                            }}
-                          >
-                            {eff}
-                          </PromptMenuItem>
-                        ))}
-                      </PromptMenuList>
-                    </PromptPopover>
                   )}
-                </div>
-              )}
+                </button>
+              </div>
+            )}
+          </div>
 
-              {/* Duration btn */}
-              {showDuration && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleDropdown("duration")}
-                    className={promptControlClassName({
-                      active: openDropdown === "duration",
-                    })}
-                  >
-                    <PromptDurationIcon />
-                    <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                      {selectedDuration}s
-                    </span>
-                  </button>
-                  {openDropdown === "duration" && (
-                    <PromptPopover
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <PromptPopoverHeader>
-                        Duration
-                      </PromptPopoverHeader>
-                      <PromptMenuList>
-                        {getCurrentDurations(selectedModel).map((d) => (
-                          <PromptMenuItem
-                            key={d}
-                            selected={selectedDuration === d}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDuration(d);
-                              setOpenDropdown(null);
-                            }}
-                          >
-                            {d}s
-                          </PromptMenuItem>
-                        ))}
-                      </PromptMenuList>
-                    </PromptPopover>
-                  )}
-                </div>
-              )}
+          {/* Prompt textarea */}
+          <div className="flex-1 flex flex-col gap-1">
+            <PromptTextarea
+              ref={textareaRef}
+              value={prompt}
+              onChange={handlePromptInput}
+              placeholder={promptPlaceholder}
+              disabled={promptDisabled}
+            />
+          </div>
+        </div>
 
-              {/* Resolution btn */}
-              {showResolution && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleDropdown("resolution")}
-                    className={promptControlClassName({
-                      active: openDropdown === "resolution",
-                    })}
-                  >
-                    <PromptQualityIcon />
-                    <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                      {selectedResolution || "720p"}
-                    </span>
-                  </button>
-                  {openDropdown === "resolution" && (
-                    <PromptPopover
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <PromptPopoverHeader>
-                        Resolution
-                      </PromptPopoverHeader>
-                      <PromptMenuList>
-                        {getCurrentResolutions(selectedModel).map((r) => (
-                          <PromptMenuItem
-                            key={r}
-                            selected={selectedResolution === r}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedResolution(r);
-                              setOpenDropdown(null);
-                            }}
-                          >
-                            {r}
-                          </PromptMenuItem>
-                        ))}
-                      </PromptMenuList>
-                    </PromptPopover>
-                  )}
-                </div>
-              )}
+        {/* Extend banner */}
+        {isExtendMode && (
+          <div className="flex items-center gap-2 px-3 py-1.5 mx-3 bg-primary/5 border border-primary/10 rounded-lg text-[10px] text-primary/80 font-medium tracking-tight">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+            <span>Extending previous Seedance 2.0 generation</span>
+          </div>
+        )}
 
-              {canUploadImageReference && (
+        {/* Bottom row: controls + generate */}
+        <PromptFooter>
+          <PromptControls ref={dropdownRef}>
+            {/* Model btn */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={toggleDropdown('model')}
+                className={promptControlClassName({
+                  active: openDropdown === 'model',
+                })}
+              >
+                <div className="w-4 h-4 rounded overflow-hidden shrink-0 flex items-center justify-center bg-white/5">
+                  {(() => {
+                    const allCurrentModels = [...t2vModels, ...i2vModels, ...v2vModels];
+                    const selectedModelObj = allCurrentModels.find((m) => m.id === selectedModel);
+                    const selectedModelProvider = selectedModelObj?.provider || 'Local API';
+                    return PROVIDER_LOGOS[selectedModelProvider] ? (
+                      <img
+                        src={PROVIDER_LOGOS[selectedModelProvider]}
+                        alt=""
+                        className={`w-full h-full object-contain ${invertLogos.includes(selectedModelProvider) ? 'invert' : ''}`}
+                      />
+                    ) : (
+                      <span className="text-[9px] font-bold text-black uppercase">V</span>
+                    );
+                  })()}
+                </div>
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedModelName}</span>
+                <PromptChevronIcon />
+              </button>
+              {openDropdown === 'model' && (
+                <PromptPopover
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-[calc(100vw-2rem)] md:w-[480px] max-w-md md:max-w-none max-h-[70vh]"
+                >
+                  <PromptPopoverHeader>Model</PromptPopoverHeader>
+                  <ModelDropdown
+                    models={imageMode ? i2vModels : t2vModels}
+                    toolsModels={v2vModels}
+                    selectedModel={selectedModel}
+                    onSelect={handleModelSelect}
+                    onClose={() => setOpenDropdown(null)}
+                    modelType="Generation Models"
+                    toolsType="Video-to-Video Tools"
+                  />
+                </PromptPopover>
+              )}
+            </div>
+
+            {/* Aspect ratio btn */}
+            {showAr && (
+              <div className="relative">
                 <button
                   type="button"
-                  className={promptControlClassName()}
-                  onClick={() => setIsDrawModalOpen(true)}
+                  onClick={toggleDropdown('ar')}
+                  className={promptControlClassName({
+                    active: openDropdown === 'ar',
+                  })}
+                >
+                  <PromptAspectRatioIcon />
+                  <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedAr}</span>
+                </button>
+                {openDropdown === 'ar' && (
+                  <PromptPopover onClick={(e) => e.stopPropagation()}>
+                    <PromptPopoverHeader>Aspect Ratio</PromptPopoverHeader>
+                    <PromptMenuList>
+                      {getCurrentAspectRatios(selectedModel).map((r) => (
+                        <PromptMenuItem
+                          key={r}
+                          selected={selectedAr === r}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedAr(r);
+                            setOpenDropdown(null);
+                          }}
+                        >
+                          {r}
+                        </PromptMenuItem>
+                      ))}
+                    </PromptMenuList>
+                  </PromptPopover>
+                )}
+              </div>
+            )}
+
+            {/* Effect btn */}
+            {showEffect && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={toggleDropdown('effect')}
+                  className={promptControlClassName({
+                    active: openDropdown === 'effect',
+                  })}
                 >
                   <svg
                     width="16"
@@ -1603,41 +1538,151 @@ export default function VideoStudio({
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.5"
-                    className="opacity-40 text-white group-hover:text-primary transition-colors"
+                    strokeWidth="2"
+                    className="opacity-40 text-white"
                   >
-                    <path d="M12 20h9" />
-                    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    <path d="M5 3l14 9-14 9V3z" />
                   </svg>
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>Draw</span>
+                  <span className={`${PROMPT_CONTROL_LABEL_CLASS} max-w-[140px] truncate`}>
+                    {selectedEffect || 'Effect'}
+                  </span>
                 </button>
-              )}
-            </PromptControls>
+                {openDropdown === 'effect' && (
+                  <PromptPopover onClick={(e) => e.stopPropagation()} className="min-w-[200px]">
+                    <PromptPopoverHeader>Effect Type</PromptPopoverHeader>
+                    <PromptMenuList>
+                      {getEffectsForI2VModel(selectedModel).map((eff) => (
+                        <PromptMenuItem
+                          key={eff}
+                          selected={selectedEffect === eff}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEffect(eff);
+                            setOpenDropdown(null);
+                          }}
+                        >
+                          {eff}
+                        </PromptMenuItem>
+                      ))}
+                    </PromptMenuList>
+                  </PromptPopover>
+                )}
+              </div>
+            )}
 
-            {/* Generate button */}
-            <PromptAction
-              onClick={handleGenerate}
-              disabled={generating}
-            >
-              {generating ? (
-                <>
-                  <span className="animate-spin inline-block text-black">
-                    ◌
-                  </span>{" "}
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <span>Generate</span>
-                </>
-              )}
-            </PromptAction>
-          </PromptFooter>
+            {/* Duration btn */}
+            {showDuration && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={toggleDropdown('duration')}
+                  className={promptControlClassName({
+                    active: openDropdown === 'duration',
+                  })}
+                >
+                  <PromptDurationIcon />
+                  <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedDuration}s</span>
+                </button>
+                {openDropdown === 'duration' && (
+                  <PromptPopover onClick={(e) => e.stopPropagation()}>
+                    <PromptPopoverHeader>Duration</PromptPopoverHeader>
+                    <PromptMenuList>
+                      {getCurrentDurations(selectedModel).map((d) => (
+                        <PromptMenuItem
+                          key={d}
+                          selected={selectedDuration === d}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDuration(d);
+                            setOpenDropdown(null);
+                          }}
+                        >
+                          {d}s
+                        </PromptMenuItem>
+                      ))}
+                    </PromptMenuList>
+                  </PromptPopover>
+                )}
+              </div>
+            )}
+
+            {/* Resolution btn */}
+            {showResolution && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={toggleDropdown('resolution')}
+                  className={promptControlClassName({
+                    active: openDropdown === 'resolution',
+                  })}
+                >
+                  <PromptQualityIcon />
+                  <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedResolution || '720p'}</span>
+                </button>
+                {openDropdown === 'resolution' && (
+                  <PromptPopover onClick={(e) => e.stopPropagation()}>
+                    <PromptPopoverHeader>Resolution</PromptPopoverHeader>
+                    <PromptMenuList>
+                      {getCurrentResolutions(selectedModel).map((r) => (
+                        <PromptMenuItem
+                          key={r}
+                          selected={selectedResolution === r}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedResolution(r);
+                            setOpenDropdown(null);
+                          }}
+                        >
+                          {r}
+                        </PromptMenuItem>
+                      ))}
+                    </PromptMenuList>
+                  </PromptPopover>
+                )}
+              </div>
+            )}
+
+            {canUploadImageReference && (
+              <button
+                type="button"
+                className={promptControlClassName()}
+                onClick={() => setIsDrawModalOpen(true)}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="opacity-40 text-white group-hover:text-primary transition-colors"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>Draw</span>
+              </button>
+            )}
+          </PromptControls>
+
+          {/* Generate button */}
+          <PromptAction onClick={handleGenerate} disabled={generating}>
+            {generating ? (
+              <>
+                <span className="animate-spin inline-block text-black">◌</span> Generating...
+              </>
+            ) : (
+              <>
+                <span>Generate</span>
+              </>
+            )}
+          </PromptAction>
+        </PromptFooter>
       </PromptComposer>
 
       {/* ── FULLSCREEN VIDEO MODAL ── */}
       {fullscreenUrl && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-fade-in"
           onClick={() => setFullscreenUrl(null)}
         >
@@ -1649,17 +1694,26 @@ export default function VideoStudio({
               setFullscreenUrl(null);
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <video 
-            src={fullscreenUrl} 
-            controls 
-            autoPlay 
-            loop 
-            className="max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl object-contain animate-scale-up" 
+          <video
+            src={fullscreenUrl}
+            controls
+            autoPlay
+            loop
+            className="max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl object-contain animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -1672,7 +1726,6 @@ export default function VideoStudio({
         batchSize={1}
         onAddHistoryItem={handleDrawReference}
       />
-
     </div>
   );
 }

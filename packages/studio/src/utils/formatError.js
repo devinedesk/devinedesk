@@ -1,9 +1,9 @@
 /**
  * Format API and studio error messages into clean, user-friendly strings.
  */
-export function formatErrorMessage(err, fallback = "Generation failed") {
+export function formatErrorMessage(err, fallback = 'Generation failed') {
   if (!err) return fallback;
-  let message = typeof err === 'string' ? err : (err.message || fallback);
+  let message = typeof err === 'string' ? err : err.message || fallback;
 
   // If message contains JSON payload (e.g. `API Request Failed: 402 Payment Required - {...}`)
   if (message.includes('{') && message.includes('}')) {
@@ -26,14 +26,18 @@ export function formatErrorMessage(err, fallback = "Generation failed") {
   }
 
   // Handle common HTTP error codes
-  if (message.includes('402') || message.includes('INSUFFICIENT_CREDITS') || message.toLowerCase().includes('insufficient credits')) {
-    return "Insufficient credits. Please top up your wallet.";
+  if (
+    message.includes('402') ||
+    message.includes('INSUFFICIENT_CREDITS') ||
+    message.toLowerCase().includes('insufficient credits')
+  ) {
+    return 'Insufficient credits. Please top up your wallet.';
   }
   if (message.includes('401') || message.includes('403')) {
-    return "Authentication failed. Please check your account session or API key.";
+    return 'Authentication failed. Please check your account session or API key.';
   }
   if (message.includes('429')) {
-    return "Too many requests. Please wait a moment and try again.";
+    return 'Too many requests. Please wait a moment and try again.';
   }
 
   // Strip technical prefix like "API Request Failed: 500 Internal Server Error -"

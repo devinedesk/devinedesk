@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   getTemplateAgents,
   getUserAgents,
@@ -13,17 +13,16 @@ import {
   sendAgentChatMessage,
   pollAgentChatResult,
   createAgent,
-} from "../apiClient.js";
-import { Button } from "../../../../components/ui/Button.jsx";
-import { Input } from "../../../../components/ui/Input.jsx";
+} from '../apiClient.js';
+import { Button } from '../../../../components/ui/Button.jsx';
+import { Input } from '../../../../components/ui/Input.jsx';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 function timeAgo(dateStr) {
-  if (!dateStr) return "";
-  const utcStr =
-    dateStr.endsWith("Z") || dateStr.includes("+") ? dateStr : dateStr + "Z";
+  if (!dateStr) return '';
+  const utcStr = dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : dateStr + 'Z';
   const diff = Math.floor((Date.now() - new Date(utcStr)) / 1000);
-  if (diff < 60) return "just now";
+  if (diff < 60) return 'just now';
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
@@ -46,7 +45,15 @@ function AgentCard({ agent, onClick, onEdit }) {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 flex items-center justify-center">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1" className="opacity-20">
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="1"
+              className="opacity-20"
+            >
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
@@ -54,10 +61,10 @@ function AgentCard({ agent, onClick, onEdit }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-4">
           <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1 opacity-80">
-            {agent.category || "AI Assistant"}
+            {agent.category || 'AI Assistant'}
           </div>
           <h3 className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">
-            {agent.name || "Unnamed Agent"}
+            {agent.name || 'Unnamed Agent'}
           </h3>
           {agent.owner_username && (
             <p className="text-[9px] text-white/60 mt-1 uppercase tracking-tighter font-black">
@@ -66,7 +73,7 @@ function AgentCard({ agent, onClick, onEdit }) {
           )}
         </div>
       </div>
-      
+
       {onEdit && (
         <button
           onClick={(e) => {
@@ -75,7 +82,16 @@ function AgentCard({ agent, onClick, onEdit }) {
           }}
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-primary hover:text-black hover:scale-110 z-10"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
@@ -87,7 +103,7 @@ function AgentCard({ agent, onClick, onEdit }) {
 
 // ─── Conversation Card (My Chats) ────────────────────────────────────────────
 function ConversationCard({ conv, onClick }) {
-  const displayTitle = conv.title || "New Chat";
+  const displayTitle = conv.title || 'New Chat';
   const agentSlug = conv.agent_slug || conv.agent_id;
   return (
     <div
@@ -97,10 +113,21 @@ function ConversationCard({ conv, onClick }) {
       <div className="flex items-center gap-3">
         <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white/5 border border-white/5 shrink-0">
           {conv.agent_icon_url ? (
-            <img src={conv.agent_icon_url} alt={conv.agent_name || "Agent"} className="w-full h-full object-cover" />
+            <img
+              src={conv.agent_icon_url}
+              alt={conv.agent_name || 'Agent'}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white/60">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
             </div>
@@ -108,7 +135,7 @@ function ConversationCard({ conv, onClick }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-black text-primary uppercase tracking-wider truncate">
-            {conv.agent_name || "Unknown Agent"}
+            {conv.agent_name || 'Unknown Agent'}
           </p>
           <p className="text-sm font-bold text-white truncate" title={displayTitle}>
             {displayTitle}
@@ -127,30 +154,30 @@ function ConversationCard({ conv, onClick }) {
 // list of structured blocks (matches the shape agent_router.py's own last-message
 // preview extraction already assumes for the "My Chats" list).
 function textFromContent(content) {
-  if (typeof content === "string") return content;
+  if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
-    return content.map((b) => (typeof b === "string" ? b : b?.text || "")).join("\n");
+    return content.map((b) => (typeof b === 'string' ? b : b?.text || '')).join('\n');
   }
-  return "";
+  return '';
 }
 
 function ChatBubble({ message }) {
-  const isUser = message.role === "user";
+  const isUser = message.role === 'user';
   const text = textFromContent(message.content);
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
-            ? "bg-primary text-black font-medium"
-            : "bg-white/[0.04] border border-white/5 text-white/90"
+            ? 'bg-primary text-black font-medium'
+            : 'bg-white/[0.04] border border-white/5 text-white/90'
         }`}
       >
         {isUser ? (
           <span className="whitespace-pre-wrap">{text}</span>
         ) : (
           <div className="prose prose-invert prose-sm max-w-none prose-p:my-2 prose-pre:bg-black/40">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{text || "…"}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{text || '…'}</ReactMarkdown>
           </div>
         )}
       </div>
@@ -159,13 +186,13 @@ function ChatBubble({ message }) {
 }
 
 // ─── Main Component ──────────────────────────────────────────────────────────
-const TABS = ["templates", "my-agents", "my-chats"];
+const TABS = ['templates', 'my-agents', 'my-chats'];
 
 export default function AgentStudio({ apiKey }) {
   const router = useRouter();
   const params = useParams();
 
-  const [activeMainTab, setActiveMainTab] = useState("templates");
+  const [activeMainTab, setActiveMainTab] = useState('templates');
   const [agents, setAgents] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -178,20 +205,25 @@ export default function AgentStudio({ apiKey }) {
   // reading it back out via useParams() here drives an inline view instead of navigating
   // anywhere — see docs/whitelabel_plan.md for the full routing writeup.
   const tabSegments = Array.isArray(params?.tab) ? params.tab : [];
-  const agentsIdx = tabSegments.indexOf("agents");
+  const agentsIdx = tabSegments.indexOf('agents');
   const urlAgentSlug = agentsIdx === -1 ? null : tabSegments[agentsIdx + 1] || null;
   const urlConversationId = agentsIdx === -1 ? null : tabSegments[agentsIdx + 2] || null;
 
-  const [view, setView] = useState("list"); // 'list' | 'chat' | 'create'
+  const [view, setView] = useState('list'); // 'list' | 'chat' | 'create'
   const [activeAgent, setActiveAgent] = useState(null);
   const [conversationId, setConversationId] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput] = useState("");
+  const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [chatError, setChatError] = useState(null);
 
-  const [createForm, setCreateForm] = useState({ name: "", description: "", system_prompt: "", welcome_message: "" });
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    description: '',
+    system_prompt: '',
+    welcome_message: '',
+  });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
 
@@ -214,7 +246,7 @@ export default function AgentStudio({ apiKey }) {
   );
 
   const handleCreateAgent = useCallback(() => {
-    router.push("/agents/create");
+    router.push('/agents/create');
   }, [router]);
 
   const handleOpenConversation = useCallback(
@@ -229,12 +261,12 @@ export default function AgentStudio({ apiKey }) {
   // trying to load an agent named "edit" and showing a confusing error.
   useEffect(() => {
     if (!apiKey) return;
-    if (!urlAgentSlug || urlAgentSlug === "edit") {
-      setView("list");
+    if (!urlAgentSlug || urlAgentSlug === 'edit') {
+      setView('list');
       return;
     }
-    if (urlAgentSlug === "create") {
-      setView("create");
+    if (urlAgentSlug === 'create') {
+      setView('create');
       return;
     }
 
@@ -255,22 +287,24 @@ export default function AgentStudio({ apiKey }) {
           setConversationId(null);
           setChatMessages([]);
         }
-        setView("chat");
+        setView('chat');
       } catch (err) {
-        if (!cancelled) setChatError(err.message || "Failed to load agent");
+        if (!cancelled) setChatError(err.message || 'Failed to load agent');
       } finally {
         if (!cancelled) setChatLoading(false);
       }
     }
     openFromUrl();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [apiKey, urlAgentSlug, urlConversationId]);
 
   const handleSendMessage = useCallback(async () => {
     if (!chatInput.trim() || sending || !activeAgent) return;
     const text = chatInput.trim();
-    setChatInput("");
-    setChatMessages((prev) => [...prev, { role: "user", content: text }]);
+    setChatInput('');
+    setChatMessages((prev) => [...prev, { role: 'user', content: text }]);
     setSending(true);
     setChatError(null);
     try {
@@ -279,23 +313,22 @@ export default function AgentStudio({ apiKey }) {
         message: text,
         conversationId,
       });
-      const result = response.request_id ? await pollAgentChatResult(apiKey, response.request_id) : response;
+      const result = response.request_id
+        ? await pollAgentChatResult(apiKey, response.request_id)
+        : response;
       // result.messages is only this turn's assistant/pulse entries, not the
       // full transcript (see AiAgent.jsx) — append, don't replace, or every
       // send wipes the user's own message and all prior history from view.
       const assistantMessage = (result.messages || []).find(
-        (m) => m.role === "assistant" && m.content
+        (m) => m.role === 'assistant' && m.content
       );
-      setChatMessages((prev) => [
-        ...prev,
-        assistantMessage || { role: "assistant", content: "" },
-      ]);
+      setChatMessages((prev) => [...prev, assistantMessage || { role: 'assistant', content: '' }]);
       if (result.conversation_id && result.conversation_id !== conversationId) {
         setConversationId(result.conversation_id);
         router.replace(`/agents/${agentSlug}/${result.conversation_id}`, { scroll: false });
       }
     } catch (err) {
-      setChatError(err.message || "Failed to send message");
+      setChatError(err.message || 'Failed to send message');
     } finally {
       setSending(false);
     }
@@ -317,7 +350,7 @@ export default function AgentStudio({ apiKey }) {
         });
         router.push(`/agents/${created.agent_id}`);
       } catch (err) {
-        setCreateError(err.message || "Failed to create agent");
+        setCreateError(err.message || 'Failed to create agent');
       } finally {
         setCreating(false);
       }
@@ -326,7 +359,7 @@ export default function AgentStudio({ apiKey }) {
   );
 
   useEffect(() => {
-    if (!apiKey || view !== "list") return;
+    if (!apiKey || view !== 'list') return;
     let cancelled = false;
 
     async function load() {
@@ -335,44 +368,57 @@ export default function AgentStudio({ apiKey }) {
       setAgents([]);
       setConversations([]);
       try {
-        if (activeMainTab === "templates") {
+        if (activeMainTab === 'templates') {
           const data = await getTemplateAgents(apiKey);
           if (!cancelled) setAgents(data);
-        } else if (activeMainTab === "my-agents") {
+        } else if (activeMainTab === 'my-agents') {
           const data = await getUserAgents(apiKey);
           if (!cancelled) setAgents(data);
-        } else if (activeMainTab === "my-chats") {
+        } else if (activeMainTab === 'my-chats') {
           const data = await getUserConversations(apiKey);
           if (!cancelled) setConversations(data);
         }
       } catch (err) {
-        console.error("AgentStudio load error:", err);
-        if (!cancelled) setError(err.message || "Failed to load.");
+        console.error('AgentStudio load error:', err);
+        if (!cancelled) setError(err.message || 'Failed to load.');
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [apiKey, activeMainTab, view]);
 
   // ── Render: Create ───────────────────────────────────────────────────────────
-  if (view === "create") {
+  if (view === 'create') {
     return (
       <div className="h-full flex flex-col bg-app-bg text-white overflow-y-auto custom-scrollbar">
         <div className="flex-shrink-0 h-16 border-b border-white/5 flex items-center gap-6 px-8 bg-black/40">
           <button
-            onClick={() => router.push("/agents")}
+            onClick={() => router.push('/agents')}
             className="flex items-center gap-2 text-xs font-bold text-white/50 hover:text-white transition-colors"
             type="button"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Agents
           </button>
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">Create Agent</h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">
+            Create Agent
+          </h2>
         </div>
 
         <form onSubmit={handleCreateSubmit} className="max-w-2xl w-full mx-auto p-8 space-y-6">
@@ -412,9 +458,7 @@ export default function AgentStudio({ apiKey }) {
             placeholder="Hi! How can I help you today?"
           />
 
-          {createError && (
-            <p className="text-xs font-bold text-red-400">{createError}</p>
-          )}
+          {createError && <p className="text-xs font-bold text-red-400">{createError}</p>}
 
           <Button
             type="submit"
@@ -431,16 +475,25 @@ export default function AgentStudio({ apiKey }) {
   }
 
   // ── Render: Chat ─────────────────────────────────────────────────────────────
-  if (view === "chat") {
+  if (view === 'chat') {
     return (
       <div className="h-full flex flex-col bg-app-bg text-white">
         <div className="flex-shrink-0 h-16 border-b border-white/5 flex items-center gap-4 px-8 bg-black/40">
           <button
-            onClick={() => router.push("/agents")}
+            onClick={() => router.push('/agents')}
             className="flex items-center gap-2 text-xs font-bold text-white/50 hover:text-white transition-colors"
             type="button"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Agents
@@ -450,7 +503,11 @@ export default function AgentStudio({ apiKey }) {
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg overflow-hidden bg-white/5 border border-white/5 shrink-0">
                 {activeAgent.icon_url ? (
-                  <img src={activeAgent.icon_url} alt={activeAgent.name} className="w-full h-full object-cover" />
+                  <img
+                    src={activeAgent.icon_url}
+                    alt={activeAgent.name}
+                    className="w-full h-full object-cover"
+                  />
                 ) : null}
               </div>
               <span className="text-sm font-bold text-white">{activeAgent.name}</span>
@@ -466,7 +523,7 @@ export default function AgentStudio({ apiKey }) {
           ) : (
             <>
               {chatMessages.length === 0 && activeAgent?.welcome_message && (
-                <ChatBubble message={{ role: "assistant", content: activeAgent.welcome_message }} />
+                <ChatBubble message={{ role: 'assistant', content: activeAgent.welcome_message }} />
               )}
               {chatMessages.map((msg, i) => (
                 <ChatBubble key={i} message={msg} />
@@ -478,23 +535,24 @@ export default function AgentStudio({ apiKey }) {
                   </div>
                 </div>
               )}
-              {chatError && (
-                <p className="text-xs font-bold text-red-400">{chatError}</p>
-              )}
+              {chatError && <p className="text-xs font-bold text-red-400">{chatError}</p>}
             </>
           )}
         </div>
 
         <div className="flex-shrink-0 border-t border-white/5 p-6 bg-black/40">
           <form
-            onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
             className="max-w-3xl w-full mx-auto flex items-end gap-3"
           >
             <textarea
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSendMessage();
                 }
@@ -523,9 +581,7 @@ export default function AgentStudio({ apiKey }) {
       {/* Header */}
       <div className="flex-shrink-0 h-16 border-b border-white/5 flex items-center justify-between px-8 bg-black/40">
         <div className="flex items-center gap-8 h-full">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">
-            Agents
-          </h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">Agents</h2>
           <div className="flex gap-1 bg-white/5 p-1 rounded-xl">
             {TABS.map((tab) => (
               <button
@@ -533,11 +589,11 @@ export default function AgentStudio({ apiKey }) {
                 onClick={() => setActiveMainTab(tab)}
                 className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
                   activeMainTab === tab
-                    ? "bg-white text-black shadow-xl"
-                    : "text-white/60 hover:text-white hover:bg-white/5"
+                    ? 'bg-white text-black shadow-xl'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
                 }`}
               >
-                {tab.replace(/-/g, " ")}
+                {tab.replace(/-/g, ' ')}
               </button>
             ))}
           </div>
@@ -561,7 +617,14 @@ export default function AgentStudio({ apiKey }) {
           </div>
         ) : error ? (
           <div className="h-full flex flex-col items-center justify-center text-white/60 gap-4">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1"
+            >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -575,53 +638,57 @@ export default function AgentStudio({ apiKey }) {
               Retry
             </Button>
           </div>
-        ) : activeMainTab === "my-chats" ? (
+        ) : activeMainTab === 'my-chats' ? (
           // ── My Chats view ─────────────────────────────────────────────────
           conversations.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-white/10 gap-4">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
+              <svg
+                width="60"
+                height="60"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+              >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
               <p className="text-[10px] font-black uppercase tracking-[0.3em]">No chats yet</p>
-              <Button
-                onClick={() => setActiveMainTab("templates")}
-                variant="outline"
-                size="sm"
-              >
+              <Button onClick={() => setActiveMainTab('templates')} variant="outline" size="sm">
                 Browse Templates
               </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-[1600px] mx-auto">
               {conversations.map((conv) => (
-                <ConversationCard
-                  key={conv.id}
-                  conv={conv}
-                  onClick={handleOpenConversation}
-                />
+                <ConversationCard key={conv.id} conv={conv} onClick={handleOpenConversation} />
               ))}
             </div>
           )
+        ) : // ── Agents grid (templates / my-agents) ───────────────────────────
+        agents.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-white/10 gap-4">
+            <svg
+              width="60"
+              height="60"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.5"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em]">No agents found</p>
+          </div>
         ) : (
-          // ── Agents grid (templates / my-agents) ───────────────────────────
-          agents.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-white/10 gap-4">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em]">No agents found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 max-w-[1600px] mx-auto">
-              {agents.map((agent) => (
-                <AgentCard
-                  key={agent.agent_id || agent.id}
-                  agent={agent}
-                  onClick={handleSelectAgent}
-                />
-              ))}
-            </div>
-          )
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 max-w-[1600px] mx-auto">
+            {agents.map((agent) => (
+              <AgentCard
+                key={agent.agent_id || agent.id}
+                agent={agent}
+                onClick={handleSelectAgent}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

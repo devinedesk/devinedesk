@@ -1,13 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { runMotionGraphics, runMotionGraphicsEdit } from "../apiClient.js";
-import { formatErrorMessage } from "../utils/formatError.js";
-import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
-import MobileGenerationActions, {
-  GenerationCopyButtons,
-} from "./MobileGenerationActions.jsx";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { runMotionGraphics, runMotionGraphicsEdit } from '../apiClient.js';
+import { formatErrorMessage } from '../utils/formatError.js';
+import { scopedPersistKey, migrateLegacyPersistKey } from '../persistKey.js';
+import MobileGenerationActions, { GenerationCopyButtons } from './MobileGenerationActions.jsx';
 import {
   PROMPT_CONTROL_LABEL_CLASS,
   PromptAspectRatioIcon,
@@ -25,7 +23,7 @@ import {
   PromptSegmentOption,
   PromptTextarea,
   promptControlClassName,
-} from "./prompt/PromptComposer.jsx";
+} from './prompt/PromptComposer.jsx';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 async function downloadFile(url, filename) {
@@ -33,7 +31,7 @@ async function downloadFile(url, filename) {
     const res = await fetch(url);
     const blob = await res.blob();
     const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = blobUrl;
     a.download = filename;
     document.body.appendChild(a);
@@ -41,16 +39,23 @@ async function downloadFile(url, filename) {
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
   } catch {
-    window.open(url, "_blank");
+    window.open(url, '_blank');
   }
 }
 
-const formatTime = (s) =>
-  `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 // ── icons ─────────────────────────────────────────────────────────────────────
 const CheckSvg = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-primary" strokeWidth="4">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    className="text-primary"
+    strokeWidth="4"
+  >
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
@@ -58,10 +63,7 @@ const CheckSvg = () => (
 // ── Dropdown helper ───────────────────────────────────────────────────────────
 function DropdownItem({ label, selected, onClick }) {
   return (
-    <PromptMenuItem
-      selected={selected}
-      onClick={onClick}
-    >
+    <PromptMenuItem selected={selected} onClick={onClick}>
       {label}
     </PromptMenuItem>
   );
@@ -75,20 +77,20 @@ export default function VibeMotionStudio({
   onGenerationComplete,
   onGenerationError,
 }) {
-  const LEGACY_PERSIST_KEY = "hg_vibe_motion_studio_persistent";
+  const LEGACY_PERSIST_KEY = 'hg_vibe_motion_studio_persistent';
   const PERSIST_KEY = scopedPersistKey(LEGACY_PERSIST_KEY, apiKey);
   useEffect(() => {
     migrateLegacyPersistKey(LEGACY_PERSIST_KEY, PERSIST_KEY);
   }, [PERSIST_KEY]);
 
   // ── Params ────────────────────────────────────────────────────────────────
-  const [prompt, setPrompt] = useState("");
-  const [aspectRatio, setAspectRatio] = useState("16:9");
+  const [prompt, setPrompt] = useState('');
+  const [aspectRatio, setAspectRatio] = useState('16:9');
   const [duration, setDuration] = useState(6);
 
   // ── Edit mode ─────────────────────────────────────────────────────────────
   const [editMode, setEditMode] = useState(false);
-  const [editSourceId, setEditSourceId] = useState(null);  // request_id of source
+  const [editSourceId, setEditSourceId] = useState(null); // request_id of source
 
   // ── Dropdown open state ───────────────────────────────────────────────────
   const [openDropdown, setOpenDropdown] = useState(null); // "ar" | "dur" | "source"
@@ -109,7 +111,7 @@ export default function VibeMotionStudio({
   // ── Load from localStorage ─────────────────────────────────────────────────
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(PERSIST_KEY) || "[]");
+      const saved = JSON.parse(localStorage.getItem(PERSIST_KEY) || '[]');
       if (Array.isArray(saved)) {
         // Strip any wrongly-persisted canEdit:false flags from old bug — restore all entries as remixable
         const restored = saved.map((h) => {
@@ -125,7 +127,9 @@ export default function VibeMotionStudio({
     setHistory(items);
     // Strip canEdit from persisted data — it is an in-memory hint only
     const stripped = items.map(({ canEdit, ...rest }) => rest);
-    try { localStorage.setItem(PERSIST_KEY, JSON.stringify(stripped)); } catch (_) {}
+    try {
+      localStorage.setItem(PERSIST_KEY, JSON.stringify(stripped));
+    } catch (_) {}
   }, []);
 
   // ── Close dropdowns on outside click ─────────────────────────────────────
@@ -135,15 +139,18 @@ export default function VibeMotionStudio({
         setOpenDropdown(null);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
   // ── Timer ─────────────────────────────────────────────────────────────────
   const startTimer = () => {
     setElapsedTime(0);
     timerRef.current = setInterval(() => setElapsedTime((t) => t + 1), 1000);
   };
-  const stopTimer = () => { clearInterval(timerRef.current); timerRef.current = null; };
+  const stopTimer = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = null;
+  };
   useEffect(() => () => stopTimer(), []);
 
   // ── Generate ──────────────────────────────────────────────────────────────
@@ -161,14 +168,18 @@ export default function VibeMotionStudio({
           edit_prompt: prompt.trim(),
           aspect_ratio: aspectRatio,
           duration_seconds: duration,
-          onRequestId: (id) => { pendingRequestId.current = id; },
+          onRequestId: (id) => {
+            pendingRequestId.current = id;
+          },
         });
       } else {
         result = await runMotionGraphics(apiKey, {
           prompt: prompt.trim(),
           aspect_ratio: aspectRatio,
           duration_seconds: duration,
-          onRequestId: (id) => { pendingRequestId.current = id; },
+          onRequestId: (id) => {
+            pendingRequestId.current = id;
+          },
         });
       }
 
@@ -182,7 +193,7 @@ export default function VibeMotionStudio({
         prompt: prompt.trim(),
         aspectRatio,
         duration,
-        mode: editMode ? "edit" : "generate",
+        mode: editMode ? 'edit' : 'generate',
         sourceId: editMode ? editSourceId : null,
         timestamp: new Date().toISOString(),
         // Mark as editable — only generations created with saved animation code can be remixed
@@ -191,25 +202,26 @@ export default function VibeMotionStudio({
 
       const next = [entry, ...history].slice(0, 30);
       saveHistory(next);
-      onGenerationComplete?.({ url: videoUrl, type: "video" });
+      onGenerationComplete?.({ url: videoUrl, type: 'video' });
     } catch (err) {
       // Detect the backend's "animation code not saved" limitation
-      const raw = err.message || "";
+      const raw = err.message || '';
       const isStaleEdit =
-        raw.includes("animation code") ||
-        raw.includes("does not have saved") ||
-        raw.includes("Original generation does not");
+        raw.includes('animation code') ||
+        raw.includes('does not have saved') ||
+        raw.includes('Original generation does not');
 
       if (isStaleEdit) {
-        console.warn("[VibeMotionStudio] Remix unavailable:", raw.slice(0, 120));
-        const msg = "This generation can't be remixed — the animation code wasn't saved server-side. Generate a new motion graphic first, then remix that result.";
+        console.warn('[VibeMotionStudio] Remix unavailable:', raw.slice(0, 120));
+        const msg =
+          "This generation can't be remixed — the animation code wasn't saved server-side. Generate a new motion graphic first, then remix that result.";
         if (onGenerationError) onGenerationError(msg);
         else toast.error(msg);
         setEditMode(false);
         setEditSourceId(null);
       } else {
-        console.error("[VibeMotionStudio]", err);
-        const errMsg = formatErrorMessage(raw || err, "Vibe Motion generation failed");
+        console.error('[VibeMotionStudio]', err);
+        const errMsg = formatErrorMessage(raw || err, 'Vibe Motion generation failed');
         if (onGenerationError) onGenerationError(errMsg);
         else toast.error(errMsg);
       }
@@ -234,7 +246,7 @@ export default function VibeMotionStudio({
   ]);
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleGenerate();
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleGenerate();
   };
 
   const toggleDropdown = (type) => (e) => {
@@ -242,7 +254,7 @@ export default function VibeMotionStudio({
     setOpenDropdown((prev) => (prev === type ? null : type));
   };
 
-  const ASPECT_RATIOS = ["16:9", "9:16", "1:1"];
+  const ASPECT_RATIOS = ['16:9', '9:16', '1:1'];
   const DURATION_OPTIONS = [5, 6, 8, 10, 12, 15, 20, 25, 30];
 
   // Show all entries with a requestId as editable UNLESS they are explicitly marked canEdit:false
@@ -261,14 +273,18 @@ export default function VibeMotionStudio({
         >
           <video
             src={fullscreenUrl}
-            autoPlay loop controls
+            autoPlay
+            loop
+            controls
             className="max-h-[90vh] max-w-[90vw] rounded shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
           <button
             className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors text-3xl font-light leading-none"
             onClick={() => setFullscreenUrl(null)}
-          >×</button>
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -283,21 +299,39 @@ export default function VibeMotionStudio({
                 <div className="absolute inset-2 rounded-full border-2 border-primary/30 animate-spin" />
                 <div className="absolute inset-4 rounded-full border-2 border-violet-400/50 animate-[spin_1.5s_linear_infinite_reverse]" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400 animate-pulse">
-                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-violet-400 animate-pulse"
+                  >
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
                   </svg>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-1">
                 <span className="text-white/80 font-semibold text-sm">
-                  {editMode ? "Remixing motion graphics…" : "Generating motion graphics…"}
+                  {editMode ? 'Remixing motion graphics…' : 'Generating motion graphics…'}
                 </span>
                 <span className="text-white/60 text-xs">React/Remotion rendering on Modal</span>
               </div>
               <div className="flex items-center gap-2 text-white/60 text-xs bg-white/[0.03] px-4 py-1.5 rounded-full border border-white/[0.05]">
-                <svg className="animate-spin" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <circle cx="12" cy="12" r="10" strokeOpacity="0.2"/>
-                  <path d="M12 2a10 10 0 0 1 10 10"/>
+                <svg
+                  className="animate-spin"
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                >
+                  <circle cx="12" cy="12" r="10" strokeOpacity="0.2" />
+                  <path d="M12 2a10 10 0 0 1 10 10" />
                 </svg>
                 {formatTime(elapsedTime)}
               </div>
@@ -322,31 +356,43 @@ export default function VibeMotionStudio({
                   muted
                   playsInline
                   onMouseOver={(e) => e.target.play()}
-                  onMouseOut={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+                  onMouseOut={(e) => {
+                    e.target.pause();
+                    e.target.currentTime = 0;
+                  }}
                 />
 
                 {/* ── Mode tag (top-left) ── */}
-                <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm border ${
-                  entry.mode === "edit"
-                    ? "bg-primary/20 text-primary border-primary/30"
-                    : "bg-violet-600/30 text-violet-300 border-violet-500/30"
-                }`}>
-                  {entry.mode === "edit" ? "✏ Edit" : "✦ Generated"}
+                <div
+                  className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm border ${
+                    entry.mode === 'edit'
+                      ? 'bg-primary/20 text-primary border-primary/30'
+                      : 'bg-violet-600/30 text-violet-300 border-violet-500/30'
+                  }`}
+                >
+                  {entry.mode === 'edit' ? '✏ Edit' : '✦ Generated'}
                 </div>
 
                 {/* ── Hover overlay actions ── */}
                 <div className="absolute top-2 right-2 hidden md:flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <GenerationCopyButtons
-                    prompt={entry.prompt}
-                    onCopyError={onGenerationError}
-                  />
+                  <GenerationCopyButtons prompt={entry.prompt} onCopyError={onGenerationError} />
                   <button
                     type="button"
                     title="Download"
-                    onClick={(e) => { e.stopPropagation(); downloadFile(entry.url, `motion-${entry.id || idx}.mp4`); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadFile(entry.url, `motion-${entry.id || idx}.mp4`);
+                    }}
                     className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-primary hover:text-black transition-all border border-white/10"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
                       <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
                     </svg>
                   </button>
@@ -358,14 +404,23 @@ export default function VibeMotionStudio({
                         e.stopPropagation();
                         setEditMode(true);
                         setEditSourceId(entry.requestId);
-                        setPrompt("");
+                        setPrompt('');
                         setTimeout(() => textareaRef.current?.focus(), 50);
                       }}
                       className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-primary hover:text-black transition-all border border-white/10"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </button>
                   ) : entry.requestId && entry.canEdit === false ? (
@@ -374,10 +429,20 @@ export default function VibeMotionStudio({
                       title="Legacy generation — remix not available. Generate a new motion graphic to enable editing."
                       className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white/60 border border-white/5 cursor-not-allowed"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2"/>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="opacity-40"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" strokeWidth="2" />
                       </svg>
                     </div>
                   ) : null}
@@ -386,13 +451,20 @@ export default function VibeMotionStudio({
                     title="Delete"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm("Are you sure you want to delete this generated item?")) {
-                        setHistory(prev => prev.filter((_, i) => i !== idx));
+                      if (confirm('Are you sure you want to delete this generated item?')) {
+                        setHistory((prev) => prev.filter((_, i) => i !== idx));
                       }
                     }}
                     className="p-2 bg-black/60 backdrop-blur-md rounded-full text-red-400 hover:bg-red-500 hover:text-white transition-all border border-white/10"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
                       <polyline points="3 6 5 6 21 6" />
                       <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                       <line x1="10" y1="11" x2="10" y2="17" />
@@ -405,28 +477,27 @@ export default function VibeMotionStudio({
                   onCopyError={onGenerationError}
                   actions={[
                     {
-                      kind: "download",
-                      label: "Download",
-                      onSelect: () =>
-                        downloadFile(entry.url, `motion-${entry.id || idx}.mp4`),
+                      kind: 'download',
+                      label: 'Download',
+                      onSelect: () => downloadFile(entry.url, `motion-${entry.id || idx}.mp4`),
                     },
                     entry.requestId &&
                       entry.canEdit !== false && {
-                        kind: "remix",
-                        label: "Remix",
+                        kind: 'remix',
+                        label: 'Remix',
                         onSelect: () => {
                           setEditMode(true);
                           setEditSourceId(entry.requestId);
-                          setPrompt("");
+                          setPrompt('');
                           setTimeout(() => textareaRef.current?.focus(), 50);
                         },
                       },
                     {
-                      kind: "delete",
-                      label: "Delete",
+                      kind: 'delete',
+                      label: 'Delete',
                       danger: true,
                       onSelect: () => {
-                        if (confirm("Are you sure you want to delete this generated item?")) {
+                        if (confirm('Are you sure you want to delete this generated item?')) {
                           setHistory((prev) => prev.filter((_, i) => i !== idx));
                         }
                       },
@@ -436,8 +507,11 @@ export default function VibeMotionStudio({
 
                 {/* ── Card footer: prompt + metadata ── */}
                 <div className="p-3 bg-black/80 backdrop-blur-sm border-t border-white/5 flex-1 flex flex-col justify-between gap-2">
-                  <p className="text-white/70 text-xs line-clamp-3 leading-relaxed" title={entry.prompt}>
-                    {entry.prompt || "No prompt"}
+                  <p
+                    className="text-white/70 text-xs line-clamp-3 leading-relaxed"
+                    title={entry.prompt}
+                  >
+                    {entry.prompt || 'No prompt'}
                   </p>
                   <div className="flex items-center justify-between mt-1 flex-wrap gap-1">
                     <div className="flex items-center gap-2">
@@ -494,13 +568,16 @@ export default function VibeMotionStudio({
             </div>
 
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-center px-4 flex flex-col items-center">
-              <span className="text-white font-black uppercase text-xl sm:text-3xl tracking-wide mb-1 opacity-90">START CREATING WITH</span>
+              <span className="text-white font-black uppercase text-xl sm:text-3xl tracking-wide mb-1 opacity-90">
+                START CREATING WITH
+              </span>
               <span className="text-primary font-black uppercase text-2xl sm:text-4xl sm:mt-1 tracking-tight">
                 VIBE MOTION STUDIO
               </span>
             </h1>
             <p className="text-white/60 text-xs sm:text-sm font-medium tracking-wide text-center max-w-lg leading-relaxed px-4">
-              Generate animated motion graphics from a text prompt — kinetic typography, data charts, logo reveals, and more.
+              Generate animated motion graphics from a text prompt — kinetic typography, data
+              charts, logo reveals, and more.
             </p>
           </div>
         ) : null}
@@ -508,206 +585,258 @@ export default function VibeMotionStudio({
 
       {/* ── BOTTOM PROMPT BAR — matches VideoStudio exactly ── */}
       <PromptComposer>
+        {/* ── Top Row: Mode Toggle & Edit Source Banner ── */}
+        <div className="flex items-center justify-between gap-3 px-1">
+          {/* Left: Mode toggle pill */}
+          <PromptSegmentedControl className="flex-shrink-0">
+            <PromptSegmentOption
+              type="button"
+              onClick={() => {
+                setEditMode(false);
+                setEditSourceId(null);
+              }}
+              selected={!editMode}
+            >
+              Generate
+            </PromptSegmentOption>
+            <PromptSegmentOption
+              type="button"
+              onClick={() => setEditMode(true)}
+              disabled={editSources.length === 0}
+              selected={editMode}
+              className="disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Edit
+            </PromptSegmentOption>
+          </PromptSegmentedControl>
 
-          {/* ── Top Row: Mode Toggle & Edit Source Banner ── */}
-          <div className="flex items-center justify-between gap-3 px-1">
-            {/* Left: Mode toggle pill */}
-            <PromptSegmentedControl className="flex-shrink-0">
-              <PromptSegmentOption
-                type="button"
-                onClick={() => { setEditMode(false); setEditSourceId(null); }}
-                selected={!editMode}
+          {/* Right: Edit mode status banner beside toggle buttons */}
+          {editMode && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full text-[11px] text-primary font-medium tracking-tight min-w-0 max-w-full overflow-hidden">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="flex-shrink-0"
               >
-                Generate
-              </PromptSegmentOption>
-              <PromptSegmentOption
-                type="button"
-                onClick={() => setEditMode(true)}
-                disabled={editSources.length === 0}
-                selected={editMode}
-                className="disabled:opacity-30 disabled:cursor-not-allowed"
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              <span className="truncate">
+                {sourceEntry
+                  ? `Editing: "${sourceEntry.prompt?.slice(0, 45)}${sourceEntry.prompt?.length > 45 ? '…' : ''}"`
+                  : 'Select a source generation from the gallery'}
+              </span>
+              <button
+                onClick={() => {
+                  setEditMode(false);
+                  setEditSourceId(null);
+                  setPrompt('');
+                }}
+                className="ml-auto text-primary/40 hover:text-primary transition-colors text-sm leading-none flex-shrink-0"
+                title="Cancel Edit Mode"
               >
-                Edit
-              </PromptSegmentOption>
-            </PromptSegmentedControl>
-
-            {/* Right: Edit mode status banner beside toggle buttons */}
-            {editMode && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/10 rounded-full text-[11px] text-primary font-medium tracking-tight min-w-0 max-w-full overflow-hidden">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="flex-shrink-0">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-                <span className="truncate">
-                  {sourceEntry
-                    ? `Editing: "${sourceEntry.prompt?.slice(0, 45)}${sourceEntry.prompt?.length > 45 ? "…" : ""}"`
-                    : "Select a source generation from the gallery"}
-                </span>
-                <button
-                  onClick={() => { setEditMode(false); setEditSourceId(null); setPrompt(""); }}
-                  className="ml-auto text-primary/40 hover:text-primary transition-colors text-sm leading-none flex-shrink-0"
-                  title="Cancel Edit Mode"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-          </div>
-
-            {/* Bottom: Textarea full width */}
-            <div className="w-full">
-              <PromptTextarea
-                ref={textareaRef}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={
-                  editMode
-                    ? "Describe what to change — 'change background to dark navy, make bars gold, add particles…'"
-                    : "Describe the motion graphic — 'Animated sales dashboard with glowing bar charts and rising numbers'"
-                }
-              />
-            </div>
-
-          {/* ── Error banner ── */}
-          {generateError && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-xs">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              {generateError}
+                ×
+              </button>
             </div>
           )}
+        </div>
 
-          {/* ── Controls row: dropdowns + generate button ── */}
-          <PromptFooter>
-            <PromptControls ref={controlsRef}>
+        {/* Bottom: Textarea full width */}
+        <div className="w-full">
+          <PromptTextarea
+            ref={textareaRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              editMode
+                ? "Describe what to change — 'change background to dark navy, make bars gold, add particles…'"
+                : "Describe the motion graphic — 'Animated sales dashboard with glowing bar charts and rising numbers'"
+            }
+          />
+        </div>
 
-              {/* ── Aspect Ratio dropdown ── */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={toggleDropdown("ar")}
-                  className={promptControlClassName({
-                    active: openDropdown === "ar",
-                  })}
-                >
-                  <PromptAspectRatioIcon />
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {aspectRatio}
-                  </span>
-                </button>
-                {openDropdown === "ar" && (
-                  <PromptPopover>
-                    <PromptPopoverHeader>Aspect Ratio</PromptPopoverHeader>
-                    <PromptMenuList>
-                      {ASPECT_RATIOS.map((ar) => (
-                        <DropdownItem
-                          key={ar}
-                          label={ar}
-                          selected={aspectRatio === ar}
-                          onClick={() => { setAspectRatio(ar); setOpenDropdown(null); }}
-                        />
-                      ))}
-                    </PromptMenuList>
-                  </PromptPopover>
-                )}
-              </div>
-
-              {/* ── Duration dropdown ── */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={toggleDropdown("dur")}
-                  className={promptControlClassName({
-                    active: openDropdown === "dur",
-                  })}
-                >
-                  <PromptDurationIcon />
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {duration}s
-                  </span>
-                </button>
-                {openDropdown === "dur" && (
-                  <PromptPopover>
-                    <PromptPopoverHeader>Duration</PromptPopoverHeader>
-                    <PromptMenuList>
-                      {DURATION_OPTIONS.map((d) => (
-                        <DropdownItem
-                          key={d}
-                          label={`${d}s`}
-                          selected={duration === d}
-                          onClick={() => { setDuration(d); setOpenDropdown(null); }}
-                        />
-                      ))}
-                    </PromptMenuList>
-                  </PromptPopover>
-                )}
-              </div>
-
-              {/* Edit source picker dropdown — only shown in edit mode */}
-              {editMode && editSources.length > 0 && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={toggleDropdown("source")}
-                    className={promptControlClassName({ active: true })}
-                  >
-                    <div className="w-4 h-4 bg-primary/20 rounded flex items-center justify-center border border-primary/30">
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-primary" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </div>
-                    <span className={`${PROMPT_CONTROL_LABEL_CLASS} text-primary/70 max-w-[120px] truncate`}>
-                      {sourceEntry ? `Source: ${sourceEntry.prompt?.slice(0, 20)}…` : "Pick source…"}
-                    </span>
-                    <PromptChevronIcon />
-                  </button>
-                  {openDropdown === "source" && (
-                    <PromptPopover className="w-64">
-                      <PromptPopoverHeader>Source Generation</PromptPopoverHeader>
-                      <div className="flex flex-col gap-1">
-                        {editSources.map((src) => (
-                          <div
-                            key={src.requestId}
-                            className="flex items-center gap-3 p-2 hover:bg-white/5 rounded cursor-pointer transition-all group/opt"
-                            onClick={() => { setEditSourceId(src.requestId); setOpenDropdown(null); }}
-                          >
-                            <div className="w-10 h-7 rounded overflow-hidden bg-black/40 flex-shrink-0 border border-white/5">
-                              <video src={src.url} className="w-full h-full object-cover" muted playsInline />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] text-white/70 truncate leading-tight group-hover/opt:text-white">{src.prompt}</p>
-                              <p className="text-[9px] text-white/60 mt-0.5">{src.aspectRatio} · {src.duration}s</p>
-                            </div>
-                            {editSourceId === src.requestId && <CheckSvg />}
-                          </div>
-                        ))}
-                      </div>
-                    </PromptPopover>
-                  )}
-                </div>
-              )}
-
-              <span className="text-[10px] text-white/60 hidden sm:block ml-2">Ctrl+Enter to run</span>
-            </PromptControls>
-
-            {/* ── Generate Button — matches VideoStudio exactly ── */}
-            <PromptAction
-              onClick={handleGenerate}
-              disabled={generating || !prompt.trim() || (editMode && !editSourceId)}
+        {/* ── Error banner ── */}
+        {generateError && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-xs">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
             >
-              {generating ? (
-                <>
-                  <span className="animate-spin inline-block text-black">◌</span>{" "}
-                  {editMode ? "Remixing..." : "Generating..."}
-                </>
-              ) : editMode ? (
-                <span>Remix</span>
-              ) : (
-                <span>Generate</span>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            {generateError}
+          </div>
+        )}
+
+        {/* ── Controls row: dropdowns + generate button ── */}
+        <PromptFooter>
+          <PromptControls ref={controlsRef}>
+            {/* ── Aspect Ratio dropdown ── */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={toggleDropdown('ar')}
+                className={promptControlClassName({
+                  active: openDropdown === 'ar',
+                })}
+              >
+                <PromptAspectRatioIcon />
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{aspectRatio}</span>
+              </button>
+              {openDropdown === 'ar' && (
+                <PromptPopover>
+                  <PromptPopoverHeader>Aspect Ratio</PromptPopoverHeader>
+                  <PromptMenuList>
+                    {ASPECT_RATIOS.map((ar) => (
+                      <DropdownItem
+                        key={ar}
+                        label={ar}
+                        selected={aspectRatio === ar}
+                        onClick={() => {
+                          setAspectRatio(ar);
+                          setOpenDropdown(null);
+                        }}
+                      />
+                    ))}
+                  </PromptMenuList>
+                </PromptPopover>
               )}
-            </PromptAction>
-          </PromptFooter>
+            </div>
+
+            {/* ── Duration dropdown ── */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={toggleDropdown('dur')}
+                className={promptControlClassName({
+                  active: openDropdown === 'dur',
+                })}
+              >
+                <PromptDurationIcon />
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{duration}s</span>
+              </button>
+              {openDropdown === 'dur' && (
+                <PromptPopover>
+                  <PromptPopoverHeader>Duration</PromptPopoverHeader>
+                  <PromptMenuList>
+                    {DURATION_OPTIONS.map((d) => (
+                      <DropdownItem
+                        key={d}
+                        label={`${d}s`}
+                        selected={duration === d}
+                        onClick={() => {
+                          setDuration(d);
+                          setOpenDropdown(null);
+                        }}
+                      />
+                    ))}
+                  </PromptMenuList>
+                </PromptPopover>
+              )}
+            </div>
+
+            {/* Edit source picker dropdown — only shown in edit mode */}
+            {editMode && editSources.length > 0 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={toggleDropdown('source')}
+                  className={promptControlClassName({ active: true })}
+                >
+                  <div className="w-4 h-4 bg-primary/20 rounded flex items-center justify-center border border-primary/30">
+                    <svg
+                      width="9"
+                      height="9"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      className="text-primary"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </div>
+                  <span
+                    className={`${PROMPT_CONTROL_LABEL_CLASS} text-primary/70 max-w-[120px] truncate`}
+                  >
+                    {sourceEntry ? `Source: ${sourceEntry.prompt?.slice(0, 20)}…` : 'Pick source…'}
+                  </span>
+                  <PromptChevronIcon />
+                </button>
+                {openDropdown === 'source' && (
+                  <PromptPopover className="w-64">
+                    <PromptPopoverHeader>Source Generation</PromptPopoverHeader>
+                    <div className="flex flex-col gap-1">
+                      {editSources.map((src) => (
+                        <div
+                          key={src.requestId}
+                          className="flex items-center gap-3 p-2 hover:bg-white/5 rounded cursor-pointer transition-all group/opt"
+                          onClick={() => {
+                            setEditSourceId(src.requestId);
+                            setOpenDropdown(null);
+                          }}
+                        >
+                          <div className="w-10 h-7 rounded overflow-hidden bg-black/40 flex-shrink-0 border border-white/5">
+                            <video
+                              src={src.url}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] text-white/70 truncate leading-tight group-hover/opt:text-white">
+                              {src.prompt}
+                            </p>
+                            <p className="text-[9px] text-white/60 mt-0.5">
+                              {src.aspectRatio} · {src.duration}s
+                            </p>
+                          </div>
+                          {editSourceId === src.requestId && <CheckSvg />}
+                        </div>
+                      ))}
+                    </div>
+                  </PromptPopover>
+                )}
+              </div>
+            )}
+
+            <span className="text-[10px] text-white/60 hidden sm:block ml-2">
+              Ctrl+Enter to run
+            </span>
+          </PromptControls>
+
+          {/* ── Generate Button — matches VideoStudio exactly ── */}
+          <PromptAction
+            onClick={handleGenerate}
+            disabled={generating || !prompt.trim() || (editMode && !editSourceId)}
+          >
+            {generating ? (
+              <>
+                <span className="animate-spin inline-block text-black">◌</span>{' '}
+                {editMode ? 'Remixing...' : 'Generating...'}
+              </>
+            ) : editMode ? (
+              <span>Remix</span>
+            ) : (
+              <span>Generate</span>
+            )}
+          </PromptAction>
+        </PromptFooter>
       </PromptComposer>
       <div className="absolute inset-x-0 bottom-0 pointer-events-none bg-gradient-to-t from-app-bg to-transparent h-8" />
     </div>

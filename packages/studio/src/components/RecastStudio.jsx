@@ -1,21 +1,15 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { processRecast, uploadFile } from "../apiClient.js";
-import { formatErrorMessage } from "../utils/formatError.js";
-import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
-import DrawModal from "./DrawModal.jsx";
-import MobileGenerationActions, {
-  GenerationCopyButtons,
-} from "./MobileGenerationActions.jsx";
-import { StudioGallery } from "./shared/StudioGallery.jsx";
-import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
-import {
-  recastModels,
-  getRecastModelById,
-  getAspectRatiosForRecastModel,
-} from "../models.js";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { processRecast, uploadFile } from '../apiClient.js';
+import { formatErrorMessage } from '../utils/formatError.js';
+import { scopedPersistKey, migrateLegacyPersistKey } from '../persistKey.js';
+import DrawModal from './DrawModal.jsx';
+import MobileGenerationActions, { GenerationCopyButtons } from './MobileGenerationActions.jsx';
+import { StudioGallery } from './shared/StudioGallery.jsx';
+import { EmptyStateHero } from './shared/EmptyStateHero.jsx';
+import { recastModels, getRecastModelById, getAspectRatiosForRecastModel } from '../models.js';
 import {
   PROMPT_CONTROL_LABEL_CLASS,
   PromptAspectRatioIcon,
@@ -31,15 +25,15 @@ import {
   PromptTextarea,
   promptControlClassName,
   promptMediaButtonClassName,
-} from "./prompt/PromptComposer.jsx";
+} from './prompt/PromptComposer.jsx';
 
 // ---------------------------------------------------------------------------
 // Upload button states
 // ---------------------------------------------------------------------------
 const UPLOAD_STATE = {
-  IDLE: "idle",
-  UPLOADING: "uploading",
-  READY: "ready",
+  IDLE: 'idle',
+  UPLOADING: 'uploading',
+  READY: 'ready',
 };
 
 function MediaPickerButton({
@@ -68,7 +62,7 @@ function MediaPickerButton({
   const handleChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = "";
+    e.target.value = '';
     await onUpload(file);
   };
 
@@ -95,9 +89,7 @@ function MediaPickerButton({
 
       {/* Idle state */}
       {uploadState === UPLOAD_STATE.IDLE && (
-        <div className="flex flex-col items-center justify-center gap-1 w-full h-full">
-          {icon}
-        </div>
+        <div className="flex flex-col items-center justify-center gap-1 w-full h-full">{icon}</div>
       )}
 
       {/* Uploading indicator */}
@@ -136,17 +128,9 @@ function MediaPickerButton({
         <div className="flex flex-col items-center justify-center gap-1 w-full h-full absolute inset-0 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-all">
           {previewUrl ? (
             isVideo ? (
-              <video
-                src={previewUrl}
-                className="w-full h-full object-cover"
-                muted
-              />
+              <video src={previewUrl} className="w-full h-full object-cover" muted />
             ) : (
-              <img
-                src={previewUrl}
-                alt=""
-                className="w-full h-full object-cover"
-              />
+              <img src={previewUrl} alt="" className="w-full h-full object-cover" />
             )
           ) : (
             icon
@@ -172,23 +156,20 @@ function AssetsDropdown({
   onClose,
   anchorRef,
 }) {
-  const [activeTab, setActiveTab] = useState("videos"); // 'videos' | 'images' | 'results'
+  const [activeTab, setActiveTab] = useState('videos'); // 'videos' | 'images' | 'results'
   const dropRef = useRef(null);
 
   useEffect(() => {
     const handler = (e) => {
-      if (
-        !dropRef.current?.contains(e.target) &&
-        !anchorRef?.current?.contains(e.target)
-      ) {
+      if (!dropRef.current?.contains(e.target) && !anchorRef?.current?.contains(e.target)) {
         onClose();
       }
     };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
   }, [onClose, anchorRef]);
 
-  const items = activeTab === "videos" ? videos : activeTab === "images" ? images : results;
+  const items = activeTab === 'videos' ? videos : activeTab === 'images' ? images : results;
 
   return (
     <PromptPopover
@@ -199,15 +180,15 @@ function AssetsDropdown({
       <PromptPopoverHeader className="mb-0">Asset Library</PromptPopoverHeader>
       {/* Tabs */}
       <div className="flex border-b border-white/5 pb-1">
-        {["videos", "images", "results"].map((tab) => (
+        {['videos', 'images', 'results'].map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
             className={`flex-1 text-center py-1 text-xs font-bold capitalize transition-colors ${
               activeTab === tab
-                ? "text-primary border-b border-primary"
-                : "text-white/60 hover:text-white/80"
+                ? 'text-primary border-b border-primary'
+                : 'text-white/60 hover:text-white/80'
             }`}
           >
             {tab}
@@ -226,9 +207,9 @@ function AssetsDropdown({
             <div
               key={idx}
               onClick={() => {
-                if (activeTab === "videos") {
+                if (activeTab === 'videos') {
                   onSelectVideo(item.url, item.name);
-                } else if (activeTab === "images") {
+                } else if (activeTab === 'images') {
                   onSelectImage(item.url, item.name);
                 } else {
                   onSelectResultAsVideo(item.url, item.name);
@@ -238,12 +219,8 @@ function AssetsDropdown({
             >
               {/* Media Preview Thumbnail */}
               <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 flex-shrink-0 relative">
-                {activeTab === "images" ? (
-                  <img
-                    src={item.url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
+                {activeTab === 'images' ? (
+                  <img src={item.url} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <video
                     src={item.url}
@@ -263,7 +240,14 @@ function AssetsDropdown({
                   }}
                   className="absolute inset-0 bg-black/60 opacity-0 group-hover/item:opacity-100 flex items-center justify-center transition-opacity text-white hover:text-primary"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                     <line x1="11" y1="8" x2="11" y2="14" />
@@ -299,7 +283,14 @@ function AssetsDropdown({
                   }}
                   className="p-1.5 text-white/60 hover:text-red-500 rounded hover:bg-white/5 transition-colors"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                   </svg>
@@ -324,47 +315,40 @@ function Dropdown({
   onSelect,
   onClose,
   anchorRef,
-  className = "",
+  className = '',
 }) {
   const dropRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e) => {
-      if (
-        !dropRef.current?.contains(e.target) &&
-        !anchorRef?.current?.contains(e.target)
-      ) {
+      if (!dropRef.current?.contains(e.target) && !anchorRef?.current?.contains(e.target)) {
         onClose();
       }
     };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
   }, [isOpen, onClose, anchorRef]);
 
   if (!isOpen) return null;
 
   return (
-    <PromptPopover
-      ref={dropRef}
-      className={className}
-      onClick={(e) => e.stopPropagation()}
-    >
+    <PromptPopover ref={dropRef} className={className} onClick={(e) => e.stopPropagation()}>
       <PromptPopoverHeader>{title}</PromptPopoverHeader>
       <PromptMenuList>
-      {items.map((item) => (
-        <PromptMenuItem
-          key={item.id}
-          selected={item.id === selectedId}
-          description={item.description?.slice(0, 75)}
-          onClick={() => {
-            onSelect(item);
-            onClose();
-          }}
-        >
-          {item.name}
-        </PromptMenuItem>
-      ))}
+        {items.map((item) => (
+          <PromptMenuItem
+            key={item.id}
+            selected={item.id === selectedId}
+            description={item.description?.slice(0, 75)}
+            onClick={() => {
+              onSelect(item);
+              onClose();
+            }}
+          >
+            {item.name}
+          </PromptMenuItem>
+        ))}
       </PromptMenuList>
     </PromptPopover>
   );
@@ -373,9 +357,7 @@ function Dropdown({
 // ---------------------------------------------------------------------------
 // SVG icons
 // ---------------------------------------------------------------------------
-const VideoIcon = ({
-  className = "text-white/60 group-hover:text-primary transition-colors",
-}) => (
+const VideoIcon = ({ className = 'text-white/60 group-hover:text-primary transition-colors' }) => (
   <svg
     width="16"
     height="16"
@@ -390,9 +372,7 @@ const VideoIcon = ({
   </svg>
 );
 
-const ImageIcon = ({
-  className = "text-white/60 group-hover:text-primary transition-colors",
-}) => (
+const ImageIcon = ({ className = 'text-white/60 group-hover:text-primary transition-colors' }) => (
   <svg
     width="16"
     height="16"
@@ -421,7 +401,7 @@ export default function RecastStudio({
   droppedFiles,
   onFilesHandled,
 }) {
-  const LEGACY_PERSIST_KEY = "hg_recast_studio_persistent";
+  const LEGACY_PERSIST_KEY = 'hg_recast_studio_persistent';
   const PERSIST_KEY = scopedPersistKey(LEGACY_PERSIST_KEY, apiKey);
   useEffect(() => {
     migrateLegacyPersistKey(LEGACY_PERSIST_KEY, PERSIST_KEY);
@@ -429,33 +409,33 @@ export default function RecastStudio({
 
   // ── Model state ───────────────────────────────────────────────────────────
   const firstModel = recastModels[0];
-  const [selectedModelId, setSelectedModelId] = useState(firstModel?.id ?? "");
+  const [selectedModelId, setSelectedModelId] = useState(firstModel?.id ?? '');
   const [selectedAspectRatio, setSelectedAspectRatio] = useState(
-    firstModel?.inputs?.aspect_ratio?.default ?? "16:9",
+    firstModel?.inputs?.aspect_ratio?.default ?? '16:9'
   );
 
   // ── Upload state ──────────────────────────────────────────────────────────
   const [videoState, setVideoState] = useState(UPLOAD_STATE.IDLE);
-  const [videoName, setVideoName] = useState("");
+  const [videoName, setVideoName] = useState('');
   const [videoUrl, setVideoUrl] = useState(null);
   const [videoProgress, setVideoProgress] = useState(0);
 
   const [imageState, setImageState] = useState(UPLOAD_STATE.IDLE);
-  const [imageName, setImageName] = useState("");
+  const [imageName, setImageName] = useState('');
   const [imageUrl, setImageUrl] = useState(null);
   const [imageProgress, setImageProgress] = useState(0);
 
   // ── Prompt ────────────────────────────────────────────────────────────────
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState('');
 
   // ── Character Orientation ─────────────────────────────────────────────────
-  const [characterOrientation, setCharacterOrientation] = useState("image");
+  const [characterOrientation, setCharacterOrientation] = useState('image');
 
   // ── Assets Library ────────────────────────────────────────────────────────
   const [assetVideos, setAssetVideos] = useState(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem("hg_recast_studio_assets");
+        const stored = localStorage.getItem('hg_recast_studio_assets');
         if (stored) {
           const data = JSON.parse(stored);
           return data.videos || [];
@@ -466,9 +446,9 @@ export default function RecastStudio({
   });
 
   const [assetImages, setAssetImages] = useState(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem("hg_recast_studio_assets");
+        const stored = localStorage.getItem('hg_recast_studio_assets');
         if (stored) {
           const data = JSON.parse(stored);
           return data.images || [];
@@ -479,9 +459,9 @@ export default function RecastStudio({
   });
 
   const [assetResults, setAssetResults] = useState(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem("hg_recast_studio_assets");
+        const stored = localStorage.getItem('hg_recast_studio_assets');
         if (stored) {
           const data = JSON.parse(stored);
           return data.results || [];
@@ -532,7 +512,7 @@ export default function RecastStudio({
         if (data.internalHistory) setInternalHistory(data.internalHistory);
       }
     } catch (err) {
-      console.warn("Failed to load RecastStudio persistence:", err);
+      console.warn('Failed to load RecastStudio persistence:', err);
     } finally {
       hasRestored.current = true;
     }
@@ -542,7 +522,7 @@ export default function RecastStudio({
   useEffect(() => {
     try {
       localStorage.setItem(
-        "hg_recast_studio_assets",
+        'hg_recast_studio_assets',
         JSON.stringify({
           videos: assetVideos,
           images: assetImages,
@@ -550,14 +530,14 @@ export default function RecastStudio({
         })
       );
     } catch (err) {
-      console.warn("Failed to save RecastStudio assets:", err);
+      console.warn('Failed to save RecastStudio assets:', err);
     }
   }, [assetVideos, assetImages, assetResults]);
 
   const handleDeleteAsset = (tab, url) => {
-    if (tab === "videos") {
+    if (tab === 'videos') {
       setAssetVideos((prev) => prev.filter((item) => item.url !== url));
-    } else if (tab === "images") {
+    } else if (tab === 'images') {
       setAssetImages((prev) => prev.filter((item) => item.url !== url));
     } else {
       setAssetResults((prev) => prev.filter((item) => item.url !== url));
@@ -580,10 +560,10 @@ export default function RecastStudio({
             imageName,
             prompt,
             internalHistory,
-          }),
+          })
         );
       } catch (err) {
-        console.warn("Failed to save RecastStudio persistence:", err);
+        console.warn('Failed to save RecastStudio persistence:', err);
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -609,7 +589,7 @@ export default function RecastStudio({
   const handleVideoPick = useCallback(
     async (file) => {
       if (file.size > 50 * 1024 * 1024) {
-        alert("Video exceeds 50MB limit.");
+        alert('Video exceeds 50MB limit.');
         return;
       }
       setVideoState(UPLOAD_STATE.UPLOADING);
@@ -624,7 +604,10 @@ export default function RecastStudio({
         setAssetVideos((prev) => {
           const exists = prev.some((item) => item.url === url);
           if (exists) return prev;
-          return [{ url, name: file.name, timestamp: new Date().toISOString() }, ...prev].slice(0, 30);
+          return [{ url, name: file.name, timestamp: new Date().toISOString() }, ...prev].slice(
+            0,
+            30
+          );
         });
       } catch (err) {
         setVideoState(UPLOAD_STATE.IDLE);
@@ -633,7 +616,7 @@ export default function RecastStudio({
         setVideoProgress(0);
       }
     },
-    [apiKey],
+    [apiKey]
   );
 
   const handlePromptInput = (e) => {
@@ -643,7 +626,7 @@ export default function RecastStudio({
   const handleImageUpload = useCallback(
     async (file) => {
       if (file.size > 10 * 1024 * 1024) {
-        alert("Image exceeds 10MB limit.");
+        alert('Image exceeds 10MB limit.');
         return;
       }
       setImageState(UPLOAD_STATE.UPLOADING);
@@ -658,7 +641,10 @@ export default function RecastStudio({
         setAssetImages((prev) => {
           const exists = prev.some((item) => item.url === url);
           if (exists) return prev;
-          return [{ url, name: file.name, timestamp: new Date().toISOString() }, ...prev].slice(0, 30);
+          return [{ url, name: file.name, timestamp: new Date().toISOString() }, ...prev].slice(
+            0,
+            30
+          );
         });
       } catch (err) {
         setImageState(UPLOAD_STATE.IDLE);
@@ -667,14 +653,14 @@ export default function RecastStudio({
         setImageProgress(0);
       }
     },
-    [apiKey],
+    [apiKey]
   );
 
   // ── Handle Dropped Files ────────────────────────────────────────────────────
   useEffect(() => {
     if (droppedFiles && droppedFiles.length > 0) {
-      const imageFiles = droppedFiles.filter((f) => f.type.startsWith("image/"));
-      const videoFiles = droppedFiles.filter((f) => f.type.startsWith("video/"));
+      const imageFiles = droppedFiles.filter((f) => f.type.startsWith('image/'));
+      const videoFiles = droppedFiles.filter((f) => f.type.startsWith('video/'));
       if (videoFiles.length > 0) handleVideoPick(videoFiles[0]);
       if (imageFiles.length > 0) handleImageUpload(imageFiles[0]);
       onFilesHandled?.();
@@ -700,7 +686,7 @@ export default function RecastStudio({
       const response = await fetch(url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = blobUrl;
       a.download = filename;
       document.body.appendChild(a);
@@ -708,18 +694,18 @@ export default function RecastStudio({
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch {
-      window.open(url, "_blank");
+      window.open(url, '_blank');
     }
   };
 
   // ── Generation ──────────────────────────────────────────────────────────────
   const handleGenerate = async () => {
     if (!videoUrl) {
-      alert("Please upload a source video first.");
+      alert('Please upload a source video first.');
       return;
     }
     if (!imageUrl) {
-      alert("Please upload a character image first.");
+      alert('Please upload a character image first.');
       return;
     }
 
@@ -735,13 +721,13 @@ export default function RecastStudio({
       };
       if (showAspect) params.aspect_ratio = selectedAspectRatio;
       if (prompt && selectedModel?.hasPrompt) params.prompt = prompt;
-      if (selectedModelId === "kling-v3.0-pro-recast") {
+      if (selectedModelId === 'kling-v3.0-pro-recast') {
         params.character_orientation = characterOrientation;
       }
 
       const res = await processRecast(apiKey, params);
 
-      if (!res?.url) throw new Error("No video URL returned by API");
+      if (!res?.url) throw new Error('No video URL returned by API');
 
       const genId = res.id || Date.now().toString();
       const entry = {
@@ -757,7 +743,9 @@ export default function RecastStudio({
       // Add to assets
       setAssetResults((prev) => {
         const url = res.url;
-        const name = prompt ? (prompt.slice(0, 20) + "...") : `Result ${new Date().toLocaleTimeString()}`;
+        const name = prompt
+          ? prompt.slice(0, 20) + '...'
+          : `Result ${new Date().toLocaleTimeString()}`;
         const exists = prev.some((item) => item.url === url);
         if (exists) return prev;
         return [{ url, name, timestamp: new Date().toISOString() }, ...prev].slice(0, 30);
@@ -768,12 +756,12 @@ export default function RecastStudio({
           url: res.url,
           model: selectedModelId,
           prompt,
-          type: "recast",
+          type: 'recast',
         });
       }
     } catch (e) {
-      console.error("[RecastStudio]", e);
-      const errMsg = formatErrorMessage(e, "Body swap generation failed");
+      console.error('[RecastStudio]', e);
+      const errMsg = formatErrorMessage(e, 'Body swap generation failed');
       if (onGenerationError) onGenerationError(errMsg);
       else toast.error(errMsg);
     } finally {
@@ -788,20 +776,21 @@ export default function RecastStudio({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-app-bg relative overflow-hidden">
-
       {/* ── CENTRAL GALLERY AREA ── */}
       <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto custom-scrollbar pb-40 lg:pb-32 px-2">
         {history.length > 0 ? (
-          <StudioGallery 
+          <StudioGallery
             history={history}
             onSelectFullscreen={setFullscreenUrl}
             onDownload={(entry, idx) => downloadFile(entry.url, `bodyswap-${entry.id || idx}.mp4`)}
-            onDelete={(entry, idx) => setInternalHistory(prev => prev.filter((_, i) => i !== idx))}
+            onDelete={(entry, idx) =>
+              setInternalHistory((prev) => prev.filter((_, i) => i !== idx))
+            }
             onCopyError={onGenerationError}
             studioName="Body Swap"
           />
         ) : (
-          <EmptyStateHero 
+          <EmptyStateHero
             selectedModelName="BODY SWAP STUDIO"
             title="START CREATING WITH"
             subtitle="Swap the character in any video dynamically by choosing a video clip and a target character image."
@@ -811,240 +800,246 @@ export default function RecastStudio({
 
       {/* ── BOTTOM PROMPT BAR ── */}
       <PromptComposer>
-          {/* Uploads row */}
-          <div className="flex items-center gap-2 px-1">
-            <div className="flex items-center gap-2">
-              {/* Source video */}
-              <MediaPickerButton
-                accept="video/*"
-                label="Video"
-                icon={<VideoIcon className="text-white/60 group-hover:text-primary transition-colors" />}
-                onUpload={handleVideoPick}
-                onClear={() => {
-                  setVideoUrl(null);
-                  setVideoState(UPLOAD_STATE.IDLE);
-                  setVideoName("");
-                }}
-                uploadState={videoState}
-                progress={videoProgress}
-                fileName={videoName}
-                previewUrl={videoUrl}
-                isVideo={true}
-              />
+        {/* Uploads row */}
+        <div className="flex items-center gap-2 px-1">
+          <div className="flex items-center gap-2">
+            {/* Source video */}
+            <MediaPickerButton
+              accept="video/*"
+              label="Video"
+              icon={
+                <VideoIcon className="text-white/60 group-hover:text-primary transition-colors" />
+              }
+              onUpload={handleVideoPick}
+              onClear={() => {
+                setVideoUrl(null);
+                setVideoState(UPLOAD_STATE.IDLE);
+                setVideoName('');
+              }}
+              uploadState={videoState}
+              progress={videoProgress}
+              fileName={videoName}
+              previewUrl={videoUrl}
+              isVideo={true}
+            />
 
-              {/* Character image */}
-              <MediaPickerButton
-                accept="image/*"
-                label="Character image"
-                icon={<ImageIcon className="text-white/60 group-hover:text-primary transition-colors" />}
-                onUpload={handleImageUpload}
-                onClear={() => {
-                  setImageUrl(null);
-                  setImageState(UPLOAD_STATE.IDLE);
-                  setImageName("");
-                }}
-                uploadState={imageState}
-                progress={imageProgress}
-                fileName={imageName}
-                previewUrl={imageUrl}
-                isVideo={false}
-              />
-            </div>
-
-            {/* Prompt textarea */}
-            <div className="flex-1 flex flex-col">
-              <PromptTextarea
-                ref={textareaRef}
-                value={prompt}
-                onChange={handlePromptInput}
-                placeholder="Optional — describe the motion or scene..."
-              />
-            </div>
+            {/* Character image */}
+            <MediaPickerButton
+              accept="image/*"
+              label="Character image"
+              icon={
+                <ImageIcon className="text-white/60 group-hover:text-primary transition-colors" />
+              }
+              onUpload={handleImageUpload}
+              onClear={() => {
+                setImageUrl(null);
+                setImageState(UPLOAD_STATE.IDLE);
+                setImageName('');
+              }}
+              uploadState={imageState}
+              progress={imageProgress}
+              fileName={imageName}
+              previewUrl={imageUrl}
+              isVideo={false}
+            />
           </div>
 
-          {/* Bottom controls row */}
-          <PromptFooter>
-            <PromptControls>
-              {/* Model selector */}
+          {/* Prompt textarea */}
+          <div className="flex-1 flex flex-col">
+            <PromptTextarea
+              ref={textareaRef}
+              value={prompt}
+              onChange={handlePromptInput}
+              placeholder="Optional — describe the motion or scene..."
+            />
+          </div>
+        </div>
+
+        {/* Bottom controls row */}
+        <PromptFooter>
+          <PromptControls>
+            {/* Model selector */}
+            <div className="relative">
+              <button
+                ref={modelBtnRef}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenDropdown(openDropdown === 'model' ? null : 'model');
+                }}
+                className={promptControlClassName({
+                  active: openDropdown === 'model',
+                })}
+              >
+                <div className="w-3.5 h-3.5 bg-primary rounded-sm flex items-center justify-center">
+                  <span className="text-[9px] font-black text-black">R</span>
+                </div>
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>
+                  {selectedModel?.name ?? 'Select model'}
+                </span>
+                <PromptChevronIcon />
+              </button>
+              <Dropdown
+                isOpen={openDropdown === 'model'}
+                title="Model"
+                items={recastModels}
+                selectedId={selectedModelId}
+                onSelect={handleModelSelect}
+                onClose={() => setOpenDropdown(null)}
+                anchorRef={modelBtnRef}
+                className="w-80 max-w-[calc(100vw-2rem)]"
+              />
+            </div>
+
+            {/* Aspect ratio selector */}
+            {showAspect && (
               <div className="relative">
                 <button
-                  ref={modelBtnRef}
+                  ref={aspectBtnRef}
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setOpenDropdown(openDropdown === "model" ? null : "model");
+                    setOpenDropdown(openDropdown === 'aspect' ? null : 'aspect');
                   }}
                   className={promptControlClassName({
-                    active: openDropdown === "model",
+                    active: openDropdown === 'aspect',
                   })}
                 >
-                  <div className="w-3.5 h-3.5 bg-primary rounded-sm flex items-center justify-center">
-                    <span className="text-[9px] font-black text-black">R</span>
-                  </div>
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {selectedModel?.name ?? "Select model"}
+                  <PromptAspectRatioIcon />
+                  <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedAspectRatio}</span>
+                  <PromptChevronIcon />
+                </button>
+                <Dropdown
+                  isOpen={openDropdown === 'aspect'}
+                  title="Aspect Ratio"
+                  items={aspectDropdownItems}
+                  selectedId={selectedAspectRatio}
+                  onSelect={(item) => setSelectedAspectRatio(item.id)}
+                  onClose={() => setOpenDropdown(null)}
+                  anchorRef={aspectBtnRef}
+                />
+              </div>
+            )}
+
+            {/* Character Orientation selector */}
+            {selectedModelId === 'kling-v3.0-pro-recast' && (
+              <div className="relative">
+                <button
+                  ref={orientationBtnRef}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenDropdown(openDropdown === 'orientation' ? null : 'orientation');
+                  }}
+                  className={promptControlClassName({
+                    active: openDropdown === 'orientation',
+                  })}
+                >
+                  <span className="text-xs font-semibold text-current opacity-50 group-hover:opacity-100 transition-opacity">
+                    Orientation:
+                  </span>
+                  <span className="text-xs font-semibold text-current capitalize">
+                    {characterOrientation}
                   </span>
                   <PromptChevronIcon />
                 </button>
                 <Dropdown
-                  isOpen={openDropdown === "model"}
-                  title="Model"
-                  items={recastModels}
-                  selectedId={selectedModelId}
-                  onSelect={handleModelSelect}
+                  isOpen={openDropdown === 'orientation'}
+                  title="Orientation"
+                  items={[
+                    {
+                      id: 'image',
+                      name: 'Image',
+                      description: 'Use image orientation (Max 10s video)',
+                    },
+                    {
+                      id: 'video',
+                      name: 'Video',
+                      description: 'Use video orientation (Max 30s video)',
+                    },
+                  ]}
+                  selectedId={characterOrientation}
+                  onSelect={(item) => setCharacterOrientation(item.id)}
                   onClose={() => setOpenDropdown(null)}
-                  anchorRef={modelBtnRef}
-                  className="w-80 max-w-[calc(100vw-2rem)]"
+                  anchorRef={orientationBtnRef}
+                  className="w-64"
                 />
               </div>
+            )}
 
-              {/* Aspect ratio selector */}
-              {showAspect && (
-                <div className="relative">
-                  <button
-                    ref={aspectBtnRef}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenDropdown(openDropdown === "aspect" ? null : "aspect");
-                    }}
-                    className={promptControlClassName({
-                      active: openDropdown === "aspect",
-                    })}
-                  >
-                    <PromptAspectRatioIcon />
-                    <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                      {selectedAspectRatio}
-                    </span>
-                    <PromptChevronIcon />
-                  </button>
-                  <Dropdown
-                    isOpen={openDropdown === "aspect"}
-                    title="Aspect Ratio"
-                    items={aspectDropdownItems}
-                    selectedId={selectedAspectRatio}
-                    onSelect={(item) => setSelectedAspectRatio(item.id)}
-                    onClose={() => setOpenDropdown(null)}
-                    anchorRef={aspectBtnRef}
-                  />
-                </div>
-              )}
-
-              {/* Character Orientation selector */}
-              {selectedModelId === "kling-v3.0-pro-recast" && (
-                <div className="relative">
-                  <button
-                    ref={orientationBtnRef}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenDropdown(openDropdown === "orientation" ? null : "orientation");
-                    }}
-                    className={promptControlClassName({
-                      active: openDropdown === "orientation",
-                    })}
-                  >
-                    <span className="text-xs font-semibold text-current opacity-50 group-hover:opacity-100 transition-opacity">
-                      Orientation:
-                    </span>
-                    <span className="text-xs font-semibold text-current capitalize">
-                      {characterOrientation}
-                    </span>
-                    <PromptChevronIcon />
-                  </button>
-                  <Dropdown
-                    isOpen={openDropdown === "orientation"}
-                    title="Orientation"
-                    items={[
-                      { id: "image", name: "Image", description: "Use image orientation (Max 10s video)" },
-                      { id: "video", name: "Video", description: "Use video orientation (Max 30s video)" },
-                    ]}
-                    selectedId={characterOrientation}
-                    onSelect={(item) => setCharacterOrientation(item.id)}
-                    onClose={() => setOpenDropdown(null)}
-                    anchorRef={orientationBtnRef}
-                    className="w-64"
-                  />
-                </div>
-              )}
-
-              {/* Assets Library selector */}
-              <div className="relative">
-                <button
-                  ref={assetsBtnRef}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenDropdown(openDropdown === "assets" ? null : "assets");
-                  }}
-                  className={promptControlClassName({
-                    active: openDropdown === "assets",
-                  })}
+            {/* Assets Library selector */}
+            <div className="relative">
+              <button
+                ref={assetsBtnRef}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenDropdown(openDropdown === 'assets' ? null : 'assets');
+                }}
+                className={promptControlClassName({
+                  active: openDropdown === 'assets',
+                })}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-white/50 group-hover:text-primary transition-colors"
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-white/50 group-hover:text-primary transition-colors"
-                  >
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                  </svg>
-                  <span className="text-xs font-semibold text-white/70 group-hover:text-primary transition-colors">
-                    Library
-                  </span>
-                  <PromptChevronIcon />
-                </button>
-                {openDropdown === "assets" && (
-                  <AssetsDropdown
-                    videos={assetVideos}
-                    images={assetImages}
-                    results={assetResults}
-                    onSelectVideo={(url, name) => {
-                      setVideoUrl(url);
-                      setVideoName(name || "Selected Video");
-                      setVideoState(UPLOAD_STATE.READY);
-                      setOpenDropdown(null);
-                    }}
-                    onSelectImage={(url, name) => {
-                      setImageUrl(url);
-                      setImageName(name || "Selected Image");
-                      setImageState(UPLOAD_STATE.READY);
-                      setOpenDropdown(null);
-                    }}
-                    onSelectResultAsVideo={(url, name) => {
-                      setVideoUrl(url);
-                      setVideoName(name || "Result Video");
-                      setVideoState(UPLOAD_STATE.READY);
-                      setOpenDropdown(null);
-                    }}
-                    onDeleteAsset={handleDeleteAsset}
-                    setFullscreenUrl={setFullscreenUrl}
-                    onClose={() => setOpenDropdown(null)}
-                    anchorRef={assetsBtnRef}
-                  />
-                )}
-              </div>
-            </PromptControls>
-
-            {/* Generate button */}
-            <PromptAction
-              onClick={handleGenerate}
-              disabled={isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <span className="animate-spin inline-block text-black">◌</span>{" "}
-                  Swapping...
-                </>
-              ) : (
-                <span>Swap Body</span>
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+                <span className="text-xs font-semibold text-white/70 group-hover:text-primary transition-colors">
+                  Library
+                </span>
+                <PromptChevronIcon />
+              </button>
+              {openDropdown === 'assets' && (
+                <AssetsDropdown
+                  videos={assetVideos}
+                  images={assetImages}
+                  results={assetResults}
+                  onSelectVideo={(url, name) => {
+                    setVideoUrl(url);
+                    setVideoName(name || 'Selected Video');
+                    setVideoState(UPLOAD_STATE.READY);
+                    setOpenDropdown(null);
+                  }}
+                  onSelectImage={(url, name) => {
+                    setImageUrl(url);
+                    setImageName(name || 'Selected Image');
+                    setImageState(UPLOAD_STATE.READY);
+                    setOpenDropdown(null);
+                  }}
+                  onSelectResultAsVideo={(url, name) => {
+                    setVideoUrl(url);
+                    setVideoName(name || 'Result Video');
+                    setVideoState(UPLOAD_STATE.READY);
+                    setOpenDropdown(null);
+                  }}
+                  onDeleteAsset={handleDeleteAsset}
+                  setFullscreenUrl={setFullscreenUrl}
+                  onClose={() => setOpenDropdown(null)}
+                  anchorRef={assetsBtnRef}
+                />
               )}
-            </PromptAction>
-          </PromptFooter>
+            </div>
+          </PromptControls>
+
+          {/* Generate button */}
+          <PromptAction onClick={handleGenerate} disabled={isGenerating}>
+            {isGenerating ? (
+              <>
+                <span className="animate-spin inline-block text-black">◌</span> Swapping...
+              </>
+            ) : (
+              <span>Swap Body</span>
+            )}
+          </PromptAction>
+        </PromptFooter>
       </PromptComposer>
 
       {/* ── FULLSCREEN MEDIA MODAL ── */}
@@ -1061,16 +1056,26 @@ export default function RecastStudio({
               setFullscreenUrl(null);
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
           {(() => {
-            const isImg = fullscreenUrl.match(/\.(jpeg|jpg|gif|png|webp|avif)/i) || 
-                          fullscreenUrl.includes("/ai-images/") || 
-                          fullscreenUrl.includes("image") || 
-                          fullscreenUrl.startsWith("data:image");
+            const isImg =
+              fullscreenUrl.match(/\.(jpeg|jpg|gif|png|webp|avif)/i) ||
+              fullscreenUrl.includes('/ai-images/') ||
+              fullscreenUrl.includes('image') ||
+              fullscreenUrl.startsWith('data:image');
             return isImg ? (
               <img
                 src={fullscreenUrl}
@@ -1091,7 +1096,6 @@ export default function RecastStudio({
           })()}
         </div>
       )}
-
     </div>
   );
 }

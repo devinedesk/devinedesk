@@ -4,12 +4,26 @@ import { t, tf } from '../../../../src/lib/i18n.js';
 
 // Icons
 const DownloadIcon = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
   </svg>
 );
 const TrashIcon = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
     <polyline points="3 6 5 6 21 6" />
     <path d="M19 6l-1 14H6L5 6" />
     <path d="M10 11v6M14 11v6" />
@@ -73,21 +87,32 @@ function BinaryStatusBar({ onStatusChange }) {
     <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
       <div className="flex flex-col gap-0.5 w-full">
         <span className="text-xs font-bold text-white">sd.cpp inference engine</span>
-        
+
         {downloading ? (
           <div className="mt-2 w-full">
             <div className="flex justify-between items-center mb-1">
               <span className="text-[10px] text-primary">
-                {phase === 'extracting' ? t('localModels.extracting') : `${t('localModels.downloading')} ${Math.round(progress * 100)}%`}
+                {phase === 'extracting'
+                  ? t('localModels.extracting')
+                  : `${t('localModels.downloading')} ${Math.round(progress * 100)}%`}
               </span>
             </div>
             <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-              <div className="h-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+              <div
+                className="h-full bg-primary transition-all"
+                style={{ width: `${Math.round(progress * 100)}%` }}
+              />
             </div>
           </div>
         ) : (
-          <span className={`text-[11px] ${status.exists ? 'text-green-400' : (error ? 'text-red-400' : 'text-yellow-400')}`}>
-            {error ? `Error: ${error}` : (status.exists ? t('localModels.installed') : t('localModels.notInstalled'))}
+          <span
+            className={`text-[11px] ${status.exists ? 'text-green-400' : error ? 'text-red-400' : 'text-yellow-400'}`}
+          >
+            {error
+              ? `Error: ${error}`
+              : status.exists
+                ? t('localModels.installed')
+                : t('localModels.notInstalled')}
           </span>
         )}
       </div>
@@ -115,7 +140,7 @@ function AuxRow({ label, auxKey, initStatus, onStateChange }) {
     setDownloading(true);
     setError('');
     const auxId = auxKey === 'llm' ? '__llm__' : '__vae__';
-    
+
     const unsub = localAI.onDownloadProgress((data) => {
       if (data.id !== auxId) return;
       setProgress(data.progress);
@@ -155,19 +180,28 @@ function AuxRow({ label, auxKey, initStatus, onStateChange }) {
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-all disabled:opacity-50"
             >
               {downloading ? <span className="animate-spin">◌</span> : DownloadIcon}
-              {error ? t('common.retry') : (downloading ? t('localModels.downloading') : t('localModels.get'))}
+              {error
+                ? t('common.retry')
+                : downloading
+                  ? t('localModels.downloading')
+                  : t('localModels.get')}
             </button>
           )}
         </div>
       </div>
-      
+
       {downloading && (
         <div className="w-full mt-1">
           <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${Math.round(progress * 100)}%` }}
+            />
           </div>
           <span className="text-[10px] text-muted block mt-0.5">
-            {phase === 'done' ? t('localModels.complete') : `${t('localModels.downloading')} ${Math.round(progress * 100)}%`}
+            {phase === 'done'
+              ? t('localModels.complete')
+              : `${t('localModels.downloading')} ${Math.round(progress * 100)}%`}
           </span>
         </div>
       )}
@@ -198,22 +232,33 @@ function Wan2gpConfigBar({ onChange }) {
         setUrl(cfg.url);
         const r = await localAI.probeWan2gp(cfg.url);
         if (!mounted) return;
-        updateStatus(r.ok ? `Connected · Gradio ${r.version}` : `Saved URL not reachable: ${r.error}`, r.ok ? 'ok' : 'warn');
+        updateStatus(
+          r.ok ? `Connected · Gradio ${r.version}` : `Saved URL not reachable: ${r.error}`,
+          r.ok ? 'ok' : 'warn'
+        );
       } else {
         updateStatus(t('localModels.notConfiguredNote'), 'muted');
       }
     });
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleTest = async () => {
     const trimmed = url.trim();
-    if (!trimmed) { updateStatus('Enter a URL first', 'warn'); return; }
+    if (!trimmed) {
+      updateStatus('Enter a URL first', 'warn');
+      return;
+    }
     updateStatus(t('localModels.probing'), 'muted');
     setTesting(true);
     try {
       const r = await localAI.probeWan2gp(trimmed);
-      updateStatus(r.ok ? `Reachable · Gradio ${r.version}` : `Unreachable: ${r.error}`, r.ok ? 'ok' : 'err');
+      updateStatus(
+        r.ok ? `Reachable · Gradio ${r.version}` : `Unreachable: ${r.error}`,
+        r.ok ? 'ok' : 'err'
+      );
     } finally {
       setTesting(false);
     }
@@ -225,26 +270,44 @@ function Wan2gpConfigBar({ onChange }) {
     try {
       await localAI.setWan2gpUrl(trimmed);
       const r = trimmed ? await localAI.probeWan2gp(trimmed) : { ok: false, error: 'cleared' };
-      updateStatus(r.ok ? `Saved · Connected to Gradio ${r.version}` : (trimmed ? `Saved, not reachable: ${r.error}` : 'Cleared'), r.ok ? 'ok' : 'warn');
+      updateStatus(
+        r.ok
+          ? `Saved · Connected to Gradio ${r.version}`
+          : trimmed
+            ? `Saved, not reachable: ${r.error}`
+            : 'Cleared',
+        r.ok ? 'ok' : 'warn'
+      );
       if (onChange) onChange();
     } finally {
       setSaving(false);
     }
   };
 
-  const statusColor = {
-    muted: 'text-white/40',
-    ok: 'text-green-400',
-    warn: 'text-yellow-400',
-    err: 'text-red-400'
-  }[statusKind] || 'text-white/40';
+  const statusColor =
+    {
+      muted: 'text-white/40',
+      ok: 'text-green-400',
+      warn: 'text-yellow-400',
+      err: 'text-red-400',
+    }[statusKind] || 'text-white/40';
 
   return (
     <div className="flex flex-col gap-3 p-3 rounded-xl bg-white/5 border border-white/10 mt-3">
       <div className="flex flex-col gap-0.5">
         <span className="text-xs font-bold text-white">Wan2GP server (optional)</span>
         <span className="text-[11px] text-white/50 leading-relaxed">
-          Run <a href="https://github.com/deepbeepmeep/Wan2GP" target="_blank" rel="noreferrer" className="text-primary hover:underline">Wan2GP</a> on a CUDA box (<code>python wgp.py --listen --server-name 0.0.0.0</code>) to unlock video models from this UI.
+          Run{' '}
+          <a
+            href="https://github.com/deepbeepmeep/Wan2GP"
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary hover:underline"
+          >
+            Wan2GP
+          </a>{' '}
+          on a CUDA box (<code>python wgp.py --listen --server-name 0.0.0.0</code>) to unlock video
+          models from this UI.
         </span>
       </div>
       <div className="flex items-center gap-2">
@@ -278,7 +341,8 @@ function Wan2gpConfigBar({ onChange }) {
 function ModelCard({ model, onStateChange }) {
   const isDownloaded = model.state === 'downloaded';
   const auxStatus = model.auxiliaryStatus || {};
-  const auxReady = !model.requiresAuxiliary || (auxStatus.llm === 'downloaded' && auxStatus.vae === 'downloaded');
+  const auxReady =
+    !model.requiresAuxiliary || (auxStatus.llm === 'downloaded' && auxStatus.vae === 'downloaded');
   const fullyReady = isDownloaded && auxReady;
   const isWan2gp = model.provider === 'wan2gp';
 
@@ -298,13 +362,24 @@ function ModelCard({ model, onStateChange }) {
           </div>
           <p className="text-[11px] text-white/50 leading-relaxed">{model.description}</p>
           <div className="flex items-center gap-1.5 flex-wrap mt-1">
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${model.type === 'video' ? 'bg-purple-500/15 text-purple-300' : 'bg-primary/10 text-primary'}`}>
+            <span
+              className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${model.type === 'video' ? 'bg-purple-500/15 text-purple-300' : 'bg-primary/10 text-primary'}`}
+            >
               {model.type.toUpperCase()}
             </span>
-            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60">via Wan2GP</span>
-            {(model.tags || []).filter(t => !['featured', 'remote'].includes(t)).map(t => (
-              <span key={t} className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60">{t}</span>
-            ))}
+            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60">
+              via Wan2GP
+            </span>
+            {(model.tags || [])
+              .filter((t) => !['featured', 'remote'].includes(t))
+              .map((t) => (
+                <span
+                  key={t}
+                  className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60"
+                >
+                  {t}
+                </span>
+              ))}
           </div>
         </div>
         <div className="shrink-0">
@@ -368,14 +443,24 @@ function ModelCard({ model, onStateChange }) {
             <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60">
               {fmtGB(model.sizeGB)}
             </span>
-            {(model.tags || []).filter(t => t !== 'featured').map(t => (
-              <span key={t} className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60">{t}</span>
-            ))}
+            {(model.tags || [])
+              .filter((t) => t !== 'featured')
+              .map((t) => (
+                <span
+                  key={t}
+                  className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/60"
+                >
+                  {t}
+                </span>
+              ))}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {isDownloaded ? (
-            <button onClick={handleDelete} className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all">
+            <button
+              onClick={handleDelete}
+              className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all"
+            >
               {TrashIcon}
             </button>
           ) : (
@@ -385,7 +470,11 @@ function ModelCard({ model, onStateChange }) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary text-black hover:scale-105 transition-all disabled:opacity-50"
             >
               {downloading ? <span className="animate-spin">◌</span> : DownloadIcon}
-              {error ? t('common.retry') : (downloading ? t('localModels.downloading') : t('localModels.download'))}
+              {error
+                ? t('common.retry')
+                : downloading
+                  ? t('localModels.downloading')
+                  : t('localModels.download')}
             </button>
           )}
         </div>
@@ -394,10 +483,15 @@ function ModelCard({ model, onStateChange }) {
       {downloading && (
         <div className="w-full">
           <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-            <div className="h-full bg-primary transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+            <div
+              className="h-full bg-primary transition-all"
+              style={{ width: `${Math.round(progress * 100)}%` }}
+            />
           </div>
           <span className="text-[10px] text-white/40 block mt-1">
-            {phase === 'done' ? t('localModels.complete') : `${t('localModels.downloading')} ${Math.round(progress * 100)}%`}
+            {phase === 'done'
+              ? t('localModels.complete')
+              : `${t('localModels.downloading')} ${Math.round(progress * 100)}%`}
           </span>
         </div>
       )}
@@ -410,8 +504,18 @@ function ModelCard({ model, onStateChange }) {
           <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold">
             {t('localModels.requiredComponents')}
           </span>
-          <AuxRow label="Qwen3-4B Text Encoder (2.4 GB)" auxKey="llm" initStatus={auxStatus.llm} onStateChange={onStateChange} />
-          <AuxRow label="FLUX VAE (335 MB)" auxKey="vae" initStatus={auxStatus.vae} onStateChange={onStateChange} />
+          <AuxRow
+            label="Qwen3-4B Text Encoder (2.4 GB)"
+            auxKey="llm"
+            initStatus={auxStatus.llm}
+            onStateChange={onStateChange}
+          />
+          <AuxRow
+            label="FLUX VAE (335 MB)"
+            auxKey="vae"
+            initStatus={auxStatus.vae}
+            onStateChange={onStateChange}
+          />
         </div>
       )}
     </div>
@@ -442,7 +546,9 @@ export function LocalModelManager() {
     try {
       const status = await localAI.getBinaryStatus();
       const storagePath = status.modelsDir || status.dataDir;
-      setStorageInfo(storagePath ? `${t('localModels.storedIn')} ${storagePath}` : t('localModels.storedDefault'));
+      setStorageInfo(
+        storagePath ? `${t('localModels.storedIn')} ${storagePath}` : t('localModels.storedDefault')
+      );
       if (storagePath && status.envVar) {
         setStorageTitle(`Set ${status.envVar} before launch to change this location`);
       }
@@ -484,20 +590,23 @@ export function LocalModelManager() {
           <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider shrink-0">
             {t('localModels.title')}
           </h3>
-          <span title={storageTitle} className="min-w-0 truncate text-right text-[10px] text-white/40">
+          <span
+            title={storageTitle}
+            className="min-w-0 truncate text-right text-[10px] text-white/40"
+          >
             {storageInfo}
           </span>
         </div>
-        
+
         <div className="flex flex-col gap-3">
           {loading ? (
             <div className="text-xs text-white/40 text-center py-4">{t('localModels.loading')}</div>
           ) : error ? (
-            <div className="text-xs text-red-400 text-center py-4">{t('localModels.errorLoading')} {error}</div>
+            <div className="text-xs text-red-400 text-center py-4">
+              {t('localModels.errorLoading')} {error}
+            </div>
           ) : (
-            models.map(m => (
-              <ModelCard key={m.id} model={m} onStateChange={fetchModels} />
-            ))
+            models.map((m) => <ModelCard key={m.id} model={m} onStateChange={fetchModels} />)
           )}
         </div>
       </div>

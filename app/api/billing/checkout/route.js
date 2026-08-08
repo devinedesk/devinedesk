@@ -1,3 +1,4 @@
+import { checkRateLimit } from '@/src/lib/rateLimit';
 import { NextResponse } from 'next/server';
 import { withApiAuth } from '@/src/lib/apiHandler';
 import Stripe from 'stripe';
@@ -13,7 +14,10 @@ export const POST = withApiAuth({
   schema: checkoutSchema,
   handler: async (request, { auth, body }) => {
     if (!env.STRIPE_SECRET_KEY || env.STRIPE_SECRET_KEY.includes('mock')) {
-      return NextResponse.json({ error: 'Stripe configuration is missing or invalid for production environment' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Stripe configuration is missing or invalid for production environment' },
+        { status: 500 }
+      );
     }
 
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
@@ -23,18 +27,18 @@ export const POST = withApiAuth({
     const { user } = auth;
     // Note: auth middleware guarantees auth.authorized is true, but for checkout we usually need a full session user
     if (!user) {
-        return NextResponse.json({ error: 'User session required for checkout' }, { status: 401 });
+      return NextResponse.json({ error: 'User session required for checkout' }, { status: 401 });
     }
 
     const { packageId } = body;
-    
+
     // Mapping of price/packages
     const PACKAGES = {
-      'pkg_500': { credits: 500, priceCents: 500, name: '500 Credits' },
-      'pkg_2000': { credits: 2000, priceCents: 1500, name: '2000 Credits (Discounted)' },
-      'pkg_5000': { credits: 5000, priceCents: 3500, name: '5000 Credits (Best Value)' },
+      pkg_500: { credits: 500, priceCents: 500, name: '500 Credits' },
+      pkg_2000: { credits: 2000, priceCents: 1500, name: '2000 Credits (Discounted)' },
+      pkg_5000: { credits: 5000, priceCents: 3500, name: '5000 Credits (Best Value)' },
     };
-    
+
     const selectedPackage = PACKAGES[packageId];
 
     if (!selectedPackage) {
@@ -88,5 +92,5 @@ export const POST = withApiAuth({
     });
 
     return NextResponse.json({ url: checkoutSession.url });
-  }
+  },
 });

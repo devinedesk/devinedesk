@@ -1,9 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { uploadFile } from "../apiClient.js";
-import { PromptPopover, promptMediaButtonClassName } from "./prompt/PromptComposer.jsx";
-import { Button } from "../../../../components/ui/Button.jsx";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { uploadFile } from '../apiClient.js';
+import { PromptPopover, promptMediaButtonClassName } from './prompt/PromptComposer.jsx';
+import { Button } from '../../../../components/ui/Button.jsx';
 
-export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls = [], label = null, persistedHistory = null, onHistoryChange = null, accept = "image/*" }) {
+export function UploadButton({
+  apiKey,
+  maxImages,
+  onSelect,
+  onClear,
+  initialUrls = [],
+  label = null,
+  persistedHistory = null,
+  onHistoryChange = null,
+  accept = 'image/*',
+}) {
   const [panelOpen, setPanelOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedEntries, setSelectedEntries] = useState([]); // [{url, thumbnail}]
@@ -21,13 +31,13 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
     if (persistedHistory && persistedHistory.length > 0) {
       setUploadHistory((prev) => {
         // Merge: add any entries from persistedHistory that aren't already present
-        const existingUrls = new Set(prev.map(h => h.url));
-        const missing = persistedHistory.filter(h => h.url && !existingUrls.has(h.url));
+        const existingUrls = new Set(prev.map((h) => h.url));
+        const missing = persistedHistory.filter((h) => h.url && !existingUrls.has(h.url));
         return missing.length > 0 ? [...prev, ...missing] : prev;
       });
     }
   }, [persistedHistory]);
-  
+
   const [lastUploadProgress, setLastUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
   const panelRef = useRef(null);
@@ -46,27 +56,29 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
         setPanelOpen(false);
       }
     };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
   }, [panelOpen]);
 
   // Sync initialUrls from parent (e.g. restored from localStorage)
   useEffect(() => {
     if (initialUrls && initialUrls.length > 0) {
       // Avoid infinite loops by only updating if URLs actually changed
-      const currentUrls = selectedEntries.map(e => e.url);
-      const isSame = initialUrls.length === currentUrls.length && initialUrls.every(u => currentUrls.includes(u));
+      const currentUrls = selectedEntries.map((e) => e.url);
+      const isSame =
+        initialUrls.length === currentUrls.length &&
+        initialUrls.every((u) => currentUrls.includes(u));
       if (isSame) return;
 
-      const newEntries = initialUrls.map(url => ({ url }));
+      const newEntries = initialUrls.map((url) => ({ url }));
       setSelectedEntries(newEntries);
-      
+
       // Also ensure they are in the history panel
-      setUploadHistory(prev => {
-        const existingUrls = prev.map(h => h.url);
+      setUploadHistory((prev) => {
+        const existingUrls = prev.map((h) => h.url);
         const missing = initialUrls
-          .filter(u => !existingUrls.includes(u))
-          .map(u => ({ id: `restored-${u}`, name: "Restored Image", url: u, progress: 100 }));
+          .filter((u) => !existingUrls.includes(u))
+          .map((u) => ({ id: `restored-${u}`, name: 'Restored Image', url: u, progress: 100 }));
         return [...missing, ...prev];
       });
     }
@@ -90,19 +102,19 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
       const urls = entries.map((e) => e.url);
       onSelect({ url: urls[0], urls, thumbnail: entries[0].url });
     },
-    [onSelect],
+    [onSelect]
   );
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    e.target.value = "";
+    e.target.value = '';
 
     const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
     const tooLarge = files.filter((f) => f.size > MAX_IMAGE_SIZE);
     if (tooLarge.length > 0) {
       alert(
-        `The following images are too large (max 10MB): ${tooLarge.map((f) => f.name).join(", ")}`,
+        `The following images are too large (max 10MB): ${tooLarge.map((f) => f.name).join(', ')}`
       );
       return;
     }
@@ -132,7 +144,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
                   return { ...h, url: uploadedUrl, progress: 100 };
                 }
                 return h;
-              }),
+              })
             );
 
             // Auto-select if there's room
@@ -146,11 +158,11 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
               }
             }
           } catch (err) {
-            console.error("[UploadButton] Upload failed for", file.name, err);
+            console.error('[UploadButton] Upload failed for', file.name, err);
             setUploadHistory((prev) => prev.filter((h) => h.id !== id));
             throw err;
           }
-        }),
+        })
       );
     } catch (err) {
       alert(`Image upload failed: ${err.message}`);
@@ -163,8 +175,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
   const handleCellClick = (entry) => {
     const selIdx = selectedEntries.findIndex((e) => e.url === entry.url);
     const isSelected = selIdx !== -1;
-    const atMax =
-      maxImages > 1 && !isSelected && selectedEntries.length >= maxImages;
+    const atMax = maxImages > 1 && !isSelected && selectedEntries.length >= maxImages;
     if (atMax) return;
 
     if (maxImages === 1) {
@@ -178,10 +189,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
         next = selectedEntries.filter((_, i) => i !== selIdx);
         if (next.length === 0) onClear?.();
       } else {
-        next = [
-          ...selectedEntries,
-          { url: entry.url, localUrl: entry.localUrl },
-        ];
+        next = [...selectedEntries, { url: entry.url, localUrl: entry.localUrl }];
       }
       setSelectedEntries(next);
     }
@@ -238,7 +246,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
         {lastUploadProgress}%
       </span>
     </div>
-  ) : label === "Swap Face" ? (
+  ) : label === 'Swap Face' ? (
     hasSelection ? (
       <img src={selectedEntries[0].url} alt="" className="w-full h-full object-cover" />
     ) : (
@@ -259,13 +267,13 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
     </svg>
   );
 
-  const defaultLabel = isMulti ? `Add up to ${maxImages} images` : "Reference image";
+  const defaultLabel = isMulti ? `Add up to ${maxImages} images` : 'Reference image';
   const triggerTitle = hasSelection
     ? count > 1
       ? `${count} of ${maxImages} images selected — click to manage`
       : isMulti
         ? `1 image selected — click to add more (up to ${maxImages})`
-        : label || "Reference image"
+        : label || 'Reference image'
     : label || defaultLabel;
 
   return (
@@ -306,13 +314,9 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
           {/* Header */}
           <div className="flex items-center justify-between px-1 pb-3 mb-2 border-b border-white/5">
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-bold text-secondary">
-                Reference Images
-              </span>
+              <span className="text-xs font-bold text-secondary">Reference Images</span>
               {isMulti && (
-                <span className="text-[9px] text-muted">
-                  Select up to {maxImages} images
-                </span>
+                <span className="text-[9px] text-muted">Select up to {maxImages} images</span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -348,7 +352,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                {isMulti ? "Upload files" : "Upload new"}
+                {isMulti ? 'Upload files' : 'Upload new'}
               </button>
             </div>
           </div>
@@ -374,12 +378,9 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
           ) : (
             <div className="grid grid-cols-3 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-0.5">
               {uploadHistory.map((entry) => {
-                const selIdx = selectedEntries.findIndex(
-                  (e) => e.url === entry.url,
-                );
+                const selIdx = selectedEntries.findIndex((e) => e.url === entry.url);
                 const isSelected = selIdx !== -1;
-                const atMax =
-                  isMulti && !isSelected && selectedEntries.length >= maxImages;
+                const atMax = isMulti && !isSelected && selectedEntries.length >= maxImages;
 
                 return (
                   <div
@@ -388,9 +389,9 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
                     onClick={() => entry.url && handleCellClick(entry)}
                     className={`relative rounded-xl overflow-hidden border-2 cursor-pointer group/cell aspect-square transition-all ${
                       isSelected
-                        ? "border-primary shadow-glow"
-                        : "border-white/10 hover:border-white/30"
-                    } ${atMax ? "opacity-40 cursor-not-allowed" : ""} ${!entry.url ? "cursor-wait" : ""}`}
+                        ? 'border-primary shadow-glow'
+                        : 'border-white/10 hover:border-white/30'
+                    } ${atMax ? 'opacity-40 cursor-not-allowed' : ''} ${!entry.url ? 'cursor-wait' : ''}`}
                   >
                     {entry.url ? (
                       <img
@@ -435,9 +436,7 @@ export function UploadButton({ apiKey, maxImages, onSelect, onClear, initialUrls
                     {isSelected && (
                       <div className="absolute top-1 left-1 min-w-[20px] h-5 bg-primary rounded-full flex items-center justify-center px-1">
                         {isMulti ? (
-                          <span className="text-[10px] font-black text-black">
-                            {selIdx + 1}
-                          </span>
+                          <span className="text-[10px] font-black text-black">{selIdx + 1}</span>
                         ) : (
                           <svg
                             width="9"

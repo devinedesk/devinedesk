@@ -19,7 +19,7 @@ apiClient.interceptors.response.use(
     // Format error message
     const customError = new Error();
     customError.status = error.response?.status || 500;
-    
+
     if (error.response?.data?.error) {
       customError.message = error.response.data.error;
       customError.details = error.response.data.details;

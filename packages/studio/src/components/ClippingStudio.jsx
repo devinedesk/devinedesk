@@ -1,15 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { runClipping, uploadFile } from "../apiClient.js";
-import { formatErrorMessage } from "../utils/formatError.js";
-import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
-import MobileGenerationActions, {
-  GenerationCopyButtons,
-} from "./MobileGenerationActions.jsx";
-import { StudioGallery } from "./shared/StudioGallery.jsx";
-import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
+import { useState, useEffect, useRef } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { runClipping, uploadFile } from '../apiClient.js';
+import { formatErrorMessage } from '../utils/formatError.js';
+import { scopedPersistKey, migrateLegacyPersistKey } from '../persistKey.js';
+import MobileGenerationActions, { GenerationCopyButtons } from './MobileGenerationActions.jsx';
+import { StudioGallery } from './shared/StudioGallery.jsx';
+import { EmptyStateHero } from './shared/EmptyStateHero.jsx';
 import {
   PROMPT_CONTROL_LABEL_CLASS,
   PROMPT_MEDIA_PREVIEW_CLASS,
@@ -26,13 +24,13 @@ import {
   PromptTextarea,
   promptControlClassName,
   promptMediaButtonClassName,
-} from "./prompt/PromptComposer.jsx";
+} from './prompt/PromptComposer.jsx';
 
 const MAX_VIDEO_SIZE_MB = 100;
 const MAX_VIDEO_SIZE_BYTES = MAX_VIDEO_SIZE_MB * 1024 * 1024;
-const CLIPPING_TOASTER_ID = "clipping-studio";
+const CLIPPING_TOASTER_ID = 'clipping-studio';
 const VIDEO_TOO_LARGE_FOR_MODE_MESSAGE =
-  "The file is too large for this mode. Compress or trim the video, then upload a smaller file.";
+  'The file is too large for this mode. Compress or trim the video, then upload a smaller file.';
 const MAX_VISIBLE_ERROR_TOASTS = 3;
 const ERROR_TOAST_DURATION_MS = 7000;
 const activeErrorToastIds = [];
@@ -50,8 +48,18 @@ const dismissErrorToast = (toastId) => {
 // ---------------------------------------------------------------------------
 // Inline SVG Icons
 // ---------------------------------------------------------------------------
-const ScissorsIcon = ({ className = "text-primary" }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+const ScissorsIcon = ({ className = 'text-primary' }) => (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
     <circle cx="6" cy="6" r="3" />
     <circle cx="6" cy="18" r="3" />
     <line x1="9.8" y1="8.2" x2="21" y2="19.4" />
@@ -60,7 +68,14 @@ const ScissorsIcon = ({ className = "text-primary" }) => (
 );
 
 const TrashIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
     <polyline points="3 6 5 6 21 6" />
     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     <line x1="10" y1="11" x2="10" y2="17" />
@@ -75,20 +90,45 @@ const PlayIcon = () => (
 );
 
 const DownloadIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
   </svg>
 );
 
 const CopyIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
   </svg>
 );
 
 const ClockIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <circle cx="12" cy="12" r="10" />
     <polyline points="12 6 12 12 16 14" />
   </svg>
@@ -97,7 +137,7 @@ const ClockIcon = () => (
 const ErrorToast = ({ toastInstance, message }) => (
   <div
     className={`pointer-events-auto flex w-[340px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-xl border border-red-400/40 bg-white px-3.5 py-3 text-[13px] text-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.15)] transition-all duration-200 ${
-      toastInstance.visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+      toastInstance.visible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
     }`}
     role="alert"
   >
@@ -144,7 +184,7 @@ const ErrorToast = ({ toastInstance, message }) => (
 const showErrorToast = (message) => {
   const options = {
     duration: ERROR_TOAST_DURATION_MS,
-    position: "bottom-right",
+    position: 'bottom-right',
     toasterId: CLIPPING_TOASTER_ID,
   };
 
@@ -154,20 +194,12 @@ const showErrorToast = (message) => {
   }
 
   const toastId = toast.custom(
-    (toastInstance) => (
-      <ErrorToast
-        toastInstance={toastInstance}
-        message={message}
-      />
-    ),
-    options,
+    (toastInstance) => <ErrorToast toastInstance={toastInstance} message={message} />,
+    options
   );
 
   activeErrorToastIds.push(toastId);
-  setTimeout(
-    () => forgetErrorToast(toastId),
-    ERROR_TOAST_DURATION_MS + 1000,
-  );
+  setTimeout(() => forgetErrorToast(toastId), ERROR_TOAST_DURATION_MS + 1000);
 };
 
 const showVideoSizeLimitToast = () => {
@@ -175,8 +207,10 @@ const showVideoSizeLimitToast = () => {
 };
 
 const isFileSizeError = (error) => {
-  const message = String(error?.message || error || "");
-  return /(?:\b413\b|payload too large|request entity too large|file(?: size)? (?:is )?too large|file is too heavy|exceeds?.*(?:size|limit)|слишком (?:больш|тяж)|превышает.*(?:размер|лимит))/i.test(message);
+  const message = String(error?.message || error || '');
+  return /(?:\b413\b|payload too large|request entity too large|file(?: size)? (?:is )?too large|file is too heavy|exceeds?.*(?:size|limit)|слишком (?:больш|тяж)|превышает.*(?:размер|лимит))/i.test(
+    message
+  );
 };
 
 const showVideoUploadError = (error) => {
@@ -185,23 +219,25 @@ const showVideoUploadError = (error) => {
     return;
   }
 
-  const message = formatErrorMessage(
-    error,
-    "Video upload failed. Please try again.",
-  );
+  const message = formatErrorMessage(error, 'Video upload failed. Please try again.');
   showErrorToast(message);
 };
 
 const getAspectClass = (ar) => {
   switch (ar) {
-    case "16:9": return "aspect-video";
-    case "1:1": return "aspect-square";
-    case "4:5": return "aspect-[4/5]";
-    case "4:3": return "aspect-[4/3]";
-    case "3:4": return "aspect-[3/4]";
-    case "9:16":
+    case '16:9':
+      return 'aspect-video';
+    case '1:1':
+      return 'aspect-square';
+    case '4:5':
+      return 'aspect-[4/5]';
+    case '4:3':
+      return 'aspect-[4/3]';
+    case '3:4':
+      return 'aspect-[3/4]';
+    case '9:16':
     default:
-      return "aspect-[9/16]";
+      return 'aspect-[9/16]';
   }
 };
 
@@ -217,19 +253,19 @@ export default function ClippingStudio({
   droppedFiles,
   onFilesHandled,
 }) {
-  const LEGACY_PERSIST_KEY = "hg_clipping_studio_persistent";
+  const LEGACY_PERSIST_KEY = 'hg_clipping_studio_persistent';
   const PERSIST_KEY = scopedPersistKey(LEGACY_PERSIST_KEY, apiKey);
   useEffect(() => {
     migrateLegacyPersistKey(LEGACY_PERSIST_KEY, PERSIST_KEY);
   }, [PERSIST_KEY]);
 
   // ── Clipping Parameters State ───────────────────────────────────────────
-  const [videoUrl, setVideoUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState('');
   const [numHighlights, setNumHighlights] = useState(3);
-  const [aspectRatio, setAspectRatio] = useState("9:16");
+  const [aspectRatio, setAspectRatio] = useState('9:16');
   const [returnCoordinatesOnly, setReturnCoordinatesOnly] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  
+  const [prompt, setPrompt] = useState('');
+
   // ── Dropdowns state ──
   const [aspectDropdownOpen, setAspectDropdownOpen] = useState(false);
   const [highlightsDropdownOpen, setHighlightsDropdownOpen] = useState(false);
@@ -257,12 +293,12 @@ export default function ClippingStudio({
   const [history, setHistory] = useState([]);
 
   const ASPECT_RATIOS = [
-    { label: "9:16 (TikTok / Reels / Shorts)", value: "9:16" },
-    { label: "16:9 (YouTube / TV)", value: "16:9" },
-    { label: "1:1 (Instagram Square)", value: "1:1" },
-    { label: "4:5 (Instagram Portrait)", value: "4:5" },
-    { label: "4:3 (Classic Video)", value: "4:3" },
-    { label: "3:4 (Portrait)", value: "3:4" },
+    { label: '9:16 (TikTok / Reels / Shorts)', value: '9:16' },
+    { label: '16:9 (YouTube / TV)', value: '16:9' },
+    { label: '1:1 (Instagram Square)', value: '1:1' },
+    { label: '4:5 (Instagram Portrait)', value: '4:5' },
+    { label: '4:3 (Classic Video)', value: '4:3' },
+    { label: '3:4 (Portrait)', value: '3:4' },
   ];
 
   // Close dropdown when clicking outside
@@ -275,8 +311,8 @@ export default function ClippingStudio({
         setHighlightsDropdownOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Timer effect for generation progress
@@ -305,12 +341,13 @@ export default function ClippingStudio({
         if (data.videoUrl) setVideoUrl(data.videoUrl);
         if (data.numHighlights) setNumHighlights(data.numHighlights);
         if (data.aspectRatio) setAspectRatio(data.aspectRatio);
-        if (data.returnCoordinatesOnly !== undefined) setReturnCoordinatesOnly(data.returnCoordinatesOnly);
+        if (data.returnCoordinatesOnly !== undefined)
+          setReturnCoordinatesOnly(data.returnCoordinatesOnly);
         if (data.history) setHistory(data.history);
         if (data.result) setResult(data.result);
       }
     } catch (err) {
-      console.warn("Failed to load ClippingStudio persistent state:", err);
+      console.warn('Failed to load ClippingStudio persistent state:', err);
     }
   }, []);
 
@@ -328,7 +365,7 @@ export default function ClippingStudio({
         };
         localStorage.setItem(PERSIST_KEY, JSON.stringify(state));
       } catch (err) {
-        console.warn("Failed to save ClippingStudio persistent state:", err);
+        console.warn('Failed to save ClippingStudio persistent state:', err);
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -337,7 +374,7 @@ export default function ClippingStudio({
   // ── Handle Dropped Files ────────────────────────────────────────────────
   useEffect(() => {
     if (droppedFiles && droppedFiles.length > 0) {
-      const videoFiles = droppedFiles.filter(f => f.type.startsWith('video/'));
+      const videoFiles = droppedFiles.filter((f) => f.type.startsWith('video/'));
       if (videoFiles.length > 0) {
         const file = videoFiles[0];
         if (file.size > MAX_VIDEO_SIZE_BYTES) {
@@ -350,11 +387,11 @@ export default function ClippingStudio({
         uploadFile(apiKey, file, (pct) => {
           setVideoProgress(pct);
         })
-          .then(url => {
+          .then((url) => {
             setVideoUrl(url);
             setVideoUploading(false);
           })
-          .catch(err => {
+          .catch((err) => {
             setVideoUploading(false);
             showVideoUploadError(err);
           });
@@ -374,24 +411,24 @@ export default function ClippingStudio({
 
   // Helper formatting seconds to MM:SS
   const formatSeconds = (totalSeconds) => {
-    if (isNaN(totalSeconds) || totalSeconds === null || totalSeconds === undefined) return "0:00";
+    if (isNaN(totalSeconds) || totalSeconds === null || totalSeconds === undefined) return '0:00';
     const mins = Math.floor(totalSeconds / 60);
     const secs = Math.floor(totalSeconds % 60);
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   // ── Copy Link & Download Helpers ─────────────────────────────────────────
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    alert("URL copied to clipboard!");
+    alert('URL copied to clipboard!');
   };
 
-  const downloadVideo = async (url, title = "clipped_video") => {
+  const downloadVideo = async (url, title = 'clipped_video') => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = blobUrl;
       a.download = `${title.replace(/\s+/g, '_')}.mp4`;
       document.body.appendChild(a);
@@ -399,7 +436,7 @@ export default function ClippingStudio({
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch {
-      window.open(url, "_blank");
+      window.open(url, '_blank');
     }
   };
 
@@ -407,7 +444,7 @@ export default function ClippingStudio({
     const val = e.target.value;
     if (val.trim().match(/^https?:\/\/[^\s]+$/i)) {
       setVideoUrl(val.trim());
-      setPrompt("");
+      setPrompt('');
       return;
     }
     setPrompt(val);
@@ -419,7 +456,7 @@ export default function ClippingStudio({
     if (!file) return;
     if (file.size > MAX_VIDEO_SIZE_BYTES) {
       showVideoSizeLimitToast();
-      if (videoFileInputRef.current) videoFileInputRef.current.value = "";
+      if (videoFileInputRef.current) videoFileInputRef.current.value = '';
       return;
     }
     setVideoUploading(true);
@@ -430,23 +467,23 @@ export default function ClippingStudio({
       });
       setVideoUrl(url);
     } catch (err) {
-      console.error("[ClippingStudio] Video upload failed:", err);
+      console.error('[ClippingStudio] Video upload failed:', err);
       showVideoUploadError(err);
     } finally {
       setVideoUploading(false);
       setVideoProgress(0);
-      if (videoFileInputRef.current) videoFileInputRef.current.value = "";
+      if (videoFileInputRef.current) videoFileInputRef.current.value = '';
     }
   };
 
   const clearVideoUpload = () => {
-    setVideoUrl("");
+    setVideoUrl('');
   };
 
   // ── Dispatch Run / Call submitAndPoll ────────────────────────────────────
   const handleGenerate = async () => {
     if (!videoUrl) {
-      alert("Please upload a video or paste a video URL first.");
+      alert('Please upload a video or paste a video URL first.');
       return;
     }
 
@@ -467,22 +504,24 @@ export default function ClippingStudio({
 
       // Parse the result
       const clips = res.outputs || [];
-      const outputCoordinates = res.output?.coordinates || res.coordinates || res.output?.timings || res.timings || [];
+      const outputCoordinates =
+        res.output?.coordinates || res.coordinates || res.output?.timings || res.timings || [];
 
       if (returnCoordinatesOnly && outputCoordinates.length === 0) {
-        throw new Error("API succeeded but returned no clipping coordinates. No highlights were found in the video.");
+        throw new Error(
+          'API succeeded but returned no clipping coordinates. No highlights were found in the video.'
+        );
       }
-      
+
       const newResult = {
         id: res.id || Date.now().toString(),
         videoUrl: videoUrl,
         clips: clips,
-        coordinates: Array.isArray(outputCoordinates) ? outputCoordinates : (res.output?.clips || []),
+        coordinates: Array.isArray(outputCoordinates) ? outputCoordinates : res.output?.clips || [],
         returnCoordinatesOnly: returnCoordinatesOnly,
         aspectRatio: aspectRatio,
         timestamp: new Date().toISOString(),
       };
-
 
       setResult(newResult);
       setActiveHighlightIndex(0);
@@ -493,16 +532,14 @@ export default function ClippingStudio({
       if (onGenerationComplete) {
         onGenerationComplete({
           url: clips[0] || videoUrl,
-          model: "ai-clipping",
-          type: "video",
+          model: 'ai-clipping',
+          type: 'video',
         });
       }
     } catch (err) {
-      console.error("[ClippingStudio] Error generating clips:", err);
-      const errMsg = formatErrorMessage(err, "Failed to process AI clipping.");
-      const notificationMessage = isFileSizeError(err)
-        ? VIDEO_TOO_LARGE_FOR_MODE_MESSAGE
-        : errMsg;
+      console.error('[ClippingStudio] Error generating clips:', err);
+      const errMsg = formatErrorMessage(err, 'Failed to process AI clipping.');
+      const notificationMessage = isFileSizeError(err) ? VIDEO_TOO_LARGE_FOR_MODE_MESSAGE : errMsg;
       if (onGenerationError) onGenerationError(notificationMessage);
       else showErrorToast(notificationMessage);
     } finally {
@@ -516,16 +553,14 @@ export default function ClippingStudio({
     setActiveHighlightIndex(0);
     setVideoUrl(entry.videoUrl);
     setNumHighlights(entry.numHighlights || 3);
-    setAspectRatio(entry.aspectRatio || "9:16");
+    setAspectRatio(entry.aspectRatio || '9:16');
     setReturnCoordinatesOnly(entry.returnCoordinatesOnly || false);
   };
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-app-bg text-white relative overflow-hidden">
-      
       {/* ─── CENTRAL AREA ─── */}
       <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto custom-scrollbar pb-40 lg:pb-32 px-2">
-        
         {/* Error Message */}
         {generateError && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded text-xs font-semibold leading-relaxed mb-6">
@@ -539,10 +574,10 @@ export default function ClippingStudio({
             title="AI CLIPPING STUDIO"
             subtitle="Extract viral highlights and precise timings from your videos automatically."
             imageAssets={[
-              "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/sdxl-image.avif",
-              "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/chroma-image.avif",
-              "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/neta-lumina.avif",
-              "https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/perfect-pony-xl.avif",
+              'https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/sdxl-image.avif',
+              'https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/chroma-image.avif',
+              'https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/neta-lumina.avif',
+              'https://d3adwkbyhxyrtq.cloudfront.net/webassets/videomodels/perfect-pony-xl.avif',
             ]}
           />
         )}
@@ -561,18 +596,18 @@ export default function ClippingStudio({
             </div>
 
             <StudioGallery
-              history={history.map(entry => ({
+              history={history.map((entry) => ({
                 ...entry,
                 url: entry.videoUrl, // Map videoUrl to url for StudioGallery thumbnail
-                prompt: entry.videoUrl.split('/').pop() || "source_video.mp4",
-                model: entry.returnCoordinatesOnly ? "Timeline Mode" : "Clips Mode",
+                prompt: entry.videoUrl.split('/').pop() || 'source_video.mp4',
+                model: entry.returnCoordinatesOnly ? 'Timeline Mode' : 'Clips Mode',
                 aspect_ratio: entry.aspectRatio,
               }))}
               onSelectFullscreen={(url) => {
-                const entry = history.find(h => h.videoUrl === url);
+                const entry = history.find((h) => h.videoUrl === url);
                 if (entry) handleSelectHistory(entry);
               }}
-              onDelete={(entry) => setHistory(prev => prev.filter(h => h.id !== entry.id))}
+              onDelete={(entry) => setHistory((prev) => prev.filter((h) => h.id !== entry.id))}
               studioName="Clipping Studio"
             />
           </div>
@@ -588,7 +623,14 @@ export default function ClippingStudio({
                 onClick={() => setResult(null)}
                 className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white transition-colors"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <line x1="19" y1="12" x2="5" y2="12" />
                   <polyline points="12 19 5 12 12 5" />
                 </svg>
@@ -596,7 +638,7 @@ export default function ClippingStudio({
               </button>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded">
-                  {result.returnCoordinatesOnly ? "Timeline Seek Mode" : "Clips Gallery Mode"}
+                  {result.returnCoordinatesOnly ? 'Timeline Seek Mode' : 'Clips Gallery Mode'}
                 </span>
                 <span className="text-[10px] text-zinc-400 bg-white/5 border border-white/5 px-2.5 py-0.5 rounded">
                   {result.aspectRatio}
@@ -635,8 +677,8 @@ export default function ClippingStudio({
                   <div className="flex-1 overflow-y-auto custom-scrollbar mt-4 space-y-3 pr-1">
                     {result.coordinates && result.coordinates.length > 0 ? (
                       result.coordinates.map((hl, i) => {
-                        const start = hl.start_time !== undefined ? hl.start_time : (hl.start || 0);
-                        const end = hl.end_time !== undefined ? hl.end_time : (hl.end || 0);
+                        const start = hl.start_time !== undefined ? hl.start_time : hl.start || 0;
+                        const end = hl.end_time !== undefined ? hl.end_time : hl.end || 0;
                         const isActive = activeHighlightIndex === i;
 
                         return (
@@ -648,13 +690,15 @@ export default function ClippingStudio({
                               seekToHighlight(start);
                             }}
                             className={`w-full p-4 border rounded-lg text-left transition-all hover:bg-zinc-900/60 flex flex-col gap-2 group/hl ${
-                              isActive 
-                                ? "border-primary bg-primary/5 shadow-[0_0_12px_rgba(34,211,238,0.03)]" 
-                                : "border-zinc-800 bg-zinc-900/30 hover:border-zinc-700"
+                              isActive
+                                ? 'border-primary bg-primary/5 shadow-[0_0_12px_rgba(34,211,238,0.03)]'
+                                : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700'
                             }`}
                           >
                             <div className="flex items-center justify-between w-full">
-                              <span className={`text-xs font-bold transition-colors ${isActive ? "text-primary" : "text-white"}`}>
+                              <span
+                                className={`text-xs font-bold transition-colors ${isActive ? 'text-primary' : 'text-white'}`}
+                              >
                                 {hl.label || `Highlight #${i + 1}`}
                               </span>
                               {hl.score && (
@@ -665,11 +709,15 @@ export default function ClippingStudio({
                             </div>
                             <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-semibold">
                               <ClockIcon />
-                              <span>{formatSeconds(start)} - {formatSeconds(end)}</span>
+                              <span>
+                                {formatSeconds(start)} - {formatSeconds(end)}
+                              </span>
                               <span className="text-zinc-650">•</span>
-                              <span className="text-primary/80 font-bold">{(end - start).toFixed(0)}s duration</span>
+                              <span className="text-primary/80 font-bold">
+                                {(end - start).toFixed(0)}s duration
+                              </span>
                             </div>
-                            
+
                             <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary mt-1 opacity-0 group-hover/hl:opacity-100 transition-opacity">
                               <PlayIcon /> Seek & Play
                             </div>
@@ -702,12 +750,12 @@ export default function ClippingStudio({
                       id: `clip-${i}`,
                       url: clipUrl,
                       prompt: result.prompt,
-                      model: "AI Clipping",
+                      model: 'AI Clipping',
                       aspect_ratio: result.aspectRatio || `Clip #${i + 1}`,
                     }))}
                     onSelectFullscreen={(url) => setFullscreenUrl(url)}
                     onDownload={(entry, idx) => {
-                      const a = document.createElement("a");
+                      const a = document.createElement('a');
                       a.href = entry.url;
                       a.download = `clip-${idx + 1}.mp4`;
                       document.body.appendChild(a);
@@ -722,7 +770,7 @@ export default function ClippingStudio({
                         onClick={(e) => {
                           e.stopPropagation();
                           navigator.clipboard.writeText(entry.url).then(() => {
-                            toast.success("Link copied!");
+                            toast.success('Link copied!');
                           });
                         }}
                         className="p-2 bg-black/60 backdrop-blur-md rounded-full text-white hover:bg-primary hover:text-black transition-all border border-white/10"
@@ -732,14 +780,14 @@ export default function ClippingStudio({
                     )}
                     customMobileActions={(entry, idx) => [
                       {
-                        kind: "copy",
-                        label: "Copy link",
+                        kind: 'copy',
+                        label: 'Copy link',
                         onSelect: () => {
                           navigator.clipboard.writeText(entry.url).then(() => {
-                            toast.success("Link copied!");
+                            toast.success('Link copied!');
                           });
                         },
-                      }
+                      },
                     ]}
                   />
                 ) : (
@@ -751,216 +799,215 @@ export default function ClippingStudio({
             )}
           </div>
         )}
-
       </div>
 
       {/* ─── FLOATING BOTTOM PROMPT BAR ─── */}
       <PromptComposer>
-          
-          {/* Inline list of uploaded media files */}
-          {videoUrl && (
-            <div className="flex items-center gap-2.5 px-1 pb-1">
-              <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
-                <video src={videoUrl} className="w-full h-full object-cover" muted playsInline />
-                <button
-                  type="button"
-                  onClick={clearVideoUpload}
-                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
-                  title="Clear video"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Upper row: upload button & prompt field */}
-          <div className="flex items-start gap-3 px-1">
-            {/* Hidden file input */}
-            <input
-              ref={videoFileInputRef}
-              type="file"
-              accept="video/*"
-              className="hidden"
-              onChange={handleVideoFileChange}
-            />
-            
-            {/* Sleek round upload button */}
-            {!videoUrl && (
+        {/* Inline list of uploaded media files */}
+        {videoUrl && (
+          <div className="flex items-center gap-2.5 px-1 pb-1">
+            <div className={PROMPT_MEDIA_PREVIEW_CLASS}>
+              <video src={videoUrl} className="w-full h-full object-cover" muted playsInline />
               <button
                 type="button"
-                title="Upload source video"
-                onClick={() => videoFileInputRef.current?.click()}
-                className={promptMediaButtonClassName({
-                  active: Boolean(videoUrl),
-                })}
+                onClick={clearVideoUpload}
+                className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 hover:bg-black rounded-full flex items-center justify-center text-white/85 hover:text-white text-[8px] border border-white/5"
+                title="Clear video"
               >
-                {videoUploading ? (
-                  <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/85 z-20 backdrop-blur-[1px]">
-                    <svg className="w-8 h-8 -rotate-90">
-                      <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/10" />
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="14"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="transparent"
-                        strokeDasharray={88}
-                        strokeDashoffset={88 - (88 * videoProgress) / 100}
-                        className="text-primary transition-all duration-300"
-                      />
-                    </svg>
-                    <span className={`absolute text-[8px] font-black text-primary leading-none ${videoProgress >= 100 ? "animate-pulse" : ""}`}>
-                      {videoProgress >= 100 ? "..." : `${videoProgress}%`}
-                    </span>
-                  </div>
-                ) : null}
-
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/60 group-hover:text-primary transition-colors">
-                  <polygon points="23 7 16 12 23 17 23 7" />
-                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                </svg>
+                ×
               </button>
-            )}
-
-            {/* Prompt textarea (supports direct URL pasting too) */}
-            <div className="flex-1 flex flex-col gap-1">
-              <PromptTextarea
-                value={prompt}
-                onChange={handlePromptInput}
-                placeholder="Describe prompt / highlights to extract"
-              />
             </div>
           </div>
+        )}
 
-          {/* Bottom row: controls + generate button */}
-          <PromptFooter>
-            <PromptControls>
-              
-              {/* Model Identifier (C) */}
-              <div className={promptControlClassName()}>
-                <div className="w-4 h-4 bg-primary rounded flex items-center justify-center shadow-lg shadow-primary/10">
-                  <span className="text-[9px] font-bold text-black uppercase">C</span>
+        {/* Upper row: upload button & prompt field */}
+        <div className="flex items-start gap-3 px-1">
+          {/* Hidden file input */}
+          <input
+            ref={videoFileInputRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={handleVideoFileChange}
+          />
+
+          {/* Sleek round upload button */}
+          {!videoUrl && (
+            <button
+              type="button"
+              title="Upload source video"
+              onClick={() => videoFileInputRef.current?.click()}
+              className={promptMediaButtonClassName({
+                active: Boolean(videoUrl),
+              })}
+            >
+              {videoUploading ? (
+                <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 bg-black/85 z-20 backdrop-blur-[1px]">
+                  <svg className="w-8 h-8 -rotate-90">
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      className="text-white/10"
+                    />
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      strokeDasharray={88}
+                      strokeDashoffset={88 - (88 * videoProgress) / 100}
+                      className="text-primary transition-all duration-300"
+                    />
+                  </svg>
+                  <span
+                    className={`absolute text-[8px] font-black text-primary leading-none ${videoProgress >= 100 ? 'animate-pulse' : ''}`}
+                  >
+                    {videoProgress >= 100 ? '...' : `${videoProgress}%`}
+                  </span>
                 </div>
-                <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                  AI Clipping
-                </span>
-              </div>
+              ) : null}
 
-              {/* Aspect Ratio selector */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setAspectDropdownOpen(!aspectDropdownOpen)}
-                  className={promptControlClassName({
-                    active: aspectDropdownOpen,
-                  })}
-                >
-                  <PromptAspectRatioIcon />
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {aspectRatio}
-                  </span>
-                </button>
-                {aspectDropdownOpen && (
-                  <PromptPopover>
-                    <PromptPopoverHeader>
-                      Aspect Ratio
-                    </PromptPopoverHeader>
-                    <PromptMenuList>
-                      {ASPECT_RATIOS.map((r) => (
-                        <PromptMenuItem
-                          key={r.value}
-                          selected={aspectRatio === r.value}
-                          onClick={() => {
-                            setAspectRatio(r.value);
-                            setAspectDropdownOpen(false);
-                          }}
-                        >
-                          {r.value}
-                        </PromptMenuItem>
-                      ))}
-                    </PromptMenuList>
-                  </PromptPopover>
-                )}
-              </div>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-white/60 group-hover:text-primary transition-colors"
+              >
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
+            </button>
+          )}
 
-              {/* Highlights Limit selector */}
-              <div className="relative" ref={highlightsDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setHighlightsDropdownOpen(!highlightsDropdownOpen)}
-                  className={promptControlClassName({
-                    active: highlightsDropdownOpen,
-                  })}
-                >
-                  <PromptDurationIcon />
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {numHighlights} Highlights
-                  </span>
-                </button>
-                {highlightsDropdownOpen && (
-                  <PromptPopover className="min-w-[180px] overflow-visible">
-                    <PromptPopoverHeader className="mb-3">
-                      Max Highlights
-                    </PromptPopoverHeader>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/60">Limit:</span>
-                        <span className="text-xs font-black text-primary bg-primary/10 px-2.5 py-0.5 rounded">
-                          {numHighlights}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="1"
-                        max="60"
-                        step="1"
-                        value={numHighlights}
-                        onChange={(e) => setNumHighlights(Number(e.target.value))}
-                        className="w-full h-1 bg-zinc-850 rounded appearance-none cursor-pointer accent-primary"
-                      />
-                    </div>
-                  </PromptPopover>
-                )}
-              </div>
+          {/* Prompt textarea (supports direct URL pasting too) */}
+          <div className="flex-1 flex flex-col gap-1">
+            <PromptTextarea
+              value={prompt}
+              onChange={handlePromptInput}
+              placeholder="Describe prompt / highlights to extract"
+            />
+          </div>
+        </div>
 
-              {/* Return Coordinates Toggle */}
+        {/* Bottom row: controls + generate button */}
+        <PromptFooter>
+          <PromptControls>
+            {/* Model Identifier (C) */}
+            <div className={promptControlClassName()}>
+              <div className="w-4 h-4 bg-primary rounded flex items-center justify-center shadow-lg shadow-primary/10">
+                <span className="text-[9px] font-bold text-black uppercase">C</span>
+              </div>
+              <span className={PROMPT_CONTROL_LABEL_CLASS}>AI Clipping</span>
+            </div>
+
+            {/* Aspect Ratio selector */}
+            <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
-                onClick={() => setReturnCoordinatesOnly(!returnCoordinatesOnly)}
+                onClick={() => setAspectDropdownOpen(!aspectDropdownOpen)}
                 className={promptControlClassName({
-                  active: returnCoordinatesOnly,
-                  className: returnCoordinatesOnly
-                    ? "text-primary"
-                    : "text-white/70 hover:text-white",
+                  active: aspectDropdownOpen,
                 })}
               >
-                <ScissorsIcon className="w-4 h-4 text-current" />
-                <span className="text-xs font-semibold">
-                  Coordinates Only
-                </span>
+                <PromptAspectRatioIcon />
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{aspectRatio}</span>
               </button>
-
-            </PromptControls>
-
-            {/* Generate button */}
-            <PromptAction
-              onClick={handleGenerate}
-              disabled={isGenerating}
-            >
-              {isGenerating ? (
-                <>
-                  <span className="animate-spin inline-block text-black">◌</span>
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <span>Generate ✦ 5</span>
-                </>
+              {aspectDropdownOpen && (
+                <PromptPopover>
+                  <PromptPopoverHeader>Aspect Ratio</PromptPopoverHeader>
+                  <PromptMenuList>
+                    {ASPECT_RATIOS.map((r) => (
+                      <PromptMenuItem
+                        key={r.value}
+                        selected={aspectRatio === r.value}
+                        onClick={() => {
+                          setAspectRatio(r.value);
+                          setAspectDropdownOpen(false);
+                        }}
+                      >
+                        {r.value}
+                      </PromptMenuItem>
+                    ))}
+                  </PromptMenuList>
+                </PromptPopover>
               )}
-            </PromptAction>
-          </PromptFooter>
+            </div>
+
+            {/* Highlights Limit selector */}
+            <div className="relative" ref={highlightsDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setHighlightsDropdownOpen(!highlightsDropdownOpen)}
+                className={promptControlClassName({
+                  active: highlightsDropdownOpen,
+                })}
+              >
+                <PromptDurationIcon />
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{numHighlights} Highlights</span>
+              </button>
+              {highlightsDropdownOpen && (
+                <PromptPopover className="min-w-[180px] overflow-visible">
+                  <PromptPopoverHeader className="mb-3">Max Highlights</PromptPopoverHeader>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/60">Limit:</span>
+                      <span className="text-xs font-black text-primary bg-primary/10 px-2.5 py-0.5 rounded">
+                        {numHighlights}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="60"
+                      step="1"
+                      value={numHighlights}
+                      onChange={(e) => setNumHighlights(Number(e.target.value))}
+                      className="w-full h-1 bg-zinc-850 rounded appearance-none cursor-pointer accent-primary"
+                    />
+                  </div>
+                </PromptPopover>
+              )}
+            </div>
+
+            {/* Return Coordinates Toggle */}
+            <button
+              type="button"
+              onClick={() => setReturnCoordinatesOnly(!returnCoordinatesOnly)}
+              className={promptControlClassName({
+                active: returnCoordinatesOnly,
+                className: returnCoordinatesOnly
+                  ? 'text-primary'
+                  : 'text-white/70 hover:text-white',
+              })}
+            >
+              <ScissorsIcon className="w-4 h-4 text-current" />
+              <span className="text-xs font-semibold">Coordinates Only</span>
+            </button>
+          </PromptControls>
+
+          {/* Generate button */}
+          <PromptAction onClick={handleGenerate} disabled={isGenerating}>
+            {isGenerating ? (
+              <>
+                <span className="animate-spin inline-block text-black">◌</span>
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <span>Generate ✦ 5</span>
+              </>
+            )}
+          </PromptAction>
+        </PromptFooter>
       </PromptComposer>
 
       <style jsx global>{`
@@ -992,21 +1039,21 @@ export default function ClippingStudio({
         toastOptions={{
           duration: 6000,
           style: {
-            background: "#0d0d0f",
-            color: "#f4f4f5",
-            border: "1px solid rgba(239,68,68,0.35)",
-            fontSize: "13px",
-            borderRadius: "12px",
-            boxShadow: "0 16px 48px rgba(0,0,0,0.65)",
-            maxWidth: "380px",
-            wordBreak: "break-word",
-            whiteSpace: "pre-wrap",
-            padding: "12px 14px",
+            background: '#0d0d0f',
+            color: '#f4f4f5',
+            border: '1px solid rgba(239,68,68,0.35)',
+            fontSize: '13px',
+            borderRadius: '12px',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.65)',
+            maxWidth: '380px',
+            wordBreak: 'break-word',
+            whiteSpace: 'pre-wrap',
+            padding: '12px 14px',
           },
           error: {
             iconTheme: {
-              primary: "#f87171",
-              secondary: "#0d0d0f",
+              primary: '#f87171',
+              secondary: '#0d0d0f',
             },
           },
         }}

@@ -1,85 +1,69 @@
-"use client";
+'use client';
 
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 
 const DEFAULT_POSITION_CLASS =
-  "absolute bottom-4 w-full max-w-[95%] lg:max-w-4xl z-30 animate-fade-in-up";
+  'absolute bottom-4 w-full max-w-[95%] lg:max-w-4xl z-30 animate-fade-in-up';
 
 const DEFAULT_PANEL_CLASS =
-  "w-full bg-gradient-to-b from-[#18181c]/90 via-[#0f0f12]/90 to-[#0c0c0e]/95 backdrop-blur-2xl rounded-[2rem] border border-white/[0.08] p-4 flex flex-col gap-3 shadow-[0_15px_50px_rgba(0,0,0,0.8)]";
+  'w-full bg-gradient-to-b from-[#18181c]/90 via-[#0f0f12]/90 to-[#0c0c0e]/95 backdrop-blur-2xl rounded-[2rem] border border-white/[0.08] p-4 flex flex-col gap-3 shadow-[0_15px_50px_rgba(0,0,0,0.8)]';
 
 const DEFAULT_TEXTAREA_CLASS =
-  "w-full bg-transparent border-none text-white text-sm placeholder:text-white/60 focus:outline-none resize-none pt-1 leading-relaxed min-h-[40px] max-h-[150px] md:max-h-[250px] overflow-y-auto custom-scrollbar disabled:opacity-40";
+  'w-full bg-transparent border-none text-white text-sm placeholder:text-white/60 focus:outline-none resize-none pt-1 leading-relaxed min-h-[40px] max-h-[150px] md:max-h-[250px] overflow-y-auto custom-scrollbar disabled:opacity-40';
 
 const DEFAULT_ACTION_CLASS =
-  "bg-primary text-black px-7 py-3 rounded-full font-bold text-sm hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 w-full sm:w-auto shadow-lg shadow-primary/20 hover:shadow-primary/35 border border-primary/10 z-10 disabled:opacity-50 disabled:cursor-not-allowed";
+  'bg-primary text-black px-7 py-3 rounded-full font-bold text-sm hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 w-full sm:w-auto shadow-lg shadow-primary/20 hover:shadow-primary/35 border border-primary/10 z-10 disabled:opacity-50 disabled:cursor-not-allowed';
 
 const CONTROL_LAYOUT_CLASS =
-  "h-[38px] flex items-center gap-2 rounded-md transition-all border group whitespace-nowrap shadow-inner focus:outline-none focus-visible:border-primary/45 focus-visible:ring-1 focus-visible:ring-primary/30";
+  'h-[38px] flex items-center gap-2 rounded-md transition-all border group whitespace-nowrap shadow-inner focus:outline-none focus-visible:border-primary/45 focus-visible:ring-1 focus-visible:ring-primary/30';
 
-const CONTROL_IDLE_CLASS =
-  "text-white bg-[#16161a]/60 hover:bg-[#202026]/80 border-white/[0.06]";
+const CONTROL_IDLE_CLASS = 'text-white bg-[#16161a]/60 hover:bg-[#202026]/80 border-white/[0.06]';
 
-const CONTROL_ACTIVE_CLASS =
-  "text-primary bg-primary/10 hover:bg-primary/15 border-primary/25";
+const CONTROL_ACTIVE_CLASS = 'text-primary bg-primary/10 hover:bg-primary/15 border-primary/25';
 
 const MEDIA_CONTROL_LAYOUT_CLASS =
-  "w-10 h-10 shrink-0 rounded-full border transition-all flex items-center justify-center relative overflow-hidden group focus:outline-none focus-visible:border-primary/45 focus-visible:ring-1 focus-visible:ring-primary/30";
+  'w-10 h-10 shrink-0 rounded-full border transition-all flex items-center justify-center relative overflow-hidden group focus:outline-none focus-visible:border-primary/45 focus-visible:ring-1 focus-visible:ring-primary/30';
 
-const DEFAULT_POPOVER_POSITION_CLASS =
-  "absolute bottom-[calc(100%+12px)] left-0 z-50";
+const DEFAULT_POPOVER_POSITION_CLASS = 'absolute bottom-[calc(100%+12px)] left-0 z-50';
 
 const DEFAULT_POPOVER_CLASS =
-  "bg-[#0c0c0f]/95 rounded-xl p-3.5 shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/[0.08] backdrop-blur-2xl min-w-[160px] max-h-[40vh] overflow-y-auto custom-scrollbar";
+  'bg-[#0c0c0f]/95 rounded-xl p-3.5 shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/[0.08] backdrop-blur-2xl min-w-[160px] max-h-[40vh] overflow-y-auto custom-scrollbar';
 
 function joinClasses(...classes) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 export function promptControlClassName({
   active = false,
   compact = false,
   iconOnly = false,
-  className = "",
+  className = '',
 } = {}) {
   return joinClasses(
     CONTROL_LAYOUT_CLASS,
-    iconOnly
-      ? "w-[38px] px-0 justify-center"
-      : compact
-        ? "px-3"
-        : "px-4",
+    iconOnly ? 'w-[38px] px-0 justify-center' : compact ? 'px-3' : 'px-4',
     active ? CONTROL_ACTIVE_CLASS : CONTROL_IDLE_CLASS,
-    className,
+    className
   );
 }
 
-export function promptMediaButtonClassName({
-  active = false,
-  className = "",
-} = {}) {
+export function promptMediaButtonClassName({ active = false, className = '' } = {}) {
   return joinClasses(
     MEDIA_CONTROL_LAYOUT_CLASS,
     active
-      ? "border-primary/60 bg-primary/5 hover:border-primary/70"
-      : "border-white/[0.03] bg-white/[0.03] hover:bg-white/[0.06] hover:border-primary/40",
-    className,
+      ? 'border-primary/60 bg-primary/5 hover:border-primary/70'
+      : 'border-white/[0.03] bg-white/[0.03] hover:bg-white/[0.06] hover:border-primary/40',
+    className
   );
 }
 
 export const PROMPT_MEDIA_PREVIEW_CLASS =
-  "relative w-10 h-10 shrink-0 rounded-full border border-white/10 overflow-hidden shadow-md group";
+  'relative w-10 h-10 shrink-0 rounded-full border border-white/10 overflow-hidden shadow-md group';
 
 export const PROMPT_CONTROL_LABEL_CLASS =
-  "text-xs font-semibold text-current opacity-70 group-hover:text-primary group-hover:opacity-100 transition-all";
+  'text-xs font-semibold text-current opacity-70 group-hover:text-primary group-hover:opacity-100 transition-all';
 
-export function PromptChevronIcon({ className = "" }) {
+export function PromptChevronIcon({ className = '' }) {
   return (
     <svg
       width="10"
@@ -91,8 +75,8 @@ export function PromptChevronIcon({ className = "" }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={joinClasses(
-        "text-current opacity-[0.45] group-hover:opacity-100 flex-shrink-0 transition-opacity",
-        className,
+        'text-current opacity-[0.45] group-hover:opacity-100 flex-shrink-0 transition-opacity',
+        className
       )}
       aria-hidden="true"
     >
@@ -101,7 +85,7 @@ export function PromptChevronIcon({ className = "" }) {
   );
 }
 
-export function PromptAspectRatioIcon({ className = "" }) {
+export function PromptAspectRatioIcon({ className = '' }) {
   return (
     <svg
       width="16"
@@ -110,7 +94,7 @@ export function PromptAspectRatioIcon({ className = "" }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
-      className={joinClasses("text-current opacity-[0.45] flex-shrink-0", className)}
+      className={joinClasses('text-current opacity-[0.45] flex-shrink-0', className)}
       aria-hidden="true"
     >
       <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -118,7 +102,7 @@ export function PromptAspectRatioIcon({ className = "" }) {
   );
 }
 
-export function PromptDurationIcon({ className = "" }) {
+export function PromptDurationIcon({ className = '' }) {
   return (
     <svg
       width="16"
@@ -129,7 +113,7 @@ export function PromptDurationIcon({ className = "" }) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={joinClasses("text-current opacity-[0.45] flex-shrink-0", className)}
+      className={joinClasses('text-current opacity-[0.45] flex-shrink-0', className)}
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="9" />
@@ -138,7 +122,7 @@ export function PromptDurationIcon({ className = "" }) {
   );
 }
 
-export function PromptQualityIcon({ className = "" }) {
+export function PromptQualityIcon({ className = '' }) {
   return (
     <svg
       width="18"
@@ -149,7 +133,7 @@ export function PromptQualityIcon({ className = "" }) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={joinClasses("text-current opacity-70 flex-shrink-0", className)}
+      className={joinClasses('text-current opacity-70 flex-shrink-0', className)}
       aria-hidden="true"
     >
       <path d="M6.5 3.5h11L22 9 12 21 2 9l4.5-5.5Z" />
@@ -161,35 +145,26 @@ export function PromptQualityIcon({ className = "" }) {
 }
 
 export const PromptPopover = forwardRef(function PromptPopover(
-  {
-    children,
-    className = "",
-    positionClassName = DEFAULT_POPOVER_POSITION_CLASS,
-    ...props
-  },
-  ref,
+  { children, className = '', positionClassName = DEFAULT_POPOVER_POSITION_CLASS, ...props },
+  ref
 ) {
   return (
     <div
       {...props}
       ref={ref}
-      className={joinClasses(
-        positionClassName,
-        DEFAULT_POPOVER_CLASS,
-        className,
-      )}
+      className={joinClasses(positionClassName, DEFAULT_POPOVER_CLASS, className)}
     >
       {children}
     </div>
   );
 });
 
-export function PromptPopoverHeader({ children, className = "" }) {
+export function PromptPopoverHeader({ children, className = '' }) {
   return (
     <div
       className={joinClasses(
-        "text-[11px] font-semibold text-white/60 uppercase tracking-wider pb-2 border-b border-white/[0.05] mb-2 px-1",
-        className,
+        'text-[11px] font-semibold text-white/60 uppercase tracking-wider pb-2 border-b border-white/[0.05] mb-2 px-1',
+        className
       )}
     >
       {children}
@@ -197,9 +172,9 @@ export function PromptPopoverHeader({ children, className = "" }) {
   );
 }
 
-export function PromptMenuList({ children, className = "" }) {
+export function PromptMenuList({ children, className = '' }) {
   return (
-    <div role="menu" className={joinClasses("flex flex-col gap-1", className)}>
+    <div role="menu" className={joinClasses('flex flex-col gap-1', className)}>
       {children}
     </div>
   );
@@ -209,8 +184,8 @@ export function PromptMenuItem({
   children,
   description,
   selected = false,
-  className = "",
-  type = "button",
+  className = '',
+  type = 'button',
   ...props
 }) {
   return (
@@ -220,9 +195,9 @@ export function PromptMenuItem({
       aria-checked={selected}
       role="menuitemradio"
       className={joinClasses(
-        "w-full min-h-10 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left cursor-pointer transition-all group/menu-item",
-        "text-xs font-semibold text-white/70 hover:bg-primary/10 hover:text-primary focus:outline-none focus-visible:bg-primary/10 focus-visible:text-primary",
-        className,
+        'w-full min-h-10 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left cursor-pointer transition-all group/menu-item',
+        'text-xs font-semibold text-white/70 hover:bg-primary/10 hover:text-primary focus:outline-none focus-visible:bg-primary/10 focus-visible:text-primary',
+        className
       )}
     >
       <span className="min-w-0">
@@ -239,7 +214,8 @@ export function PromptMenuItem({
           height="12"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="currentColor" className="text-primary"
+          stroke="currentColor"
+          className="text-primary"
           strokeWidth="4.5"
           className="flex-shrink-0"
           aria-hidden="true"
@@ -251,12 +227,12 @@ export function PromptMenuItem({
   );
 }
 
-export function PromptSegmentedControl({ children, className = "" }) {
+export function PromptSegmentedControl({ children, className = '' }) {
   return (
     <div
       className={joinClasses(
-        "inline-flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full p-0.5",
-        className,
+        'inline-flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full p-0.5',
+        className
       )}
     >
       {children}
@@ -267,8 +243,8 @@ export function PromptSegmentedControl({ children, className = "" }) {
 export function PromptSegmentOption({
   children,
   selected = false,
-  className = "",
-  type = "button",
+  className = '',
+  type = 'button',
   ...props
 }) {
   return (
@@ -277,12 +253,12 @@ export function PromptSegmentOption({
       type={type}
       aria-pressed={selected}
       className={joinClasses(
-        "min-h-7 px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5",
-        "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40",
+        'min-h-7 px-3 py-1 rounded-full text-xs font-semibold transition-all flex items-center justify-center gap-1.5',
+        'focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40',
         selected
-          ? "bg-primary text-black shadow-md shadow-primary/20"
-          : "text-white/60 hover:text-white/70",
-        className,
+          ? 'bg-primary text-black shadow-md shadow-primary/20'
+          : 'text-white/60 hover:text-white/70',
+        className
       )}
     >
       {children}
@@ -292,16 +268,14 @@ export function PromptSegmentOption({
 
 export function PromptComposer({
   children,
-  className = "",
-  panelClassName = "",
+  className = '',
+  panelClassName = '',
   positionClassName = DEFAULT_POSITION_CLASS,
-  style = { animationDelay: "0.2s" },
+  style = { animationDelay: '0.2s' },
 }) {
   return (
     <div className={joinClasses(positionClassName, className)} style={style}>
-      <div className={joinClasses(DEFAULT_PANEL_CLASS, panelClassName)}>
-        {children}
-      </div>
+      <div className={joinClasses(DEFAULT_PANEL_CLASS, panelClassName)}>{children}</div>
     </div>
   );
 }
@@ -311,13 +285,13 @@ export const PromptTextarea = forwardRef(function PromptTextarea(
     value,
     onChange,
     onInput,
-    className = "",
+    className = '',
     maxHeightMobile = 150,
     maxHeightDesktop = 250,
     rows = 1,
     ...props
   },
-  forwardedRef,
+  forwardedRef
 ) {
   const internalRef = useRef(null);
 
@@ -327,12 +301,11 @@ export const PromptTextarea = forwardRef(function PromptTextarea(
     (element = internalRef.current) => {
       if (!element) return;
 
-      element.style.height = "auto";
-      const maxHeight =
-        window.innerWidth < 768 ? maxHeightMobile : maxHeightDesktop;
+      element.style.height = 'auto';
+      const maxHeight = window.innerWidth < 768 ? maxHeightMobile : maxHeightDesktop;
       element.style.height = `${Math.min(element.scrollHeight, maxHeight)}px`;
     },
-    [maxHeightDesktop, maxHeightMobile],
+    [maxHeightDesktop, maxHeightMobile]
   );
 
   useEffect(() => {
@@ -362,12 +335,12 @@ export const PromptTextarea = forwardRef(function PromptTextarea(
   );
 });
 
-export function PromptFooter({ children, className = "" }) {
+export function PromptFooter({ children, className = '' }) {
   return (
     <div
       className={joinClasses(
-        "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/[0.03] relative",
-        className,
+        'flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-white/[0.03] relative',
+        className
       )}
     >
       {children}
@@ -376,16 +349,13 @@ export function PromptFooter({ children, className = "" }) {
 }
 
 export const PromptControls = forwardRef(function PromptControls(
-  { children, className = "" },
-  ref,
+  { children, className = '' },
+  ref
 ) {
   return (
     <div
       ref={ref}
-      className={joinClasses(
-        "flex items-center gap-2 relative flex-wrap pb-1 md:pb-0",
-        className,
-      )}
+      className={joinClasses('flex items-center gap-2 relative flex-wrap pb-1 md:pb-0', className)}
     >
       {children}
     </div>
@@ -393,8 +363,8 @@ export const PromptControls = forwardRef(function PromptControls(
 });
 
 export const PromptAction = forwardRef(function PromptAction(
-  { children, className = "", type = "button", ...props },
-  ref,
+  { children, className = '', type = 'button', ...props },
+  ref
 ) {
   return (
     <button

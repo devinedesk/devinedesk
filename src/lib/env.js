@@ -30,7 +30,8 @@ export const env = {
   // Auth
   NEXTAUTH_SECRET: getEnv('NEXTAUTH_SECRET'),
   LOCAL_API_KEY: getEnv('LOCAL_API_KEY', 'devinedesk-local-dev-key'),
-  INTERNAL_API_KEY: getEnv('INTERNAL_API_KEY') || getEnv('LOCAL_API_KEY') || getEnv('OPENROUTER_API_KEY') || '',
+  INTERNAL_API_KEY:
+    getEnv('INTERNAL_API_KEY') || getEnv('LOCAL_API_KEY') || getEnv('OPENROUTER_API_KEY') || '',
 
   // Stripe
   STRIPE_SECRET_KEY: getEnv('STRIPE_SECRET_KEY'),

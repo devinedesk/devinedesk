@@ -14,18 +14,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "3:4",
-            "4:3",
-            "9:16",
-            "16:9",
-            "3:2",
-            "2:3",
-            "5:4",
-            "4:5",
-            "21:9"
-          ],
+          "enum": ["1:1", "3:4", "4:3", "9:16", "16:9", "3:2", "2:3", "5:4", "4:5", "21:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -180,17 +169,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "3:2",
-            "2:3",
-            "21:9",
-            "9:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -443,15 +422,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "21:9",
-            "16:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9", "16:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -476,15 +447,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "21:9",
-            "16:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9", "16:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -500,20 +463,14 @@
       "name": "Gpt4o Text To Image",
       "inputs": {
         "prompt": {
-          "examples": [
-            "A diagram of the solar system with labeled planets, cartoon style."
-          ],
+          "examples": ["A diagram of the solar system with labeled planets, cartoon style."],
           "description": "Text prompt describing the image.",
           "type": "string",
           "title": "Prompt",
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "2:3",
-            "3:2"
-          ],
+          "enum": ["1:1", "2:3", "3:2"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -521,11 +478,7 @@
           "default": "1:1"
         },
         "num_images": {
-          "enum": [
-            1,
-            2,
-            4
-          ],
+          "enum": [1, 2, 4],
           "title": "Number of images",
           "name": "num_images",
           "type": "int",
@@ -550,11 +503,7 @@
           "name": "prompt"
         },
         "speed": {
-          "enum": [
-            "relaxed",
-            "fast",
-            "turbo"
-          ],
+          "enum": ["relaxed", "fast", "turbo"],
           "title": "Speed",
           "name": "speed",
           "type": "string",
@@ -562,19 +511,7 @@
           "default": "relaxed"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "3:4",
-            "4:3",
-            "1:2",
-            "2:1",
-            "2:3",
-            "3:2",
-            "5:6",
-            "6:5"
-          ],
+          "enum": ["1:1", "16:9", "9:16", "3:4", "4:3", "1:2", "2:1", "2:3", "3:2", "5:6", "6:5"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -676,13 +613,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "3:4",
-            "4:3"
-          ],
+          "enum": ["1:1", "16:9", "9:16", "3:4", "4:3"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -707,17 +638,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "21:9",
-            "9:21",
-            "3:2",
-            "2:3"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "21:9", "9:21", "3:2", "2:3"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -762,13 +683,7 @@
           "name": "image_url"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -793,11 +708,7 @@
           "name": "prompt"
         },
         "render_speed": {
-          "enum": [
-            "Turbo",
-            "Balanced",
-            "Quality"
-          ],
+          "enum": ["Turbo", "Balanced", "Quality"],
           "title": "Render Speed",
           "name": "render_speed",
           "type": "string",
@@ -805,12 +716,7 @@
           "default": "Balanced"
         },
         "style": {
-          "enum": [
-            "Auto",
-            "General",
-            "Realistic",
-            "Design"
-          ],
+          "enum": ["Auto", "General", "Realistic", "Design"],
           "title": "Style",
           "name": "style",
           "type": "string",
@@ -818,13 +724,7 @@
           "default": "Auto"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "3:4",
-            "4:3",
-            "9:16",
-            "16:9"
-          ],
+          "enum": ["1:1", "3:4", "4:3", "9:16", "16:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -860,13 +760,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -902,13 +796,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -944,13 +832,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1012,16 +894,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "3:4",
-            "4:3",
-            "2:3",
-            "3:2",
-            "21:9"
-          ],
+          "enum": ["1:1", "16:9", "9:16", "3:4", "4:3", "2:3", "3:2", "21:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1029,11 +902,7 @@
           "default": "1:1"
         },
         "resolution": {
-          "enum": [
-            "1K",
-            "2K",
-            "4K"
-          ],
+          "enum": ["1K", "2K", "4K"],
           "title": "Resolution",
           "name": "resolution",
           "type": "string",
@@ -1152,17 +1021,7 @@
           "name": "image_url"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "3:2",
-            "2:3",
-            "21:9",
-            "9:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1197,17 +1056,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "3:2",
-            "2:3",
-            "21:9",
-            "9:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1390,17 +1239,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "3:4",
-            "4:3",
-            "4:5",
-            "5:4",
-            "2:3",
-            "3:2"
-          ],
+          "enum": ["1:1", "16:9", "9:16", "3:4", "4:3", "4:5", "5:4", "2:3", "3:2"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1425,17 +1264,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "3:4",
-            "4:3",
-            "4:5",
-            "5:4",
-            "2:3",
-            "3:2"
-          ],
+          "enum": ["1:1", "16:9", "9:16", "3:4", "4:3", "4:5", "5:4", "2:3", "3:2"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1460,15 +1289,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "21:9",
-            "16:9",
-            "4:3",
-            "1:1",
-            "3:4",
-            "9:16",
-            "9:21"
-          ],
+          "enum": ["21:9", "16:9", "4:3", "1:1", "3:4", "9:16", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1493,13 +1314,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "9:16",
-            "16:9",
-            "2:3",
-            "3:2",
-            "1:1"
-          ],
+          "enum": ["9:16", "16:9", "2:3", "3:2", "1:1"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1524,18 +1339,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "3:4",
-            "4:3",
-            "9:16",
-            "16:9",
-            "3:2",
-            "2:3",
-            "5:4",
-            "4:5",
-            "21:9"
-          ],
+          "enum": ["1:1", "3:4", "4:3", "9:16", "16:9", "3:2", "2:3", "5:4", "4:5", "21:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1543,11 +1347,7 @@
           "default": "1:1"
         },
         "resolution": {
-          "enum": [
-            "1k",
-            "2k",
-            "4k"
-          ],
+          "enum": ["1k", "2k", "4k"],
           "description": "The target resolution of the generated image.",
           "type": "string",
           "title": "Resolution",
@@ -1572,16 +1372,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "2:3",
-            "3:2",
-            "21:9"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "2:3", "3:2", "21:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1589,10 +1380,7 @@
           "default": "1:1"
         },
         "resolution": {
-          "enum": [
-            "1k",
-            "2k"
-          ],
+          "enum": ["1k", "2k"],
           "title": "Resolution",
           "name": "resolution",
           "type": "string",
@@ -1701,15 +1489,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "2:3",
-            "3:2"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "2:3", "3:2"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1717,10 +1497,7 @@
           "default": "1:1"
         },
         "resolution": {
-          "enum": [
-            "1k",
-            "2k"
-          ],
+          "enum": ["1k", "2k"],
           "title": "Resolution",
           "name": "resolution",
           "type": "string",
@@ -1745,15 +1522,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "2:3",
-            "3:2"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "2:3", "3:2"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1761,10 +1530,7 @@
           "default": "1:1"
         },
         "resolution": {
-          "enum": [
-            "1k",
-            "2k"
-          ],
+          "enum": ["1k", "2k"],
           "title": "Resolution",
           "name": "resolution",
           "type": "string",
@@ -1789,16 +1555,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "2:3",
-            "3:2",
-            "21:9"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "2:3", "3:2", "21:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1806,11 +1563,7 @@
           "default": "1:1"
         },
         "resolution": {
-          "enum": [
-            "1k",
-            "2k",
-            "4k"
-          ],
+          "enum": ["1k", "2k", "4k"],
           "title": "Resolution",
           "name": "resolution",
           "type": "string",
@@ -1835,16 +1588,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "16:9",
-            "9:16",
-            "4:3",
-            "3:4",
-            "2:3",
-            "3:2",
-            "21:9"
-          ],
+          "enum": ["1:1", "16:9", "9:16", "4:3", "3:4", "2:3", "3:2", "21:9"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1852,10 +1596,7 @@
           "default": "1:1"
         },
         "quality": {
-          "enum": [
-            "basic",
-            "high"
-          ],
+          "enum": ["basic", "high"],
           "title": "Quality",
           "name": "quality",
           "type": "string",
@@ -1880,11 +1621,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "1:1",
-            "2:3",
-            "3:2"
-          ],
+          "enum": ["1:1", "2:3", "3:2"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1892,11 +1629,7 @@
           "default": "1:1"
         },
         "quality": {
-          "enum": [
-            "low",
-            "medium",
-            "high"
-          ],
+          "enum": ["low", "medium", "high"],
           "title": "Quality",
           "name": "quality",
           "type": "string",
@@ -1923,14 +1656,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "auto",
-            "1:1",
-            "16:9",
-            "9:16",
-            "4:3",
-            "3:4"
-          ],
+          "enum": ["auto", "1:1", "16:9", "9:16", "4:3", "3:4"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -1938,11 +1664,7 @@
           "default": "auto"
         },
         "resolution": {
-          "enum": [
-            "1K",
-            "2K",
-            "4K"
-          ],
+          "enum": ["1K", "2K", "4K"],
           "title": "Resolution",
           "name": "resolution",
           "type": "string",
@@ -2041,15 +1763,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "3:4",
-            "4:3",
-            "21:9",
-            "9:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "3:4", "4:3", "21:9", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -2074,15 +1788,7 @@
           "name": "prompt"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "3:4",
-            "4:3",
-            "21:9",
-            "9:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "3:4", "4:3", "21:9", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -2107,9 +1813,7 @@
           "name": "prompt"
         },
         "image_url": {
-          "examples": [
-            null
-          ],
+          "examples": [null],
           "description": "URL of the input image.",
           "field": "image",
           "type": "string",
@@ -2117,15 +1821,7 @@
           "name": "image_url"
         },
         "aspect_ratio": {
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "3:4",
-            "4:3",
-            "21:9",
-            "9:21"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "3:4", "4:3", "21:9", "9:21"],
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "type": "string",
@@ -2164,16 +1860,7 @@
           "title": "Aspect Ratio",
           "name": "aspect_ratio",
           "description": "Aspect ratio of the output image.",
-          "enum": [
-            "16:9",
-            "9:16",
-            "1:1",
-            "4:3",
-            "3:4",
-            "3:2",
-            "2:3",
-            "21:9"
-          ],
+          "enum": ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9"],
           "default": "1:1"
         },
         "num_images": {

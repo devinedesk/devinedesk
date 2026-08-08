@@ -1,25 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
-import { uploadFile, generateI2I } from "../apiClient.js";
+import React, { useState, useEffect, useRef } from 'react';
+import { uploadFile, generateI2I } from '../apiClient.js';
 
-export default function DrawModal({
-  isOpen,
-  onClose,
-  apiKey,
-  batchSize = 1,
-  onAddHistoryItem,
-}) {
-  const [activeTab, setActiveTab] = useState("draw-to-edit"); // 'sketch-to-video' | 'draw-to-video' | 'draw-to-edit'
-  const [viewState, setViewState] = useState("setup"); // 'setup' | 'canvas'
+export default function DrawModal({ isOpen, onClose, apiKey, batchSize = 1, onAddHistoryItem }) {
+  const [activeTab, setActiveTab] = useState('draw-to-edit'); // 'sketch-to-video' | 'draw-to-video' | 'draw-to-edit'
+  const [viewState, setViewState] = useState('setup'); // 'setup' | 'canvas'
   const [bgImageUrl, setBgImageUrl] = useState(null); // Image dataURL or src
-  const [aspectRatio, setAspectRatio] = useState("16:9"); // '16:9' | '1:1' | 'Auto'
-  const [selectedModel, setSelectedModel] = useState("nano-banana-pro-edit"); // 'nano-banana-2-edit' | 'nano-banana-pro-edit'
+  const [aspectRatio, setAspectRatio] = useState('16:9'); // '16:9' | '1:1' | 'Auto'
+  const [selectedModel, setSelectedModel] = useState('nano-banana-pro-edit'); // 'nano-banana-2-edit' | 'nano-banana-pro-edit'
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [isArDropdownOpen, setIsArDropdownOpen] = useState(false);
-  const [promptText, setPromptText] = useState("Edit the image based on the drawing overlay"); // text prompt for generation
+  const [promptText, setPromptText] = useState('Edit the image based on the drawing overlay'); // text prompt for generation
 
   // Drawing Tools
-  const [activeTool, setActiveTool] = useState("pencil"); // 'pointer' | 'pencil' | 'eraser' | 'rect' | 'arrow' | 'text' | 'image'
-  const [brushColor, setBrushColor] = useState("#eab308"); // default yellow
+  const [activeTool, setActiveTool] = useState('pencil'); // 'pointer' | 'pencil' | 'eraser' | 'rect' | 'arrow' | 'text' | 'image'
+  const [brushColor, setBrushColor] = useState('#eab308'); // default yellow
   const [brushSize, setBrushSize] = useState(5);
   const [showSettingsPopover, setShowSettingsPopover] = useState(false);
 
@@ -60,14 +54,14 @@ export default function DrawModal({
 
   // Predefined colors for drawing toolbar (rendered inline now)
   const PRESET_COLORS = [
-    "#ef4444", // Red
-    "#f97316", // Orange
-    "#eab308", // Yellow
-    "#22c55e", // Green
-    "#3b82f6", // Blue
-    "#a855f7", // Purple
-    "#ffffff", // White
-    "#000000", // Black
+    '#ef4444', // Red
+    '#f97316', // Orange
+    '#eab308', // Yellow
+    '#22c55e', // Green
+    '#3b82f6', // Blue
+    '#a855f7', // Purple
+    '#ffffff', // White
+    '#000000', // Black
   ];
 
   const handleSelectTool = (tool) => {
@@ -78,18 +72,15 @@ export default function DrawModal({
   // Adjust container clicks to close open menus
   useEffect(() => {
     const handleOutsideClick = (e) => {
-      if (
-        modelDropdownRef.current &&
-        !modelDropdownRef.current.contains(e.target)
-      ) {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target)) {
         setIsModelDropdownOpen(false);
       }
       if (arDropdownRef.current && !arDropdownRef.current.contains(e.target)) {
         setIsArDropdownOpen(false);
       }
     };
-    window.addEventListener("click", handleOutsideClick);
-    return () => window.removeEventListener("click", handleOutsideClick);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
   }, []);
 
   // Keep refs to latest handlers to avoid stale closures in keyboard shortcut listener
@@ -104,8 +95,8 @@ export default function DrawModal({
       const activeEl = document.activeElement;
       if (
         activeEl &&
-        (activeEl.tagName === "INPUT" ||
-          activeEl.tagName === "TEXTAREA" ||
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
           activeEl.isContentEditable)
       ) {
         return;
@@ -114,47 +105,47 @@ export default function DrawModal({
       const key = e.key.toLowerCase();
 
       // Undo/Redo
-      if ((e.ctrlKey || e.metaKey) && key === "z") {
+      if ((e.ctrlKey || e.metaKey) && key === 'z') {
         e.preventDefault();
         keyboardCallbacksRef.current.handleUndo?.();
-      } else if ((e.ctrlKey || e.metaKey) && key === "y") {
+      } else if ((e.ctrlKey || e.metaKey) && key === 'y') {
         e.preventDefault();
         keyboardCallbacksRef.current.handleRedo?.();
       }
       // Delete Selected Object
-      else if (key === "delete" || key === "backspace") {
+      else if (key === 'delete' || key === 'backspace') {
         if (keyboardCallbacksRef.current.selectedObjectId) {
           e.preventDefault();
           keyboardCallbacksRef.current.handleRemoveSelected?.();
         }
       }
       // Toolbar selections
-      else if (key === "v" || key === "1") {
+      else if (key === 'v' || key === '1') {
         e.preventDefault();
-        keyboardCallbacksRef.current.handleSelectTool?.("pointer");
-      } else if (key === "b" || key === "2") {
+        keyboardCallbacksRef.current.handleSelectTool?.('pointer');
+      } else if (key === 'b' || key === '2') {
         e.preventDefault();
-        keyboardCallbacksRef.current.handleSelectTool?.("pencil");
-      } else if (key === "e" || key === "3") {
+        keyboardCallbacksRef.current.handleSelectTool?.('pencil');
+      } else if (key === 'e' || key === '3') {
         e.preventDefault();
-        keyboardCallbacksRef.current.handleSelectTool?.("eraser");
-      } else if (key === "r" || key === "4") {
+        keyboardCallbacksRef.current.handleSelectTool?.('eraser');
+      } else if (key === 'r' || key === '4') {
         e.preventDefault();
-        keyboardCallbacksRef.current.handleSelectTool?.("rect");
-      } else if (key === "a" || key === "5") {
+        keyboardCallbacksRef.current.handleSelectTool?.('rect');
+      } else if (key === 'a' || key === '5') {
         e.preventDefault();
-        keyboardCallbacksRef.current.handleSelectTool?.("arrow");
-      } else if (key === "t" || key === "6") {
+        keyboardCallbacksRef.current.handleSelectTool?.('arrow');
+      } else if (key === 't' || key === '6') {
         e.preventDefault();
-        keyboardCallbacksRef.current.handleSelectTool?.("text");
-      } else if (key === "i" || key === "7") {
+        keyboardCallbacksRef.current.handleSelectTool?.('text');
+      } else if (key === 'i' || key === '7') {
         e.preventDefault();
         keyboardCallbacksRef.current.handleInsertImageClick?.();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
   // Save history state
@@ -191,14 +182,14 @@ export default function DrawModal({
 
   // Initialize Canvas
   useEffect(() => {
-    if (viewState !== "canvas") return;
+    if (viewState !== 'canvas') return;
 
     const canvas = canvasRef.current;
     const bgCanvas = bgCanvasRef.current;
     if (!canvas || !bgCanvas) return;
 
-    const ctx = canvas.getContext("2d");
-    const bgCtx = bgCanvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
+    const bgCtx = bgCanvas.getContext('2d');
 
     const initCanvas = (img) => {
       // Canvas always matches the image's natural dimensions (aspect ratio dropdown is for AI output only)
@@ -210,11 +201,11 @@ export default function DrawModal({
         const imgW = img.naturalWidth || img.width || 800;
         const imgH = img.naturalHeight || img.height || 600;
         const scale = Math.min(maxW / imgW, maxH / imgH, 1);
-        width  = Math.round(imgW * scale);
+        width = Math.round(imgW * scale);
         height = Math.round(imgH * scale);
       } else {
         // Blank canvas: default 800×600
-        width  = 800;
+        width = 800;
         height = 600;
       }
 
@@ -227,7 +218,7 @@ export default function DrawModal({
       if (img) {
         bgCtx.drawImage(img, 0, 0, width, height);
       } else {
-        bgCtx.fillStyle = "#ffffff";
+        bgCtx.fillStyle = '#ffffff';
         bgCtx.fillRect(0, 0, width, height);
       }
 
@@ -258,18 +249,18 @@ export default function DrawModal({
   const redrawCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     canvasObjects.forEach((obj) => {
       ctx.lineWidth = obj.brushSize || 5;
-      ctx.strokeStyle = obj.color || "#eab308";
-      ctx.fillStyle = obj.color || "#eab308";
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      ctx.strokeStyle = obj.color || '#eab308';
+      ctx.fillStyle = obj.color || '#eab308';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
-      if (obj.type === "pencil") {
-        ctx.globalCompositeOperation = "source-over";
+      if (obj.type === 'pencil') {
+        ctx.globalCompositeOperation = 'source-over';
         const p = obj.points;
         if (p.length > 0) {
           ctx.beginPath();
@@ -279,9 +270,9 @@ export default function DrawModal({
           }
           ctx.stroke();
         }
-      } else if (obj.type === "eraser") {
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.strokeStyle = "rgba(0,0,0,1)";
+      } else if (obj.type === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';
         const p = obj.points;
         if (p.length > 0) {
           ctx.beginPath();
@@ -291,11 +282,11 @@ export default function DrawModal({
           }
           ctx.stroke();
         }
-      } else if (obj.type === "rect") {
-        ctx.globalCompositeOperation = "source-over";
+      } else if (obj.type === 'rect') {
+        ctx.globalCompositeOperation = 'source-over';
         ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
-      } else if (obj.type === "arrow") {
-        ctx.globalCompositeOperation = "source-over";
+      } else if (obj.type === 'arrow') {
+        ctx.globalCompositeOperation = 'source-over';
         ctx.beginPath();
         ctx.moveTo(obj.x1, obj.y1);
         ctx.lineTo(obj.x2, obj.y2);
@@ -306,12 +297,12 @@ export default function DrawModal({
         ctx.moveTo(obj.x2, obj.y2);
         ctx.lineTo(
           obj.x2 - 15 * Math.cos(angle - Math.PI / 6),
-          obj.y2 - 15 * Math.sin(angle - Math.PI / 6),
+          obj.y2 - 15 * Math.sin(angle - Math.PI / 6)
         );
         ctx.moveTo(obj.x2, obj.y2);
         ctx.lineTo(
           obj.x2 - 15 * Math.cos(angle + Math.PI / 6),
-          obj.y2 - 15 * Math.sin(angle + Math.PI / 6),
+          obj.y2 - 15 * Math.sin(angle + Math.PI / 6)
         );
         ctx.stroke();
       }
@@ -322,16 +313,16 @@ export default function DrawModal({
       ctx.lineWidth = brushSize;
       ctx.strokeStyle = brushColor;
       ctx.fillStyle = brushColor;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
       const startX = drawingState.current.startX;
       const startY = drawingState.current.startY;
       const currX = drawingState.current.currX;
       const currY = drawingState.current.currY;
 
-      if (activeTool === "pencil") {
-        ctx.globalCompositeOperation = "source-over";
+      if (activeTool === 'pencil') {
+        ctx.globalCompositeOperation = 'source-over';
         const p = drawingState.current.activePoints;
         if (p.length > 0) {
           ctx.beginPath();
@@ -341,9 +332,9 @@ export default function DrawModal({
           }
           ctx.stroke();
         }
-      } else if (activeTool === "eraser") {
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.strokeStyle = "rgba(0,0,0,1)";
+      } else if (activeTool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';
         ctx.lineWidth = brushSize * 2;
         const p = drawingState.current.activePoints;
         if (p.length > 0) {
@@ -354,11 +345,11 @@ export default function DrawModal({
           }
           ctx.stroke();
         }
-      } else if (activeTool === "rect") {
-        ctx.globalCompositeOperation = "source-over";
+      } else if (activeTool === 'rect') {
+        ctx.globalCompositeOperation = 'source-over';
         ctx.strokeRect(startX, startY, currX - startX, currY - startY);
-      } else if (activeTool === "arrow") {
-        ctx.globalCompositeOperation = "source-over";
+      } else if (activeTool === 'arrow') {
+        ctx.globalCompositeOperation = 'source-over';
         ctx.beginPath();
         ctx.moveTo(startX, startY);
         ctx.lineTo(currX, currY);
@@ -369,12 +360,12 @@ export default function DrawModal({
         ctx.moveTo(currX, currY);
         ctx.lineTo(
           currX - 15 * Math.cos(angle - Math.PI / 6),
-          currY - 15 * Math.sin(angle - Math.PI / 6),
+          currY - 15 * Math.sin(angle - Math.PI / 6)
         );
         ctx.moveTo(currX, currY);
         ctx.lineTo(
           currX - 15 * Math.cos(angle + Math.PI / 6),
-          currY - 15 * Math.sin(angle + Math.PI / 6),
+          currY - 15 * Math.sin(angle + Math.PI / 6)
         );
         ctx.stroke();
       }
@@ -413,7 +404,7 @@ export default function DrawModal({
   const handleCanvasClick = (e) => {
     const pos = getCanvasMousePos(e);
 
-    if (activeTool === "pointer") {
+    if (activeTool === 'pointer') {
       // Select the clicked object (traverse backwards to select top element first)
       let foundId = null;
       for (let i = canvasObjects.length - 1; i >= 0; i--) {
@@ -434,12 +425,12 @@ export default function DrawModal({
         }
       }
       setSelectedObjectId(foundId);
-    } else if (activeTool === "text") {
+    } else if (activeTool === 'text') {
       const fontSize = brushSize * 4 > 12 ? brushSize * 4 : 20;
       const newText = {
         id: Math.random().toString(36).substring(7),
-        type: "text",
-        text: "Type text here...",
+        type: 'text',
+        text: 'Type text here...',
         x: Math.round(pos.x),
         y: Math.round(pos.y),
         width: 160,
@@ -451,12 +442,12 @@ export default function DrawModal({
       setCanvasObjects(nextObjs);
       saveStateToHistory(nextObjs);
       setSelectedObjectId(newText.id);
-      setActiveTool("pointer"); // switch back to pointer to allow typing and dragging
+      setActiveTool('pointer'); // switch back to pointer to allow typing and dragging
     }
   };
 
   const handleStartDraw = (e) => {
-    if (activeTool === "pointer" || activeTool === "text") return;
+    if (activeTool === 'pointer' || activeTool === 'text') return;
     const pos = getCanvasMousePos(e);
 
     drawingState.current.isDrawing = true;
@@ -476,7 +467,7 @@ export default function DrawModal({
     drawingState.current.currX = pos.x;
     drawingState.current.currY = pos.y;
 
-    if (activeTool === "pencil" || activeTool === "eraser") {
+    if (activeTool === 'pencil' || activeTool === 'eraser') {
       drawingState.current.activePoints.push(pos);
     }
 
@@ -492,27 +483,27 @@ export default function DrawModal({
     const startX = drawingState.current.startX;
     const startY = drawingState.current.startY;
 
-    if (activeTool === "pencil") {
+    if (activeTool === 'pencil') {
       newObj = {
         id: Math.random().toString(36).substring(7),
-        type: "pencil",
+        type: 'pencil',
         points: drawingState.current.activePoints,
         color: brushColor,
         brushSize: brushSize,
       };
-    } else if (activeTool === "eraser") {
+    } else if (activeTool === 'eraser') {
       newObj = {
         id: Math.random().toString(36).substring(7),
-        type: "eraser",
+        type: 'eraser',
         points: drawingState.current.activePoints,
         brushSize: brushSize * 2,
       };
-    } else if (activeTool === "rect") {
+    } else if (activeTool === 'rect') {
       const w = pos.x - startX;
       const h = pos.y - startY;
       newObj = {
         id: Math.random().toString(36).substring(7),
-        type: "rect",
+        type: 'rect',
         x: w < 0 ? startX + w : startX,
         y: h < 0 ? startY + h : startY,
         width: Math.abs(w),
@@ -520,10 +511,10 @@ export default function DrawModal({
         color: brushColor,
         brushSize: brushSize,
       };
-    } else if (activeTool === "arrow") {
+    } else if (activeTool === 'arrow') {
       newObj = {
         id: Math.random().toString(36).substring(7),
-        type: "arrow",
+        type: 'arrow',
         x1: startX,
         y1: startY,
         x2: pos.x,
@@ -544,7 +535,7 @@ export default function DrawModal({
   // Helper: compute bounding box of any object type
   const getObjectBoundingBox = (obj) => {
     if (!obj) return null;
-    if (obj.type === "pencil" || obj.type === "eraser") {
+    if (obj.type === 'pencil' || obj.type === 'eraser') {
       const xs = obj.points.map((p) => p.x);
       const ys = obj.points.map((p) => p.y);
       if (xs.length === 0) return null;
@@ -554,10 +545,10 @@ export default function DrawModal({
       const maxY = Math.max(...ys);
       return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
     }
-    if (obj.type === "rect" || obj.type === "text" || obj.type === "image") {
+    if (obj.type === 'rect' || obj.type === 'text' || obj.type === 'image') {
       return { x: obj.x, y: obj.y, width: obj.width, height: obj.height };
     }
-    if (obj.type === "arrow") {
+    if (obj.type === 'arrow') {
       const minX = Math.min(obj.x1, obj.x2);
       const maxX = Math.max(obj.x1, obj.x2);
       const minY = Math.min(obj.y1, obj.y2);
@@ -570,7 +561,7 @@ export default function DrawModal({
   // Drag selected object
   const handleStartMoveSelected = (e) => {
     e.preventDefault();
-    if (activeTool !== "pointer") return;
+    if (activeTool !== 'pointer') return;
     const startX = e.clientX;
     const startY = e.clientY;
 
@@ -591,20 +582,20 @@ export default function DrawModal({
       setCanvasObjects((prev) =>
         prev.map((o) => {
           if (o.id !== selectedObjectId) return o;
-          if (o.type === "pencil" || o.type === "eraser") {
+          if (o.type === 'pencil' || o.type === 'eraser') {
             return {
               ...o,
               points: origObj.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
             };
           }
-          if (o.type === "rect" || o.type === "text" || o.type === "image") {
+          if (o.type === 'rect' || o.type === 'text' || o.type === 'image') {
             return {
               ...o,
               x: Math.round(origObj.x + dx),
               y: Math.round(origObj.y + dy),
             };
           }
-          if (o.type === "arrow") {
+          if (o.type === 'arrow') {
             return {
               ...o,
               x1: Math.round(origObj.x1 + dx),
@@ -614,18 +605,18 @@ export default function DrawModal({
             };
           }
           return o;
-        }),
+        })
       );
     };
 
     const handleMoveEnd = () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("mouseup", handleMoveEnd);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleMoveEnd);
       saveStateToHistory(canvasObjects);
     };
 
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("mouseup", handleMoveEnd);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleMoveEnd);
   };
 
   // Resize selected object using corner handles
@@ -654,24 +645,24 @@ export default function DrawModal({
         prev.map((o) => {
           if (o.id !== selectedObjectId) return o;
 
-          if (o.type === "rect" || o.type === "text" || o.type === "image") {
+          if (o.type === 'rect' || o.type === 'text' || o.type === 'image') {
             let newX = origObj.x;
             let newY = origObj.y;
             let newW = origObj.width;
             let newH = origObj.height;
 
-            if (direction.includes("l")) {
+            if (direction.includes('l')) {
               newX = origObj.x + dx;
               newW = origObj.width - dx;
             }
-            if (direction.includes("r")) {
+            if (direction.includes('r')) {
               newW = origObj.width + dx;
             }
-            if (direction.includes("t")) {
+            if (direction.includes('t')) {
               newY = origObj.y + dy;
               newH = origObj.height - dy;
             }
-            if (direction.includes("b")) {
+            if (direction.includes('b')) {
               newH = origObj.height + dy;
             }
 
@@ -683,17 +674,17 @@ export default function DrawModal({
               height: Math.max(15, Math.round(newH)),
             };
           }
-          if (o.type === "arrow") {
+          if (o.type === 'arrow') {
             let newX1 = origObj.x1;
             let newY1 = origObj.y1;
             let newX2 = origObj.x2;
             let newY2 = origObj.y2;
 
-            if (direction.includes("t") || direction.includes("l")) {
+            if (direction.includes('t') || direction.includes('l')) {
               newX1 = origObj.x1 + dx;
               newY1 = origObj.y1 + dy;
             }
-            if (direction.includes("b") || direction.includes("r")) {
+            if (direction.includes('b') || direction.includes('r')) {
               newX2 = origObj.x2 + dx;
               newY2 = origObj.y2 + dy;
             }
@@ -706,7 +697,7 @@ export default function DrawModal({
               y2: Math.round(newY2),
             };
           }
-          if (o.type === "pencil" || o.type === "eraser") {
+          if (o.type === 'pencil' || o.type === 'eraser') {
             // Scale vector points relative to bounding box scale changes
             const wScale = (origBbox.width + dx) / origBbox.width;
             const hScale = (origBbox.height + dy) / origBbox.height;
@@ -719,18 +710,18 @@ export default function DrawModal({
             };
           }
           return o;
-        }),
+        })
       );
     };
 
     const handleResizeEnd = () => {
-      window.removeEventListener("mousemove", handleResize);
-      window.removeEventListener("mouseup", handleResizeEnd);
+      window.removeEventListener('mousemove', handleResize);
+      window.removeEventListener('mouseup', handleResizeEnd);
       saveStateToHistory(canvasObjects);
     };
 
-    window.addEventListener("mousemove", handleResize);
-    window.addEventListener("mouseup", handleResizeEnd);
+    window.addEventListener('mousemove', handleResize);
+    window.addEventListener('mouseup', handleResizeEnd);
   };
 
   // Remove the currently selected drawing object
@@ -750,11 +741,11 @@ export default function DrawModal({
         prev.map((o) => {
           if (o.id !== selectedObjectId) return o;
           const updates = {};
-          if (o.type === "text" || o.type === "rect" || o.type === "arrow") {
+          if (o.type === 'text' || o.type === 'rect' || o.type === 'arrow') {
             updates.color = brushColor;
           }
           return { ...o, ...updates };
-        }),
+        })
       );
     }
   }, [brushColor]);
@@ -765,16 +756,16 @@ export default function DrawModal({
         prev.map((o) => {
           if (o.id !== selectedObjectId) return o;
           const updates = {};
-          if (o.type === "text") {
+          if (o.type === 'text') {
             updates.fontSize = brushSize * 4 > 12 ? brushSize * 4 : 20;
             updates.height = Math.round(updates.fontSize * 1.5);
-          } else if (o.type === "rect" || o.type === "arrow") {
+          } else if (o.type === 'rect' || o.type === 'arrow') {
             // Only update shapes (not pencil/eraser — those are pixel-based strokes.
             // Retroactively resizing an eraser stroke would cause erased content to reappear.)
             updates.brushSize = brushSize;
           }
           return { ...o, ...updates };
-        }),
+        })
       );
     }
   }, [brushSize]);
@@ -786,8 +777,8 @@ export default function DrawModal({
     const reader = new FileReader();
     reader.onload = (event) => {
       setBgImageUrl(event.target.result);
-      setAspectRatio("Auto");
-      setViewState("canvas");
+      setAspectRatio('Auto');
+      setViewState('canvas');
     };
     reader.readAsDataURL(file);
   };
@@ -815,7 +806,7 @@ export default function DrawModal({
 
         const newImageObj = {
           id,
-          type: "image",
+          type: 'image',
           img,
           url: event.target.result,
           x: Math.round((canvasDimensions.width - startW) / 2),
@@ -828,7 +819,7 @@ export default function DrawModal({
         setCanvasObjects(nextObjs);
         saveStateToHistory(nextObjs);
         setSelectedObjectId(id);
-        setActiveTool("pointer");
+        setActiveTool('pointer');
       };
       img.src = event.target.result;
     };
@@ -837,21 +828,17 @@ export default function DrawModal({
 
   // Clear Canvas (Remove image, drawings, text overlays and reset to setup screen)
   const handleClearCanvas = () => {
-    if (
-      confirm(
-        "Clear all drawings, text overlays, and remove the background image?",
-      )
-    ) {
+    if (confirm('Clear all drawings, text overlays, and remove the background image?')) {
       const canvas = canvasRef.current;
       if (canvas) {
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       setCanvasObjects([]);
       setSelectedObjectId(null);
       saveStateToHistory([]);
       setBgImageUrl(null);
-      setViewState("setup");
+      setViewState('setup');
     }
   };
 
@@ -866,10 +853,10 @@ export default function DrawModal({
     setGenerating(true);
 
     try {
-      const mergeCanvas = document.createElement("canvas");
+      const mergeCanvas = document.createElement('canvas');
       mergeCanvas.width = canvas.width;
       mergeCanvas.height = canvas.height;
-      const mCtx = mergeCanvas.getContext("2d");
+      const mCtx = mergeCanvas.getContext('2d');
 
       // 1. Draw static background layer (preserving asynchronous image loading coordinates)
       if (bgImageUrl) {
@@ -886,15 +873,9 @@ export default function DrawModal({
 
       // 2. Draw overlay image objects (in lower order than drawings)
       canvasObjects
-        .filter((o) => o.type === "image")
+        .filter((o) => o.type === 'image')
         .forEach((imgObj) => {
-          mCtx.drawImage(
-            imgObj.img,
-            imgObj.x,
-            imgObj.y,
-            imgObj.width,
-            imgObj.height,
-          );
+          mCtx.drawImage(imgObj.img, imgObj.x, imgObj.y, imgObj.width, imgObj.height);
         });
 
       // 3. Draw drawing overlay layer
@@ -902,24 +883,24 @@ export default function DrawModal({
 
       // 4. Draw texts with wrap formatting
       canvasObjects
-        .filter((o) => o.type === "text")
+        .filter((o) => o.type === 'text')
         .forEach((textObj) => {
           mCtx.fillStyle = textObj.color;
           mCtx.font = `bold ${textObj.fontSize}px Inter, sans-serif`;
-          mCtx.textBaseline = "top";
+          mCtx.textBaseline = 'top';
 
-          const words = textObj.text.split(" ");
-          let line = "";
+          const words = textObj.text.split(' ');
+          let line = '';
           let testY = textObj.y;
           const lineHeight = textObj.fontSize * 1.25;
 
           for (let n = 0; n < words.length; n++) {
-            let testLine = line + words[n] + " ";
+            let testLine = line + words[n] + ' ';
             let metrics = mCtx.measureText(testLine);
             let testWidth = metrics.width;
             if (testWidth > textObj.width && n > 0) {
               mCtx.fillText(line, textObj.x, testY);
-              line = words[n] + " ";
+              line = words[n] + ' ';
               testY += lineHeight;
             } else {
               line = testLine;
@@ -928,10 +909,8 @@ export default function DrawModal({
           mCtx.fillText(line, textObj.x, testY);
         });
 
-      const blob = await new Promise((resolve) =>
-        mergeCanvas.toBlob(resolve, "image/jpeg", 0.92),
-      );
-      if (!blob) throw new Error("Canvas serialization failed");
+      const blob = await new Promise((resolve) => mergeCanvas.toBlob(resolve, 'image/jpeg', 0.92));
+      if (!blob) throw new Error('Canvas serialization failed');
 
       const uploadedUrl = await uploadFile(apiKey, blob);
 
@@ -939,12 +918,12 @@ export default function DrawModal({
         Array.from({ length: batchSize }).map(async () => {
           const genParams = {
             model: selectedModel,
-            prompt: promptText.trim() || "Edit the image based on the drawing overlay",
+            prompt: promptText.trim() || 'Edit the image based on the drawing overlay',
             images_list: [uploadedUrl],
-            aspect_ratio: aspectRatio === "Auto" ? "1:1" : aspectRatio,
+            aspect_ratio: aspectRatio === 'Auto' ? '1:1' : aspectRatio,
           };
           return await generateI2I(apiKey, genParams);
-        }),
+        })
       );
 
       results.forEach((res) => {
@@ -952,19 +931,19 @@ export default function DrawModal({
           const entry = {
             id: res.id || Math.random().toString(36).substring(7),
             url: res.url,
-            prompt: `Draw to Edit with ${selectedModel === "nano-banana-pro-edit" ? "Nano Banana Pro Edit" : "Nano Banana 2 Edit"}`,
+            prompt: `Draw to Edit with ${selectedModel === 'nano-banana-pro-edit' ? 'Nano Banana Pro Edit' : 'Nano Banana 2 Edit'}`,
             model: selectedModel,
-            aspect_ratio: aspectRatio === "Auto" ? "1:1" : aspectRatio,
+            aspect_ratio: aspectRatio === 'Auto' ? '1:1' : aspectRatio,
             timestamp: new Date().toISOString(),
           };
           onAddHistoryItem(entry);
         }
       });
 
-      alert("Generations complete!");
+      alert('Generations complete!');
       onClose();
     } catch (e) {
-      console.error("[DrawModal] Generation failed:", e);
+      console.error('[DrawModal] Generation failed:', e);
       alert(`Generation failed: ${e.message}`);
     } finally {
       setGenerating(false);
@@ -1018,11 +997,11 @@ export default function DrawModal({
               Draw to Video
             </button> */}
             <button
-              onClick={() => setActiveTab("draw-to-edit")}
+              onClick={() => setActiveTab('draw-to-edit')}
               className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                activeTab === "draw-to-edit"
-                  ? "bg-white/10 text-white"
-                  : "text-white/60 hover:text-white/70"
+                activeTab === 'draw-to-edit'
+                  ? 'bg-white/10 text-white'
+                  : 'text-white/60 hover:text-white/70'
               }`}
             >
               Draw to Edit
@@ -1040,7 +1019,7 @@ export default function DrawModal({
 
         {/* Workspace Body */}
         <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto custom-scrollbar relative bg-[#070708]/30">
-          {viewState === "setup" ? (
+          {viewState === 'setup' ? (
             /* Setup Card */
             <div className="border-2 border-dashed border-white/10 rounded-2xl p-8 max-w-md w-full text-center flex flex-col items-center gap-6 bg-[#070708]/50">
               <div className="w-56 h-36 rounded-xl border border-white/5 overflow-hidden shadow-lg select-none relative bg-black/40">
@@ -1062,8 +1041,7 @@ export default function DrawModal({
                   DRAW TO EDIT
                 </h2>
                 <p className="text-white/60 text-xs font-medium max-w-xs leading-relaxed mx-auto">
-                  From sketch to a complete picture in a second. No prompt
-                  needed.
+                  From sketch to a complete picture in a second. No prompt needed.
                 </p>
               </div>
 
@@ -1095,7 +1073,7 @@ export default function DrawModal({
                 <button
                   onClick={() => {
                     setBgImageUrl(null);
-                    setViewState("canvas");
+                    setViewState('canvas');
                   }}
                   className="bg-[#131316]/80 hover:bg-[#1c1c22] text-white border border-white/10 font-bold text-sm px-6 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 shadow-inner"
                 >
@@ -1119,17 +1097,17 @@ export default function DrawModal({
               {/* Height-first container: fixes height, derives width from aspect ratio */}
               <div
                 className="flex items-center justify-center w-full"
-                style={{ height: "60vh", maxHeight: "60vh" }}
+                style={{ height: '60vh', maxHeight: '60vh' }}
               >
                 {/* Stacked Canvases Wrapper - width auto-derived from height via aspect-ratio */}
                 <div
                   ref={canvasWrapperRef}
                   className="relative border border-white/10 shadow-2xl rounded-lg overflow-hidden bg-black select-none"
                   style={{
-                    height: "100%",
-                    width: "auto",
+                    height: '100%',
+                    width: 'auto',
                     aspectRatio: `${canvasDimensions.width} / ${canvasDimensions.height}`,
-                    maxWidth: "100%",
+                    maxWidth: '100%',
                   }}
                 >
                   {/* Background Image Layer */}
@@ -1150,38 +1128,33 @@ export default function DrawModal({
                     onTouchMove={handleDrawing}
                     onTouchEnd={handleEndDraw}
                     className={`absolute inset-0 w-full h-full ${
-                      activeTool === "pointer"
-                        ? "cursor-default"
-                        : "cursor-crosshair"
+                      activeTool === 'pointer' ? 'cursor-default' : 'cursor-crosshair'
                     }`}
                   />
 
                   {/* Floating Overlay HTML Images */}
                   {canvasObjects
-                    .filter((o) => o.type === "image")
+                    .filter((o) => o.type === 'image')
                     .map((imgObj) => {
                       const leftPct = (imgObj.x / canvasDimensions.width) * 100;
                       const topPct = (imgObj.y / canvasDimensions.height) * 100;
-                      const widthPct =
-                        (imgObj.width / canvasDimensions.width) * 100;
-                      const heightPct =
-                        (imgObj.height / canvasDimensions.height) * 100;
+                      const widthPct = (imgObj.width / canvasDimensions.width) * 100;
+                      const heightPct = (imgObj.height / canvasDimensions.height) * 100;
                       const isSelected = selectedObjectId === imgObj.id;
 
                       return (
                         <div
                           key={imgObj.id}
-                          className={`absolute group cursor-move ${isSelected ? "ring-2 ring-[#b5f500] ring-offset-1 ring-offset-black z-10" : ""}`}
+                          className={`absolute group cursor-move ${isSelected ? 'ring-2 ring-[#b5f500] ring-offset-1 ring-offset-black z-10' : ''}`}
                           style={{
                             left: `${leftPct}%`,
                             top: `${topPct}%`,
                             width: `${widthPct}%`,
                             height: `${heightPct}%`,
-                            pointerEvents:
-                              activeTool === "pointer" ? "auto" : "none",
+                            pointerEvents: activeTool === 'pointer' ? 'auto' : 'none',
                           }}
                           onMouseDown={(e) => {
-                            if (activeTool !== "pointer") return;
+                            if (activeTool !== 'pointer') return;
                             setSelectedObjectId(imgObj.id);
                             handleStartMoveSelected(e);
                           }}
@@ -1197,16 +1170,12 @@ export default function DrawModal({
 
                   {/* Text overlays with Native Focusing and Typing */}
                   {canvasObjects
-                    .filter((o) => o.type === "text")
+                    .filter((o) => o.type === 'text')
                     .map((textObj) => {
-                      const leftPct =
-                        (textObj.x / canvasDimensions.width) * 100;
-                      const topPct =
-                        (textObj.y / canvasDimensions.height) * 100;
-                      const widthPct =
-                        (textObj.width / canvasDimensions.width) * 100;
-                      const heightPct =
-                        (textObj.height / canvasDimensions.height) * 100;
+                      const leftPct = (textObj.x / canvasDimensions.width) * 100;
+                      const topPct = (textObj.y / canvasDimensions.height) * 100;
+                      const widthPct = (textObj.width / canvasDimensions.width) * 100;
+                      const heightPct = (textObj.height / canvasDimensions.height) * 100;
                       const isSelected = selectedObjectId === textObj.id;
 
                       return (
@@ -1216,20 +1185,16 @@ export default function DrawModal({
                           onChange={(e) => {
                             const val = e.target.value;
                             setCanvasObjects((prev) =>
-                              prev.map((o) =>
-                                o.id === textObj.id ? { ...o, text: val } : o,
-                              ),
+                              prev.map((o) => (o.id === textObj.id ? { ...o, text: val } : o))
                             );
                           }}
                           onFocus={() => {
-                            if (activeTool === "pointer") {
+                            if (activeTool === 'pointer') {
                               setSelectedObjectId(textObj.id);
                             }
                           }}
                           className={`absolute bg-transparent border-none outline-none resize-none font-bold text-left overflow-hidden select-text z-10 ${
-                            isSelected
-                              ? "ring-1 ring-[#b5f500] ring-dashed bg-black/25"
-                              : ""
+                            isSelected ? 'ring-1 ring-[#b5f500] ring-dashed bg-black/25' : ''
                           }`}
                           style={{
                             left: `${leftPct}%`,
@@ -1239,15 +1204,14 @@ export default function DrawModal({
                             fontSize: `${(textObj.fontSize / canvasDimensions.height) * 100}cqh`,
                             color: textObj.color,
                             lineHeight: 1.25,
-                            pointerEvents:
-                              activeTool === "pointer" ? "auto" : "none",
+                            pointerEvents: activeTool === 'pointer' ? 'auto' : 'none',
                           }}
                         />
                       );
                     })}
 
                   {/* Unified Outline Handles Overlay for Selected Object */}
-                  {activeTool === "pointer" && selectedObjectId && bbox && (
+                  {activeTool === 'pointer' && selectedObjectId && bbox && (
                     <div
                       className="absolute border border-dashed border-[#b5f500] pointer-events-auto z-20 cursor-move"
                       style={{
@@ -1261,43 +1225,43 @@ export default function DrawModal({
                       {/* Corner handles */}
                       <div
                         className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-[#b5f500] cursor-nwse-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "tl")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'tl')}
                       />
                       <div
                         className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-[#b5f500] cursor-nesw-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "tr")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'tr')}
                       />
                       <div
                         className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-[#b5f500] cursor-nesw-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "bl")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'bl')}
                       />
                       <div
                         className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-[#b5f500] cursor-nwse-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "br")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'br')}
                       />
 
                       {/* Edge handles */}
                       <div
                         className="absolute -top-1.5 left-[calc(50%-6px)] w-3 h-3 bg-white border border-[#b5f500] cursor-ns-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "t")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 't')}
                       />
                       <div
                         className="absolute -bottom-1.5 left-[calc(50%-6px)] w-3 h-3 bg-white border border-[#b5f500] cursor-ns-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "b")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'b')}
                       />
                       <div
                         className="absolute top-[calc(50%-6px)] -left-1.5 w-3 h-3 bg-white border border-[#b5f500] cursor-ew-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "l")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'l')}
                       />
                       <div
                         className="absolute top-[calc(50%-6px)] -right-1.5 w-3 h-3 bg-white border border-[#b5f500] cursor-ew-resize rounded-full"
-                        onMouseDown={(e) => handleStartResizeSelected(e, "r")}
+                        onMouseDown={(e) => handleStartResizeSelected(e, 'r')}
                       />
                     </div>
                   )}
 
                   {/* Remove Selected Button Centered at Bottom of Canvas Image */}
-                  {activeTool === "pointer" && selectedObjectId && (
+                  {activeTool === 'pointer' && selectedObjectId && (
                     <button
                       onClick={handleRemoveSelected}
                       className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/90 hover:bg-black text-white border border-white/10 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xl z-30 transition-all pointer-events-auto select-none"
@@ -1325,14 +1289,14 @@ export default function DrawModal({
                 {/* Pointer tool */}
                 <button
                   onClick={() => {
-                    setActiveTool("pointer");
+                    setActiveTool('pointer');
                     setSelectedObjectId(null);
                   }}
                   title="Selection pointer"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "pointer"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'pointer'
+                      ? 'bg-white text-black'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <svg
@@ -1350,14 +1314,14 @@ export default function DrawModal({
                 {/* Pencil tool */}
                 <button
                   onClick={() => {
-                    setActiveTool("pencil");
+                    setActiveTool('pencil');
                     setSelectedObjectId(null);
                   }}
                   title="Draw pencil"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "pencil"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'pencil'
+                      ? 'bg-white text-black'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <svg
@@ -1375,14 +1339,14 @@ export default function DrawModal({
                 {/* Eraser tool */}
                 <button
                   onClick={() => {
-                    setActiveTool("eraser");
+                    setActiveTool('eraser');
                     setSelectedObjectId(null);
                   }}
                   title="Eraser (E)"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "eraser"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'eraser'
+                      ? 'bg-white text-black'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <svg
@@ -1400,14 +1364,12 @@ export default function DrawModal({
                 {/* Shape rect tool */}
                 <button
                   onClick={() => {
-                    setActiveTool("rect");
+                    setActiveTool('rect');
                     setSelectedObjectId(null);
                   }}
                   title="Rectangle shape"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "rect"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'rect' ? 'bg-white text-black' : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <svg
@@ -1425,14 +1387,14 @@ export default function DrawModal({
                 {/* Arrow tool */}
                 <button
                   onClick={() => {
-                    setActiveTool("arrow");
+                    setActiveTool('arrow');
                     setSelectedObjectId(null);
                   }}
                   title="Arrow shape"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "arrow"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'arrow'
+                      ? 'bg-white text-black'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <svg
@@ -1451,19 +1413,15 @@ export default function DrawModal({
                 {/* Text tool */}
                 <button
                   onClick={() => {
-                    setActiveTool("text");
+                    setActiveTool('text');
                     setSelectedObjectId(null);
                   }}
                   title="Text tool"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "text"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'text' ? 'bg-white text-black' : 'text-white/60 hover:text-white'
                   }`}
                 >
-                  <span className="text-sm font-black tracking-tight select-none px-0.5">
-                    T
-                  </span>
+                  <span className="text-sm font-black tracking-tight select-none px-0.5">T</span>
                 </button>
 
                 {/* Insert Overlay Image Tool */}
@@ -1471,9 +1429,9 @@ export default function DrawModal({
                   onClick={handleInsertImageClick}
                   title="Insert overlay image"
                   className={`p-1.5 rounded-lg transition-all ${
-                    activeTool === "image"
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
+                    activeTool === 'image'
+                      ? 'bg-white text-black'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <svg
@@ -1579,7 +1537,7 @@ export default function DrawModal({
         </div>
 
         {/* Static Footer Control Row (Overlap Prevention) */}
-        {viewState === "canvas" && (
+        {viewState === 'canvas' && (
           <div className="border-t border-white/5 p-4 shrink-0 bg-[#0f0f12] flex items-center justify-between z-20">
             {/* Left Options */}
             <div className="flex items-center gap-2">
@@ -1591,9 +1549,9 @@ export default function DrawModal({
                   <span className="text-[10px] text-[#b5f500] font-black bg-[#b5f500]/10 px-1.5 rounded border border-[#b5f500]/25">
                     G
                   </span>
-                  {selectedModel === "nano-banana-pro-edit"
-                    ? "Nano Banana Pro Edit"
-                    : "Nano Banana 2 Edit"}
+                  {selectedModel === 'nano-banana-pro-edit'
+                    ? 'Nano Banana Pro Edit'
+                    : 'Nano Banana 2 Edit'}
                   <span className="opacity-45 text-[8px] ml-0.5">▼</span>
                 </button>
 
@@ -1605,18 +1563,18 @@ export default function DrawModal({
 
                     <button
                       onClick={() => {
-                        setSelectedModel("nano-banana-2-edit");
+                        setSelectedModel('nano-banana-2-edit');
                         setIsModelDropdownOpen(false);
                       }}
                       className={`flex flex-col text-left p-2.5 rounded-xl transition-all ${
-                        selectedModel === "nano-banana-2-edit"
-                          ? "bg-[#b5f500]/10 text-white"
-                          : "hover:bg-white/5 text-white/70"
+                        selectedModel === 'nano-banana-2-edit'
+                          ? 'bg-[#b5f500]/10 text-white'
+                          : 'hover:bg-white/5 text-white/70'
                       }`}
                     >
                       <div className="text-xs font-bold flex items-center gap-1.5">
                         Nano Banana 2 Edit
-                        {selectedModel === "nano-banana-2-edit" && (
+                        {selectedModel === 'nano-banana-2-edit' && (
                           <span className="text-[#b5f500]">✓</span>
                         )}
                       </div>
@@ -1627,18 +1585,18 @@ export default function DrawModal({
 
                     <button
                       onClick={() => {
-                        setSelectedModel("nano-banana-pro-edit");
+                        setSelectedModel('nano-banana-pro-edit');
                         setIsModelDropdownOpen(false);
                       }}
                       className={`flex flex-col text-left p-2.5 rounded-xl transition-all ${
-                        selectedModel === "nano-banana-pro-edit"
-                          ? "bg-[#b5f500]/10 text-white"
-                          : "hover:bg-white/5 text-white/70"
+                        selectedModel === 'nano-banana-pro-edit'
+                          ? 'bg-[#b5f500]/10 text-white'
+                          : 'hover:bg-white/5 text-white/70'
                       }`}
                     >
                       <div className="text-xs font-bold flex items-center gap-1.5">
                         Nano Banana Pro Edit
-                        {selectedModel === "nano-banana-pro-edit" && (
+                        {selectedModel === 'nano-banana-pro-edit' && (
                           <span className="text-[#b5f500]">✓</span>
                         )}
                       </div>
@@ -1680,9 +1638,7 @@ export default function DrawModal({
                 {showSettingsPopover && (
                   <div className="absolute bottom-[calc(100%+8px)] left-0 bg-[#0f0f12] border border-white/10 rounded-2xl p-3.5 w-44 shadow-2xl flex flex-col gap-2 z-30">
                     <div className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                      {selectedObj && selectedObj.type === "text"
-                        ? "Text Size"
-                        : "Brush Size"}
+                      {selectedObj && selectedObj.type === 'text' ? 'Text Size' : 'Brush Size'}
                     </div>
                     <input
                       type="range"
@@ -1706,7 +1662,7 @@ export default function DrawModal({
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !generating) handleGenerateClick();
+                if (e.key === 'Enter' && !generating) handleGenerateClick();
               }}
               placeholder="Describe what you want to generate…"
               className="flex-1 mx-3 h-[38px] bg-[#131316]/80 border border-white/5 rounded-xl px-3 text-xs text-white/80 placeholder-white/25 outline-none focus:border-[#b5f500]/40 focus:ring-1 focus:ring-[#b5f500]/20 transition-all"
@@ -1739,7 +1695,7 @@ export default function DrawModal({
                     <div className="text-[10px] font-black text-white/60 uppercase tracking-widest p-1.5 pb-1 select-none">
                       Aspect Ratio
                     </div>
-                    {["16:9", "9:16", "4:3", "3:4", "1:1", "Auto"].map((r) => (
+                    {['16:9', '9:16', '4:3', '3:4', '1:1', 'Auto'].map((r) => (
                       <button
                         key={r}
                         onClick={() => {
@@ -1748,8 +1704,8 @@ export default function DrawModal({
                         }}
                         className={`text-left p-1.5 px-2.5 rounded-xl text-xs font-bold transition-all ${
                           aspectRatio === r
-                            ? "bg-[#b5f500]/10 text-white"
-                            : "hover:bg-white/5 text-white/70"
+                            ? 'bg-[#b5f500]/10 text-white'
+                            : 'hover:bg-white/5 text-white/70'
                         }`}
                       >
                         {r}
@@ -1780,7 +1736,7 @@ export default function DrawModal({
               <button
                 onClick={() =>
                   alert(
-                    "Draw to Edit: paint directly over an image, insert overlay image/text objects, drag/resize elements, or select and delete specific components.",
+                    'Draw to Edit: paint directly over an image, insert overlay image/text objects, drag/resize elements, or select and delete specific components.'
                   )
                 }
                 title="Info"

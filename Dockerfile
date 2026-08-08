@@ -37,8 +37,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
-# Make sure sqlite db folder exists and is writable
-RUN mkdir -p /app/prisma/data && chown -R nextjs:nodejs /app/prisma
+# Use postgresql via DATABASE_URL env variable
 
 # Run as non-root user
 USER nextjs

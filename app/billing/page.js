@@ -1,16 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { apiClient } from "@/src/lib/apiClient";
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { apiClient } from '@/src/lib/apiClient';
 
 const PACKAGES = [
   { id: 'pkg_500', name: '500 Credits', credits: 500, price: '$5.00', icon: '💎' },
-  { id: 'pkg_2000', name: '2000 Credits', credits: 2000, price: '$15.00', icon: '🚀', popular: true },
+  {
+    id: 'pkg_2000',
+    name: '2000 Credits',
+    credits: 2000,
+    price: '$15.00',
+    icon: '🚀',
+    popular: true,
+  },
   { id: 'pkg_5000', name: '5000 Credits', credits: 5000, price: '$35.00', icon: '👑' },
 ];
 
@@ -51,7 +58,8 @@ export default function BillingPage() {
             Credits & Billing
           </h1>
           <p className="text-secondary text-lg max-w-2xl mx-auto">
-            Top up your account to generate more AI images, videos, and workflows. Credits never expire.
+            Top up your account to generate more AI images, videos, and workflows. Credits never
+            expire.
           </p>
         </div>
 
@@ -63,14 +71,12 @@ export default function BillingPage() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {PACKAGES.map((pkg) => (
-            <Card 
+            <Card
               key={pkg.id}
               hover
               padding="lg"
               className={`relative flex flex-col items-center text-center ${
-                pkg.popular 
-                  ? 'border-primary/50 shadow-glow' 
-                  : ''
+                pkg.popular ? 'border-primary/50 shadow-glow' : ''
               }`}
             >
               {pkg.popular && (
@@ -78,13 +84,13 @@ export default function BillingPage() {
                   Most Popular
                 </div>
               )}
-              
+
               <div className="text-4xl mb-4 mt-2">{pkg.icon}</div>
               <h3 className="text-2xl font-bold mb-2 text-white">{pkg.name}</h3>
               <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 mb-6">
                 {pkg.price}
               </div>
-              
+
               <ul className="text-secondary space-y-3 mb-8 flex-1">
                 <li>~{Math.floor(pkg.credits / 10)} Image Generations</li>
                 <li>~{Math.floor(pkg.credits / 50)} Video Generations</li>
@@ -92,7 +98,7 @@ export default function BillingPage() {
               </ul>
 
               <Button
-                variant={pkg.popular ? "primary" : "secondary"}
+                variant={pkg.popular ? 'primary' : 'secondary'}
                 onClick={() => handleCheckout(pkg.id)}
                 isLoading={loading === pkg.id}
                 className="w-full"

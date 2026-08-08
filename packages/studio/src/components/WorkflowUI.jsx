@@ -1,10 +1,8 @@
-"use client";
+'use client';
 
-import React, { useEffect } from "react";
-import { WorkflowBuilder } from "workflow-builder";
-import "reactflow/dist/style.css";
-
-
+import React, { useEffect } from 'react';
+import { WorkflowBuilder } from 'workflow-builder';
+import 'reactflow/dist/style.css';
 
 const WorkflowUI = ({
   apiKey,
@@ -17,7 +15,7 @@ const WorkflowUI = ({
   onGenerationError,
 }) => {
   useEffect(() => {
-    sessionStorage.setItem("fromWorkflowBuilder", "true");
+    sessionStorage.setItem('fromWorkflowBuilder', 'true');
   }, []);
 
   return (

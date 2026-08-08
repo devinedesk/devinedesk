@@ -6,174 +6,335 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { getUserBalance, SettingsModal, SettingsProvider, useSettings } from 'studio';
 
-const loadingFallback = () => <div className="p-8 text-center text-white/50 flex flex-col items-center justify-center h-full"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>Loading Studio...</div>;
-const ImageStudio = dynamic(() => import('studio').then(mod => mod.ImageStudio), { ssr: false, loading: loadingFallback });
-const VideoStudio = dynamic(() => import('studio').then(mod => mod.VideoStudio), { ssr: false, loading: loadingFallback });
-const ClippingStudio = dynamic(() => import('studio').then(mod => mod.ClippingStudio), { ssr: false, loading: loadingFallback });
-const VibeMotionStudio = dynamic(() => import('studio').then(mod => mod.VibeMotionStudio), { ssr: false, loading: loadingFallback });
-const LipSyncStudio = dynamic(() => import('studio').then(mod => mod.LipSyncStudio), { ssr: false, loading: loadingFallback });
-const RecastStudio = dynamic(() => import('studio').then(mod => mod.RecastStudio), { ssr: false, loading: loadingFallback });
-const CinemaStudio = dynamic(() => import('studio').then(mod => mod.CinemaStudio), { ssr: false, loading: loadingFallback });
-const AudioStudio = dynamic(() => import('studio').then(mod => mod.AudioStudio), { ssr: false, loading: loadingFallback });
-const MarketingStudio = dynamic(() => import('studio').then(mod => mod.MarketingStudio), { ssr: false, loading: loadingFallback });
-const WorkflowStudio = dynamic(() => import('studio').then(mod => mod.WorkflowStudio), { ssr: false, loading: loadingFallback });
-const AgentStudio = dynamic(() => import('studio').then(mod => mod.AgentStudio), { ssr: false, loading: loadingFallback });
-const AppsStudio = dynamic(() => import('studio').then(mod => mod.AppsStudio), { ssr: false, loading: loadingFallback });
-const AiInfluencerStudio = dynamic(() => import('studio').then(mod => mod.AiInfluencerStudio), { ssr: false, loading: loadingFallback });
+const loadingFallback = () => (
+  <div className="p-8 text-center text-white/50 flex flex-col items-center justify-center h-full">
+    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+    Loading Studio...
+  </div>
+);
+const ImageStudio = dynamic(() => import('studio').then((mod) => mod.ImageStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const VideoStudio = dynamic(() => import('studio').then((mod) => mod.VideoStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const ClippingStudio = dynamic(() => import('studio').then((mod) => mod.ClippingStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const VibeMotionStudio = dynamic(() => import('studio').then((mod) => mod.VibeMotionStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const LipSyncStudio = dynamic(() => import('studio').then((mod) => mod.LipSyncStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const RecastStudio = dynamic(() => import('studio').then((mod) => mod.RecastStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const CinemaStudio = dynamic(() => import('studio').then((mod) => mod.CinemaStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const AudioStudio = dynamic(() => import('studio').then((mod) => mod.AudioStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const MarketingStudio = dynamic(() => import('studio').then((mod) => mod.MarketingStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const WorkflowStudio = dynamic(() => import('studio').then((mod) => mod.WorkflowStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const AgentStudio = dynamic(() => import('studio').then((mod) => mod.AgentStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const AppsStudio = dynamic(() => import('studio').then((mod) => mod.AppsStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
+const AiInfluencerStudio = dynamic(() => import('studio').then((mod) => mod.AiInfluencerStudio), {
+  ssr: false,
+  loading: loadingFallback,
+});
 
 const TABS = [
   {
     id: 'image',
     label: 'Image Studio',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
       </svg>
-    )
+    ),
   },
   {
     id: 'video',
     label: 'Video Studio',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="23 7 16 12 23 17 23 7"/>
-        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <polygon points="23 7 16 12 23 17 23 7" />
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
       </svg>
-    )
+    ),
   },
   {
     id: 'audio',
     label: 'Audio Studio',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/>
-        <circle cx="18" cy="16" r="3"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
       </svg>
-    )
+    ),
   },
   {
     id: 'clipping',
     label: 'AI Clipping',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="6" cy="6" r="3"/>
-        <circle cx="6" cy="18" r="3"/>
-        <line x1="20" y1="4" x2="8.12" y2="15.88"/>
-        <line x1="14.47" y1="14.47" x2="20" y2="20"/>
-        <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="6" cy="6" r="3" />
+        <circle cx="6" cy="18" r="3" />
+        <line x1="20" y1="4" x2="8.12" y2="15.88" />
+        <line x1="14.47" y1="14.47" x2="20" y2="20" />
+        <line x1="8.12" y1="8.12" x2="12" y2="12" />
       </svg>
-    )
+    ),
   },
   {
     id: 'vibe-motion',
     label: 'Vibe Motion',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
-    )
+    ),
   },
   {
     id: 'lipsync',
     label: 'Lip Sync',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-        <line x1="12" y1="19" x2="12" y2="22"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="22" />
       </svg>
-    )
+    ),
   },
   {
     id: 'body-swap',
     label: 'Body Swap',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="8.5" cy="7" r="4"/>
-        <polyline points="17 11 19 13 23 9"/>
-        <path d="M23 13v-2"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="8.5" cy="7" r="4" />
+        <polyline points="17 11 19 13 23 9" />
+        <path d="M23 13v-2" />
       </svg>
-    )
+    ),
   },
   {
     id: 'cinema',
     label: 'Cinema Studio',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
-        <line x1="7" y1="2" x2="7" y2="22"/>
-        <line x1="17" y1="2" x2="17" y2="22"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
-        <line x1="2" y1="7" x2="7" y2="7"/>
-        <line x1="2" y1="17" x2="7" y2="17"/>
-        <line x1="17" y1="17" x2="22" y2="17"/>
-        <line x1="17" y1="7" x2="22" y2="7"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+        <line x1="7" y1="2" x2="7" y2="22" />
+        <line x1="17" y1="2" x2="17" y2="22" />
+        <line x1="2" y1="12" x2="22" y2="12" />
+        <line x1="2" y1="7" x2="7" y2="7" />
+        <line x1="2" y1="17" x2="7" y2="17" />
+        <line x1="17" y1="17" x2="22" y2="17" />
+        <line x1="17" y1="7" x2="22" y2="7" />
       </svg>
-    )
+    ),
   },
   {
     id: 'marketing',
     label: 'Marketing Studio',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        <line x1="8" y1="9" x2="16" y2="9"/>
-        <line x1="8" y1="13" x2="14" y2="13"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        <line x1="8" y1="9" x2="16" y2="9" />
+        <line x1="8" y1="13" x2="14" y2="13" />
       </svg>
-    )
+    ),
   },
   {
     id: 'workflows',
     label: 'Workflows',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="6" height="6" rx="1"/>
-        <rect x="15" y="3" width="6" height="6" rx="1"/>
-        <rect x="9" y="15" width="6" height="6" rx="1"/>
-        <path d="M6 9v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9"/>
-        <path d="M12 13v2"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="6" height="6" rx="1" />
+        <rect x="15" y="3" width="6" height="6" rx="1" />
+        <rect x="9" y="15" width="6" height="6" rx="1" />
+        <path d="M6 9v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9" />
+        <path d="M12 13v2" />
       </svg>
-    )
+    ),
   },
   {
     id: 'agents',
     label: 'Agents',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="10" rx="2"/>
-        <circle cx="12" cy="5" r="2"/>
-        <path d="M12 7v4"/>
-        <line x1="8" y1="16" x2="8.01" y2="16"/>
-        <line x1="16" y1="16" x2="16.01" y2="16"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="11" width="18" height="10" rx="2" />
+        <circle cx="12" cy="5" r="2" />
+        <path d="M12 7v4" />
+        <line x1="8" y1="16" x2="8.01" y2="16" />
+        <line x1="16" y1="16" x2="16.01" y2="16" />
       </svg>
-    )
+    ),
   },
 
   {
     id: 'apps',
     label: 'Explore Apps',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7"/>
-        <rect x="14" y="3" width="7" height="7"/>
-        <rect x="14" y="14" width="7" height="7"/>
-        <rect x="3" y="14" width="7" height="7"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
       </svg>
-    )
+    ),
   },
   {
     id: 'ai-influencer',
     label: 'AI Influencer Studio',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
       </svg>
-    )
-  }
+    ),
+  },
 ];
 
 const NAVIGATION_CATEGORIES = [
@@ -182,59 +343,93 @@ const NAVIGATION_CATEGORIES = [
     label: 'Images',
     tabIds: ['image', 'cinema', 'design-agent', 'ai-influencer'],
     icon: (
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <path d="M21 15l-5-5L5 21"/>
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M21 15l-5-5L5 21" />
       </svg>
-    )
+    ),
   },
   {
     id: 'video',
     label: 'Video',
     tabIds: ['video', 'clipping', 'vibe-motion', 'lipsync', 'body-swap', 'marketing'],
     icon: (
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="4" width="15" height="16" rx="2"/>
-        <path d="M17 9l5-3v12l-5-3"/>
-        <path d="M8 9l4 3-4 3z"/>
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="2" y="4" width="15" height="16" rx="2" />
+        <path d="M17 9l5-3v12l-5-3" />
+        <path d="M8 9l4 3-4 3z" />
       </svg>
-    )
+    ),
   },
   {
     id: 'audio',
     label: 'Audio',
     tabIds: ['audio'],
     icon: (
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/>
-        <circle cx="18" cy="16" r="3"/>
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M9 18V5l12-2v13" />
+        <circle cx="6" cy="18" r="3" />
+        <circle cx="18" cy="16" r="3" />
       </svg>
-    )
+    ),
   },
   {
     id: 'agents-automation',
     label: 'Agents & Automation',
     tabIds: ['agents', 'workflows'],
     icon: (
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="6" height="6" rx="1"/>
-        <rect x="15" y="3" width="6" height="6" rx="1"/>
-        <rect x="9" y="15" width="6" height="6" rx="1"/>
-        <path d="M6 9v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9"/>
-        <path d="M12 13v2"/>
+      <svg
+        width="19"
+        height="19"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="6" height="6" rx="1" />
+        <rect x="15" y="3" width="6" height="6" rx="1" />
+        <rect x="9" y="15" width="6" height="6" rx="1" />
+        <path d="M6 9v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9" />
+        <path d="M12 13v2" />
       </svg>
-    )
-  }
+    ),
+  },
 ];
 
 const EXPLORE_APPS_TAB = TABS.find((tab) => tab.id === 'apps');
 
-const getNavigationCategory = (tabId) => (
-  NAVIGATION_CATEGORIES.find((category) => category.tabIds.includes(tabId))
-);
-
+const getNavigationCategory = (tabId) =>
+  NAVIGATION_CATEGORIES.find((category) => category.tabIds.includes(tabId));
 
 const NOTIFICATIONS_STORAGE_KEY = 'open_gen_notifications_v1';
 const MAX_VISIBLE_NOTIFICATIONS = 3;
@@ -246,7 +441,9 @@ const loadStoredNotifications = () => {
     const stored = JSON.parse(window.sessionStorage.getItem(NOTIFICATIONS_STORAGE_KEY) || '[]');
     const now = Date.now();
     return Array.isArray(stored)
-      ? stored.filter((notification) => notification.expiresAt > now).slice(0, MAX_VISIBLE_NOTIFICATIONS)
+      ? stored
+          .filter((notification) => notification.expiresAt > now)
+          .slice(0, MAX_VISIBLE_NOTIFICATIONS)
       : [];
   } catch {
     return [];
@@ -257,10 +454,7 @@ const persistNotifications = (notifications) => {
   if (typeof window === 'undefined') return;
 
   try {
-    window.sessionStorage.setItem(
-      NOTIFICATIONS_STORAGE_KEY,
-      JSON.stringify(notifications),
-    );
+    window.sessionStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
   } catch {
     // Notification persistence is optional; rendering still works without storage.
   }
@@ -284,13 +478,13 @@ function StandaloneShellInner() {
   // Helper to extract workflow details precisely from either route structure
   const getWorkflowInfo = useCallback(() => {
     if (idFromParams) {
-        return { id: idFromParams, tab: tabFromParams || null };
+      return { id: idFromParams, tab: tabFromParams || null };
     }
-    const wfIndex = slug.findIndex(s => s === 'workflows' || s === 'workflow');
+    const wfIndex = slug.findIndex((s) => s === 'workflows' || s === 'workflow');
     if (wfIndex === -1) return { id: null, tab: null };
     return {
       id: slug[wfIndex + 1] || null,
-      tab: slug[wfIndex + 2] || null
+      tab: slug[wfIndex + 2] || null,
     };
   }, [slug, idFromParams, tabFromParams]);
 
@@ -303,10 +497,10 @@ function StandaloneShellInner() {
     if (slug.includes('design-agent')) return 'design-agent';
     if (slug.includes('apps')) return 'apps';
     const firstSegment = slug[0];
-    if (firstSegment && TABS.find(t => t.id === firstSegment)) return firstSegment;
+    if (firstSegment && TABS.find((t) => t.id === firstSegment)) return firstSegment;
     return 'image';
   };
-  
+
   const apiKey = '';
   const [activeTab, setActiveTab] = useState(getInitialTab());
 
@@ -324,32 +518,33 @@ function StandaloneShellInner() {
     }
   }, []);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [expandedCategoryId, setExpandedCategoryId] = useState(() => (
-    getNavigationCategory(getInitialTab())?.id || NAVIGATION_CATEGORIES[0].id
-  ));
+  const [expandedCategoryId, setExpandedCategoryId] = useState(
+    () => getNavigationCategory(getInitialTab())?.id || NAVIGATION_CATEGORIES[0].id
+  );
   const activeCategory = getNavigationCategory(activeTab);
 
   const toggleSidebar = useCallback(() => {
-    setIsSidebarCollapsed(prev => {
+    setIsSidebarCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem('sidebar_collapsed', next ? 'true' : 'false');
       return next;
     });
   }, []);
 
-  const handleCategoryToggle = useCallback((categoryId) => {
-    const isCollapsedNavigation = isSidebarCollapsed && !isMobileOpen;
+  const handleCategoryToggle = useCallback(
+    (categoryId) => {
+      const isCollapsedNavigation = isSidebarCollapsed && !isMobileOpen;
 
-    if (!isCollapsedNavigation) {
-      setExpandedCategoryId((currentId) => (
-        currentId === categoryId ? null : categoryId
-      ));
-      return;
-    }
+      if (!isCollapsedNavigation) {
+        setExpandedCategoryId((currentId) => (currentId === categoryId ? null : categoryId));
+        return;
+      }
 
-    setExpandedCategoryId(categoryId);
-    toggleSidebar();
-  }, [isMobileOpen, isSidebarCollapsed, toggleSidebar]);
+      setExpandedCategoryId(categoryId);
+      toggleSidebar();
+    },
+    [isMobileOpen, isSidebarCollapsed, toggleSidebar]
+  );
 
   useEffect(() => {
     if (activeCategory?.id) {
@@ -378,7 +573,7 @@ function StandaloneShellInner() {
     const entry = { ...notif, id, expiresAt: now + ttl };
     setNotifications((previous) => {
       // Prevent duplicate notifications by ID
-      if (previous.some(n => n.id === id)) return previous;
+      if (previous.some((n) => n.id === id)) return previous;
       const next = [
         ...previous.filter((notification) => notification.expiresAt > now),
         entry,
@@ -397,7 +592,7 @@ function StandaloneShellInner() {
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.length > 0) {
-          data.forEach(n => {
+          data.forEach((n) => {
             pushNotification({
               id: n.id,
               type: n.type || 'info',
@@ -409,7 +604,7 @@ function StandaloneShellInner() {
           await fetch('/api/notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: data.map(n => n.id) })
+            body: JSON.stringify({ ids: data.map((n) => n.id) }),
           });
         }
       } catch (err) {
@@ -442,59 +637,74 @@ function StandaloneShellInner() {
     if (notifications.length === 0) return undefined;
 
     const nextExpiry = Math.min(...notifications.map((notification) => notification.expiresAt));
-    const timer = window.setTimeout(() => {
-      const now = Date.now();
-      setNotifications((previous) => previous.filter((notification) => notification.expiresAt > now));
-    }, Math.max(0, nextExpiry - Date.now()));
+    const timer = window.setTimeout(
+      () => {
+        const now = Date.now();
+        setNotifications((previous) =>
+          previous.filter((notification) => notification.expiresAt > now)
+        );
+      },
+      Math.max(0, nextExpiry - Date.now())
+    );
 
     return () => window.clearTimeout(timer);
   }, [notifications]);
 
-  const makeSuccessCallback = useCallback((tabId) => (data) => {
-    const tab = TABS.find(t => t.id === tabId);
-    pushNotification({
-      type: 'success',
-      tabId,
-      label: tab?.label || tabId,
-      resultUrl: data?.url || null,
-    });
-  }, [pushNotification]);
+  const makeSuccessCallback = useCallback(
+    (tabId) => (data) => {
+      const tab = TABS.find((t) => t.id === tabId);
+      pushNotification({
+        type: 'success',
+        tabId,
+        label: tab?.label || tabId,
+        resultUrl: data?.url || null,
+      });
+    },
+    [pushNotification]
+  );
 
-  const makeErrorCallback = useCallback((tabId) => (message) => {
-    const tab = TABS.find(t => t.id === tabId);
-    pushNotification({ type: 'error', tabId, label: tab?.label || tabId, message });
-  }, [pushNotification]);
+  const makeErrorCallback = useCallback(
+    (tabId) => (message) => {
+      const tab = TABS.find((t) => t.id === tabId);
+      pushNotification({ type: 'error', tabId, label: tab?.label || tabId, message });
+    },
+    [pushNotification]
+  );
 
-  const makeGenerationStartCallback = useCallback((tabId) => () => {
-    setGenerationCounts((previous) => ({
-      ...previous,
-      [tabId]: (previous[tabId] || 0) + 1,
-    }));
-  }, []);
-
-  const makeGenerationEndCallback = useCallback((tabId) => () => {
-    setGenerationCounts((previous) => {
-      const currentCount = previous[tabId] || 0;
-      if (currentCount <= 1) {
-        const next = { ...previous };
-        delete next[tabId];
-        return next;
-      }
-
-      return {
+  const makeGenerationStartCallback = useCallback(
+    (tabId) => () => {
+      setGenerationCounts((previous) => ({
         ...previous,
-        [tabId]: currentCount - 1,
-      };
-    });
-  }, []);
+        [tabId]: (previous[tabId] || 0) + 1,
+      }));
+    },
+    []
+  );
 
-  const activeGenerations = TABS
-    .filter((tab) => generationCounts[tab.id] > 0)
-    .map((tab) => ({
-      tabId: tab.id,
-      label: tab.label,
-      count: generationCounts[tab.id],
-    }));
+  const makeGenerationEndCallback = useCallback(
+    (tabId) => () => {
+      setGenerationCounts((previous) => {
+        const currentCount = previous[tabId] || 0;
+        if (currentCount <= 1) {
+          const next = { ...previous };
+          delete next[tabId];
+          return next;
+        }
+
+        return {
+          ...previous,
+          [tabId]: currentCount - 1,
+        };
+      });
+    },
+    []
+  );
+
+  const activeGenerations = TABS.filter((tab) => generationCounts[tab.id] > 0).map((tab) => ({
+    tabId: tab.id,
+    label: tab.label,
+    count: generationCounts[tab.id],
+  }));
 
   // Popstate event listener to sync tab state with URL on back/forward navigation
   useEffect(() => {
@@ -502,7 +712,7 @@ function StandaloneShellInner() {
       const path = window.location.pathname;
       const segments = path.split('/').filter(Boolean);
       const tabId = segments[1] || 'image';
-      if (TABS.find(t => t.id === tabId)) {
+      if (TABS.find((t) => t.id === tabId)) {
         setActiveTab(tabId);
       }
     };
@@ -515,10 +725,13 @@ function StandaloneShellInner() {
     setActiveTab(tabId);
   }, []);
 
-  const handleOpenNotification = useCallback((notification) => {
-    handleTabChange(notification.tabId);
-    dismissNotification(notification.id);
-  }, [dismissNotification, handleTabChange]);
+  const handleOpenNotification = useCallback(
+    (notification) => {
+      handleTabChange(notification.tabId);
+      dismissNotification(notification.id);
+    },
+    [dismissNotification, handleTabChange]
+  );
 
   const handleTabClick = (e, tabId) => {
     if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
@@ -539,7 +752,7 @@ function StandaloneShellInner() {
   useEffect(() => {
     const isEditingWorkflow = (activeTab === 'workflows' || !!idFromParams) && urlWorkflowId;
     const isDesignAgent = activeTab === 'design-agent';
-    
+
     if (isEditingWorkflow || isDesignAgent) {
       setIsHeaderVisible(false);
     } else {
@@ -549,12 +762,15 @@ function StandaloneShellInner() {
 
   // Global builder CSS cleanup when switching away from Workflows or Design Agent tabs
   useEffect(() => {
-    const fromBuilder = sessionStorage.getItem("fromWorkflowBuilder");
-    const fromDesignAgent = sessionStorage.getItem("fromDesignAgent");
-    
-    if ((fromBuilder && activeTab !== 'workflows') || (fromDesignAgent && activeTab !== 'design-agent')) {
-      sessionStorage.removeItem("fromWorkflowBuilder");
-      sessionStorage.removeItem("fromDesignAgent");
+    const fromBuilder = sessionStorage.getItem('fromWorkflowBuilder');
+    const fromDesignAgent = sessionStorage.getItem('fromDesignAgent');
+
+    if (
+      (fromBuilder && activeTab !== 'workflows') ||
+      (fromDesignAgent && activeTab !== 'design-agent')
+    ) {
+      sessionStorage.removeItem('fromWorkflowBuilder');
+      sessionStorage.removeItem('fromDesignAgent');
       window.location.reload();
     }
   }, [activeTab]);
@@ -621,15 +837,15 @@ function StandaloneShellInner() {
     setDroppedFiles(null);
   }, []);
 
-  if (!hasMounted) return (
-    <div className="min-h-screen bg-app-bg flex items-center justify-center">
-      <div className="animate-spin text-primary text-3xl">◌</div>
-    </div>
-  );
-
+  if (!hasMounted)
+    return (
+      <div className="min-h-screen bg-app-bg flex items-center justify-center">
+        <div className="animate-spin text-primary text-3xl">◌</div>
+      </div>
+    );
 
   return (
-    <div 
+    <div
       className="h-screen bg-app-bg flex flex-col overflow-hidden text-white relative"
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
@@ -641,8 +857,15 @@ function StandaloneShellInner() {
         <div className="fixed inset-0 z-[100] bg-primary/10 backdrop-blur-md border-4 border-dashed border-primary/50 flex items-center justify-center pointer-events-none transition-all duration-300">
           <div className="bg-panel-bg p-8 rounded-3xl border border-white/10 shadow-2xl flex flex-col items-center gap-4 scale-110 animate-pulse">
             <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="black"
+                strokeWidth="2.5"
+              >
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
               </svg>
             </div>
             <div className="flex flex-col items-center">
@@ -662,7 +885,8 @@ function StandaloneShellInner() {
             rel="noopener noreferrer"
             className="text-[13px] font-bold text-white hover:opacity-80 transition-opacity text-center"
           >
-            Unrestricted AI Images &amp; Videos → Auto-Publish as YouTube Shorts &amp; TikToks, Earn ↗
+            Unrestricted AI Images &amp; Videos → Auto-Publish as YouTube Shorts &amp; TikToks, Earn
+            ↗
           </a>
           <button
             onClick={() => {
@@ -688,7 +912,14 @@ function StandaloneShellInner() {
               className="md:hidden p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
               aria-label="Toggle Navigation Menu"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="18" x2="21" y2="18" />
@@ -700,7 +931,7 @@ function StandaloneShellInner() {
               <button
                 onClick={toggleSidebar}
                 className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors border border-white/5"
-                aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 <svg
                   width="18"
@@ -718,13 +949,20 @@ function StandaloneShellInner() {
               </button>
               {/* Custom Tooltip */}
               <div className="absolute left-0 top-full mt-2 px-2.5 py-1 bg-card-bg/95 backdrop-blur-md text-white text-[11px] font-medium rounded-md shadow-2xl border border-white/15 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 whitespace-nowrap">
-                {isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                {isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               </div>
             </div>
 
             {/* Logo & Title */}
             <div className="flex items-center gap-2.5">
-              <Image src="/logo.png" alt="devinedesk" width={32} height={32} className="w-8 h-8 rounded-lg object-contain" priority />
+              <Image
+                src="/logo.png"
+                alt="devinedesk"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-lg object-contain"
+                priority
+              />
               <span className="text-sm font-bold tracking-tight hidden sm:block text-white">
                 devinedesk
               </span>
@@ -735,7 +973,7 @@ function StandaloneShellInner() {
           <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.05] text-xs text-white/60">
             <span className="w-1.5 h-1.5 rounded-full bg-primary" />
             <span className="font-medium text-white/80">
-              {TABS.find(t => t.id === activeTab)?.label || 'Studio'}
+              {TABS.find((t) => t.id === activeTab)?.label || 'Studio'}
             </span>
           </div>
 
@@ -753,7 +991,16 @@ function StandaloneShellInner() {
               className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-white/10 bg-white/5 text-[13px] font-bold text-white/80 hover:text-primary hover:bg-primary/10 hover:border-primary/30 active:scale-95 hover:shadow-glow transition-all duration-300"
               aria-label="Settings"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
@@ -767,7 +1014,7 @@ function StandaloneShellInner() {
       <div className="flex-1 min-h-0 flex relative overflow-hidden">
         {/* Mobile Backdrop Overlay */}
         {isMobileOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden animate-fade-in"
             onClick={() => setIsMobileOpen(false)}
           />
@@ -782,7 +1029,10 @@ function StandaloneShellInner() {
               ${isSidebarCollapsed ? 'md:w-16' : 'md:w-52'}
             `}
           >
-            <nav aria-label="Studio navigation" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none py-2 px-2">
+            <nav
+              aria-label="Studio navigation"
+              className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none py-2 px-2"
+            >
               <div className="space-y-1">
                 {NAVIGATION_CATEGORIES.map((category) => {
                   const isCategoryActive = activeCategory?.id === category.id;
@@ -802,11 +1052,12 @@ function StandaloneShellInner() {
                         className={`
                           group relative flex items-center rounded-xl transition-all duration-300 font-semibold
                           ${isCollapsed ? 'h-11 w-11 justify-center mx-auto' : 'px-3 py-2.5 w-full gap-3 text-left'}
-                          ${isCategoryActive
-                            ? 'bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.08)]'
-                            : isCategoryOpen
-                              ? 'bg-white/[0.06] text-white border border-white/[0.08] hover:translate-x-1'
-                              : 'text-white/60 hover:text-white hover:bg-white/[0.06] border border-transparent hover:translate-x-1'
+                          ${
+                            isCategoryActive
+                              ? 'bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.08)]'
+                              : isCategoryOpen
+                                ? 'bg-white/[0.06] text-white border border-white/[0.08] hover:translate-x-1'
+                                : 'text-white/60 hover:text-white hover:bg-white/[0.06] border border-transparent hover:translate-x-1'
                           }
                         `}
                       >
@@ -814,7 +1065,9 @@ function StandaloneShellInner() {
                           <span className="absolute left-0 top-2 bottom-2 w-1 bg-gradient-to-b from-primary to-[#a855f7] rounded-r-full shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
                         )}
 
-                        <span className={`flex-shrink-0 transition-colors ${isCategoryActive ? 'text-primary' : 'text-white/55 group-hover:text-white'}`}>
+                        <span
+                          className={`flex-shrink-0 transition-colors ${isCategoryActive ? 'text-primary' : 'text-white/55 group-hover:text-white'}`}
+                        >
                           {category.icon}
                         </span>
 
@@ -835,7 +1088,7 @@ function StandaloneShellInner() {
                               className={`flex-shrink-0 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`}
                               aria-hidden="true"
                             >
-                              <path d="M6 9l6 6 6-6"/>
+                              <path d="M6 9l6 6 6-6" />
                             </svg>
                           </>
                         )}
@@ -861,16 +1114,19 @@ function StandaloneShellInner() {
                                 aria-current={isActive ? 'page' : undefined}
                                 className={`
                                   group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-300
-                                  ${isActive
-                                    ? 'bg-primary/12 text-primary border border-primary/20 shadow-[0_0_10px_rgba(34,211,238,0.15)]'
-                                    : 'text-white/55 hover:text-white hover:bg-white/[0.06] border border-transparent hover:translate-x-1'
+                                  ${
+                                    isActive
+                                      ? 'bg-primary/12 text-primary border border-primary/20 shadow-[0_0_10px_rgba(34,211,238,0.15)]'
+                                      : 'text-white/55 hover:text-white hover:bg-white/[0.06] border border-transparent hover:translate-x-1'
                                   }
                                 `}
                               >
                                 {isActive && (
                                   <span className="absolute -left-[11px] top-2 bottom-2 w-0.5 rounded-full bg-primary shadow-[0_0_7px_rgba(34,211,238,0.7)]" />
                                 )}
-                                <span className={`flex-shrink-0 ${isActive ? 'text-primary' : 'text-white/45 group-hover:text-white/80'}`}>
+                                <span
+                                  className={`flex-shrink-0 ${isActive ? 'text-primary' : 'text-white/45 group-hover:text-white/80'}`}
+                                >
                                   {tab.icon}
                                 </span>
                                 <span className="truncate">{tab.label}</span>
@@ -895,16 +1151,19 @@ function StandaloneShellInner() {
                     className={`
                       group relative flex items-center rounded-xl transition-all duration-150 text-[13px] font-semibold
                       ${isSidebarCollapsed && !isMobileOpen ? 'h-11 w-11 justify-center mx-auto' : 'px-3 py-2.5 w-full gap-3'}
-                      ${activeTab === EXPLORE_APPS_TAB.id
-                        ? 'bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary border border-primary/20'
-                        : 'text-white/60 hover:text-white hover:bg-white/[0.04] border border-transparent'
+                      ${
+                        activeTab === EXPLORE_APPS_TAB.id
+                          ? 'bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary border border-primary/20'
+                          : 'text-white/60 hover:text-white hover:bg-white/[0.04] border border-transparent'
                       }
                     `}
                   >
                     {activeTab === EXPLORE_APPS_TAB.id && (
                       <span className="absolute left-0 top-2 bottom-2 w-1 bg-gradient-to-b from-primary to-[#a855f7] rounded-r-full" />
                     )}
-                    <span className={`flex-shrink-0 ${activeTab === EXPLORE_APPS_TAB.id ? 'text-primary' : 'text-white/50 group-hover:text-white'}`}>
+                    <span
+                      className={`flex-shrink-0 ${activeTab === EXPLORE_APPS_TAB.id ? 'text-primary' : 'text-white/50 group-hover:text-white'}`}
+                    >
                       {EXPLORE_APPS_TAB.icon}
                     </span>
                     {(!isSidebarCollapsed || isMobileOpen) && (
@@ -919,62 +1178,134 @@ function StandaloneShellInner() {
 
         {/* Studio Content */}
         <div className="flex-1 min-h-0 h-full relative overflow-hidden bg-app-bg">
-        <div className={activeTab === 'image' ? "h-full w-full" : "hidden"}>
-          <ImageStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('image')} onGenerationEnd={makeGenerationEndCallback('image')} onGenerationComplete={makeSuccessCallback('image')} onGenerationError={makeErrorCallback('image')} />
-        </div>
-        <div className={activeTab === 'video' ? "h-full w-full" : "hidden"}>
-          <VideoStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('video')} onGenerationEnd={makeGenerationEndCallback('video')} onGenerationComplete={makeSuccessCallback('video')} onGenerationError={makeErrorCallback('video')} />
-        </div>
-        <div className={activeTab === 'clipping' ? "h-full w-full" : "hidden"}>
-          <ClippingStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('clipping')} onGenerationEnd={makeGenerationEndCallback('clipping')} onGenerationComplete={makeSuccessCallback('clipping')} onGenerationError={makeErrorCallback('clipping')} />
-        </div>
-        <div className={activeTab === 'vibe-motion' ? "h-full w-full" : "hidden"}>
-          <VibeMotionStudio apiKey={apiKey} onGenerationStart={makeGenerationStartCallback('vibe-motion')} onGenerationEnd={makeGenerationEndCallback('vibe-motion')} onGenerationComplete={makeSuccessCallback('vibe-motion')} onGenerationError={makeErrorCallback('vibe-motion')} />
-        </div>
-        <div className={activeTab === 'lipsync' ? "h-full w-full" : "hidden"}>
-          <LipSyncStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('lipsync')} onGenerationEnd={makeGenerationEndCallback('lipsync')} onGenerationComplete={makeSuccessCallback('lipsync')} onGenerationError={makeErrorCallback('lipsync')} />
-        </div>
-        <div className={activeTab === 'body-swap' ? "h-full w-full" : "hidden"}>
-          <RecastStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('body-swap')} onGenerationEnd={makeGenerationEndCallback('body-swap')} onGenerationComplete={makeSuccessCallback('body-swap')} onGenerationError={makeErrorCallback('body-swap')} />
-        </div>
-        <div className={activeTab === 'cinema' ? "h-full w-full" : "hidden"}>
-          <CinemaStudio apiKey={apiKey} onGenerationStart={makeGenerationStartCallback('cinema')} onGenerationEnd={makeGenerationEndCallback('cinema')} onGenerationComplete={makeSuccessCallback('cinema')} onGenerationError={makeErrorCallback('cinema')} />
-        </div>
-        <div className={activeTab === 'audio' ? "h-full w-full" : "hidden"}>
-          <AudioStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('audio')} onGenerationEnd={makeGenerationEndCallback('audio')} onGenerationComplete={makeSuccessCallback('audio')} onGenerationError={makeErrorCallback('audio')} />
-        </div>
-        <div className={activeTab === 'marketing' ? "h-full w-full" : "hidden"}>
-          <MarketingStudio apiKey={apiKey} droppedFiles={droppedFiles} onFilesHandled={handleFilesHandled} onGenerationStart={makeGenerationStartCallback('marketing')} onGenerationEnd={makeGenerationEndCallback('marketing')} onGenerationComplete={makeSuccessCallback('marketing')} onGenerationError={makeErrorCallback('marketing')} />
-        </div>
-        <div className={activeTab === 'workflows' ? "h-full w-full" : "hidden"}>
-          <WorkflowStudio
-            apiKey={apiKey}
-            isHeaderVisible={isHeaderVisible}
-            onToggleHeader={setIsHeaderVisible}
-            onGenerationStart={makeGenerationStartCallback('workflows')}
-            onGenerationEnd={makeGenerationEndCallback('workflows')}
-            onGenerationComplete={makeSuccessCallback('workflows')}
-            onGenerationError={makeErrorCallback('workflows')}
-          />
-        </div>
-        <div className={activeTab === 'agents' ? "h-full w-full" : "hidden"}>
-          <AgentStudio apiKey={apiKey} isHeaderVisible={isHeaderVisible} onToggleHeader={setIsHeaderVisible} />
-        </div>
+          <div className={activeTab === 'image' ? 'h-full w-full' : 'hidden'}>
+            <ImageStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('image')}
+              onGenerationEnd={makeGenerationEndCallback('image')}
+              onGenerationComplete={makeSuccessCallback('image')}
+              onGenerationError={makeErrorCallback('image')}
+            />
+          </div>
+          <div className={activeTab === 'video' ? 'h-full w-full' : 'hidden'}>
+            <VideoStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('video')}
+              onGenerationEnd={makeGenerationEndCallback('video')}
+              onGenerationComplete={makeSuccessCallback('video')}
+              onGenerationError={makeErrorCallback('video')}
+            />
+          </div>
+          <div className={activeTab === 'clipping' ? 'h-full w-full' : 'hidden'}>
+            <ClippingStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('clipping')}
+              onGenerationEnd={makeGenerationEndCallback('clipping')}
+              onGenerationComplete={makeSuccessCallback('clipping')}
+              onGenerationError={makeErrorCallback('clipping')}
+            />
+          </div>
+          <div className={activeTab === 'vibe-motion' ? 'h-full w-full' : 'hidden'}>
+            <VibeMotionStudio
+              apiKey={apiKey}
+              onGenerationStart={makeGenerationStartCallback('vibe-motion')}
+              onGenerationEnd={makeGenerationEndCallback('vibe-motion')}
+              onGenerationComplete={makeSuccessCallback('vibe-motion')}
+              onGenerationError={makeErrorCallback('vibe-motion')}
+            />
+          </div>
+          <div className={activeTab === 'lipsync' ? 'h-full w-full' : 'hidden'}>
+            <LipSyncStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('lipsync')}
+              onGenerationEnd={makeGenerationEndCallback('lipsync')}
+              onGenerationComplete={makeSuccessCallback('lipsync')}
+              onGenerationError={makeErrorCallback('lipsync')}
+            />
+          </div>
+          <div className={activeTab === 'body-swap' ? 'h-full w-full' : 'hidden'}>
+            <RecastStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('body-swap')}
+              onGenerationEnd={makeGenerationEndCallback('body-swap')}
+              onGenerationComplete={makeSuccessCallback('body-swap')}
+              onGenerationError={makeErrorCallback('body-swap')}
+            />
+          </div>
+          <div className={activeTab === 'cinema' ? 'h-full w-full' : 'hidden'}>
+            <CinemaStudio
+              apiKey={apiKey}
+              onGenerationStart={makeGenerationStartCallback('cinema')}
+              onGenerationEnd={makeGenerationEndCallback('cinema')}
+              onGenerationComplete={makeSuccessCallback('cinema')}
+              onGenerationError={makeErrorCallback('cinema')}
+            />
+          </div>
+          <div className={activeTab === 'audio' ? 'h-full w-full' : 'hidden'}>
+            <AudioStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('audio')}
+              onGenerationEnd={makeGenerationEndCallback('audio')}
+              onGenerationComplete={makeSuccessCallback('audio')}
+              onGenerationError={makeErrorCallback('audio')}
+            />
+          </div>
+          <div className={activeTab === 'marketing' ? 'h-full w-full' : 'hidden'}>
+            <MarketingStudio
+              apiKey={apiKey}
+              droppedFiles={droppedFiles}
+              onFilesHandled={handleFilesHandled}
+              onGenerationStart={makeGenerationStartCallback('marketing')}
+              onGenerationEnd={makeGenerationEndCallback('marketing')}
+              onGenerationComplete={makeSuccessCallback('marketing')}
+              onGenerationError={makeErrorCallback('marketing')}
+            />
+          </div>
+          <div className={activeTab === 'workflows' ? 'h-full w-full' : 'hidden'}>
+            <WorkflowStudio
+              apiKey={apiKey}
+              isHeaderVisible={isHeaderVisible}
+              onToggleHeader={setIsHeaderVisible}
+              onGenerationStart={makeGenerationStartCallback('workflows')}
+              onGenerationEnd={makeGenerationEndCallback('workflows')}
+              onGenerationComplete={makeSuccessCallback('workflows')}
+              onGenerationError={makeErrorCallback('workflows')}
+            />
+          </div>
+          <div className={activeTab === 'agents' ? 'h-full w-full' : 'hidden'}>
+            <AgentStudio
+              apiKey={apiKey}
+              isHeaderVisible={isHeaderVisible}
+              onToggleHeader={setIsHeaderVisible}
+            />
+          </div>
 
-        <div className={activeTab === 'apps' ? "h-full w-full" : "hidden"}>
-          <AppsStudio apiKey={apiKey} />
-        </div>
-        <div className={activeTab === 'ai-influencer' ? "h-full w-full" : "hidden"}>
-          <AiInfluencerStudio
-            apiKey={apiKey}
-            onGenerationStart={makeGenerationStartCallback('ai-influencer')}
-            onGenerationEnd={makeGenerationEndCallback('ai-influencer')}
-            onGenerationComplete={makeSuccessCallback('ai-influencer')}
-            onGenerationError={makeErrorCallback('ai-influencer')}
-          />
+          <div className={activeTab === 'apps' ? 'h-full w-full' : 'hidden'}>
+            <AppsStudio apiKey={apiKey} />
+          </div>
+          <div className={activeTab === 'ai-influencer' ? 'h-full w-full' : 'hidden'}>
+            <AiInfluencerStudio
+              apiKey={apiKey}
+              onGenerationStart={makeGenerationStartCallback('ai-influencer')}
+              onGenerationEnd={makeGenerationEndCallback('ai-influencer')}
+              onGenerationComplete={makeSuccessCallback('ai-influencer')}
+              onGenerationError={makeErrorCallback('ai-influencer')}
+            />
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Global generation activity and notification stack */}
       {(activeGenerations.length > 0 || notifications.length > 0) && (
@@ -1013,7 +1344,8 @@ function StandaloneShellInner() {
               data-notification-tab={notif.tabId}
               className="pointer-events-auto flex items-start gap-3 rounded-xl border bg-white px-3.5 py-3 text-[13px] text-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
               style={{
-                borderColor: notif.type === 'success' ? 'rgba(6,182,212,0.4)' : 'rgba(239,68,68,0.4)',
+                borderColor:
+                  notif.type === 'success' ? 'rgba(6,182,212,0.4)' : 'rgba(239,68,68,0.4)',
                 animation: 'slideInRight 280ms cubic-bezier(0.16,1,0.3,1) forwards',
               }}
             >
@@ -1025,11 +1357,31 @@ function StandaloneShellInner() {
                 }`}
               >
                 {notif.type === 'success' ? (
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
                     <path d="m5 12 4 4L19 6" />
                   </svg>
                 ) : (
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
                     <circle cx="12" cy="12" r="9" />
                     <path d="M12 7v6" />
                     <path d="M12 17h.01" />
@@ -1045,7 +1397,10 @@ function StandaloneShellInner() {
                   </span>
                 </p>
                 {notif.type === 'error' && notif.message && (
-                  <p className="mt-0.5 line-clamp-2 text-[12px] font-medium leading-4 text-red-600" title={notif.message}>
+                  <p
+                    className="mt-0.5 line-clamp-2 text-[12px] font-medium leading-4 text-red-600"
+                    title={notif.message}
+                  >
                     {notif.message}
                   </p>
                 )}
@@ -1072,7 +1427,16 @@ function StandaloneShellInner() {
                 className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-300"
                 aria-label="Dismiss notification"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
               </button>
@@ -1097,9 +1461,7 @@ function StandaloneShellInner() {
       `}</style>
 
       {/* Settings Modal */}
-      {showSettings && (
-        <SettingsModal onClose={() => setShowSettings(false)} />
-      )}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   );
 }

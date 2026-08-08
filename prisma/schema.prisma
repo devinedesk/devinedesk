@@ -12,6 +12,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+  VIEWER
+  GUEST
+  SUPPORT
+  SYSTEM
+  API
+  WEBHOOK
+}
+
+enum WorkspaceRole {
+  ADMIN
+  MANAGER
+  MEMBER
+  VIEWER
+  GUEST
+}
+
+enum RunStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum TicketCategory {
+  BUG
+  FEATURE
+  BILLING
+  GENERAL
+}
+
 model User {
   id               String    @id @default(uuid())
   email            String?   @unique
@@ -19,42 +80,60 @@ model User {
   password         String?
   name             String?
   image            String?
-  role             String    @default("USER")
+  role             Role      @default(USER)
   credits          Int       @default(50)
   stripeCustomerId String?
+  referralCode     String?   @unique
+  referredById     String?
+  twoFactorEnabled Boolean   @default(false)
+  twoFactorSecret  String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
-  accounts      Account[]
-  sessions      Session[]
-  settings      Setting[]
-  history       Generation[]
-  workflows     Workflow[]
-  workflowRuns  WorkflowRun[]
-  agents        Agent[]
-  assets        Asset[]
-  transactions  Transaction[]
-  conversations Conversation[]
-  appInterests  AppInterest[]
-  notifications Notification[]
+  accounts        Account[]
+  sessions        Session[]
+  settings        Setting[]
+  history         Generation[]
+  workflows       Workflow[]
+  workflowRuns    WorkflowRun[]
+  agents          Agent[]
+  assets          Asset[]
+  transactions    Transaction[]
+  conversations   Conversation[]
+  appInterests    AppInterest[]
+  notifications   Notification[]
+  apiKeys         APIKey[]
+  webhooks        Webhook[]
+  auditLogs       AuditLog[]
+  workspaces      WorkspaceMember[]
+  organizations   OrganizationMember[]
+  supportTickets  SupportTicket[]
+  supportMessages SupportMessage[]
+  subscriptions   Subscription[]
+  promptTemplates PromptTemplate[]
+  modelUsages     ModelUsage[]
+
+  @@index([email])
 }
 
 model Transaction {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   userId          String
   amount          Int // Number of credits
   type            String // 'purchase', 'usage', 'bonus'
   description     String?
   stripePaymentId String?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
+  deletedAt       DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Account {
-  id                String  @id @default(uuid())
+  id                String    @id @default(uuid())
   userId            String
   type              String
   provider          String
@@ -66,6 +145,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  deletedAt         DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -74,99 +154,120 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  sessionToken String   @unique
+  id           String    @id @default(uuid())
+  sessionToken String    @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt    DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model VerificationToken {
   identifier String
-  token      String   @unique
+  token      String    @unique
   expires    DateTime
+  deletedAt  DateTime?
 
   @@unique([identifier, token])
 }
 
 model Setting {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   key       String
   value     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@unique([userId, key])
 }
 
 model Generation {
-  id         String   @id @default(uuid())
+  id         String           @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   type       String // e.g., 't2i', 'video', 'lipsync'
   prompt     String?
   model      String?
-  parameters String? // JSON serialized string of parameters
+  parameters Json? // JSON serialized object of parameters
   resultUrl  String?
-  status     String   @default("completed")
-  createdAt  DateTime @default(now())
+  status     GenerationStatus @default(COMPLETED)
+  createdAt  DateTime         @default(now())
+  deletedAt  DateTime?
 
-  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([parameters], type: Gin)
 }
 
 model Workflow {
-  id          String        @id @default(uuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  nodes       String // JSON string of nodes
-  edges       String // JSON string of edges
-  viewport    String? // JSON string of viewport
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  runs        WorkflowRun[]
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  nodes        Json // JSON object of nodes
+  edges        Json // JSON object of edges
+  viewport     Json? // JSON object of viewport
+  isPublic     Boolean       @default(false)
+  tags         String? // JSON string of tags or comma-separated
+  clonedFromId String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  runs         WorkflowRun[]
 
-  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([nodes], type: Gin)
+  @@index([edges], type: Gin)
+  @@index([viewport], type: Gin)
 }
 
 model WorkflowRun {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   workflowId  String
   userId      String
-  status      String   @default("PROCESSING") // PROCESSING, COMPLETED, FAILED
-  nodeOutputs String? // JSON string
-  outputs     String? // JSON string
+  status      RunStatus @default(PROCESSING)
+  nodeOutputs Json? // JSON object
+  outputs     Json? // JSON object
   error       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([workflowId])
-  @@index([userId])
+  @@index([workflowId, createdAt])
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([nodeOutputs], type: Gin)
+  @@index([outputs], type: Gin)
 }
 
 model Agent {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slug         String   @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug         String    @unique
   name         String
   description  String?
   systemPrompt String?
   model        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isPublic     Boolean   @default(false)
+  tags         String?
+  clonedFromId String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   conversations Conversation[]
 
-  @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model Conversation {
@@ -178,9 +279,10 @@ model Conversation {
   messages  Message[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  @@index([userId])
-  @@index([agentId])
+  @@index([userId, createdAt])
+  @@index([agentId, createdAt])
 }
 
 model Message {
@@ -190,41 +292,279 @@ model Message {
   role           String // 'user' or 'assistant'
   content        String
   createdAt      DateTime     @default(now())
+  deletedAt      DateTime?
 
-  @@index([conversationId])
+  @@index([conversationId, createdAt])
 }
 
 model Asset {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String // 'image', 'video', 'audio', etc.
   url       String
-  metadata  String? // JSON string
-  createdAt DateTime @default(now())
+  metadata  Json? // JSON object
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
-  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([metadata], type: Gin)
 }
 
 model Notification {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
   message   String
-  type      String   @default("info") // 'info', 'success', 'error', 'warning'
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  type      String    @default("info") // 'info', 'success', 'error', 'warning'
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
-  @@index([userId])
+  @@index([userId, createdAt])
 }
 
 model AppInterest {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   appName   String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   @@unique([userId, appName])
+}
+
+model Organization {
+  id               String    @id @default(uuid())
+  name             String
+  slug             String    @unique
+  stripeCustomerId String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  members       OrganizationMember[]
+  workspaces    Workspace[]
+  auditLogs     AuditLog[]
+  subscriptions Subscription[]
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  role           OrgRole  @default(MEMBER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId, role])
+}
+
+model Workspace {
+  id             String    @id @default(uuid())
+  organizationId String
+  name           String
+  slug           String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      WorkspaceMember[]
+  apiKeys      APIKey[]
+  webhooks     Webhook[]
+  auditLogs    AuditLog[]
+
+  @@index([organizationId])
+}
+
+model WorkspaceMember {
+  id          String        @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId, role])
+}
+
+model APIKey {
+  id          String    @id @default(uuid())
+  key         String    @unique // Store SHA256 hashed key
+  maskedKey   String // Store e.g. "sk_prod_...1234"
+  name        String
+  userId      String?
+  workspaceId String?
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model Webhook {
+  id          String    @id @default(uuid())
+  url         String
+  secret      String
+  events      String // JSON array of events
+  isActive    Boolean   @default(true)
+  userId      String?
+  workspaceId String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
+}
+
+model AuditLog {
+  id             String    @id @default(uuid())
+  action         String
+  resource       String
+  resourceId     String?
+  metadata       Json? // JSON object
+  userId         String?
+  organizationId String?
+  workspaceId    String?
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([metadata], type: Gin)
+}
+
+model SupportTicket {
+  id        String         @id @default(uuid())
+  userId    String
+  subject   String
+  status    TicketStatus   @default(OPEN)
+  priority  TicketPriority @default(NORMAL)
+  category  TicketCategory @default(GENERAL)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  deletedAt DateTime?
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages SupportMessage[]
+
+  @@index([userId, createdAt])
+}
+
+model SupportMessage {
+  id        String    @id @default(uuid())
+  ticketId  String
+  senderId  String
+  content   String
+  isStaff   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@index([senderId, createdAt])
+}
+
+model Subscription {
+  id                   String    @id @default(uuid())
+  userId               String?
+  organizationId       String?
+  stripeSubscriptionId String    @unique
+  stripePriceId        String
+  status               String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model PromptTemplate {
+  id          String    @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  content     String // The actual prompt string with variables like {{name}}
+  variables   String? // JSON array of variable names
+  version     Int       @default(1)
+  isPublic    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model ModelUsage {
+  id               String    @id @default(uuid())
+  userId           String
+  generationId     String?
+  model            String
+  provider         String? // 'openai', 'anthropic', 'local'
+  promptTokens     Int       @default(0)
+  completionTokens Int       @default(0)
+  totalTokens      Int       @default(0)
+  costInCents      Float     @default(0.0)
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([model, createdAt])
+}
+
+model FeatureFlag {
+  id        String    @id @default(uuid())
+  name      String
+  key       String    @unique
+  enabled   Boolean   @default(false)
+  rollout   String    @default("0%")
+  env       String    @default("Production")
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@index([key])
+  @@index([env])
 }

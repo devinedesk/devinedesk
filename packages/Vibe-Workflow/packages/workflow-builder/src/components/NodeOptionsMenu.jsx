@@ -1,17 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
-import { BsThreeDots } from "react-icons/bs";
-import { IoDuplicateOutline, IoTrashOutline } from "react-icons/io5";
-import { MdOutlineFileDownload } from "react-icons/md";
-import { HiOutlinePhotograph } from "react-icons/hi";
-import { downloadFile } from "./utility";
+import React, { useState, useRef, useEffect } from 'react';
+import { BsThreeDots } from 'react-icons/bs';
+import { IoDuplicateOutline, IoTrashOutline } from 'react-icons/io5';
+import { MdOutlineFileDownload } from 'react-icons/md';
+import { HiOutlinePhotograph } from 'react-icons/hi';
+import { downloadFile } from './utility';
 
-const NodeOptionsMenu = ({ 
-  nodeId, 
-  onDuplicate, 
-  onDelete, 
-  downloadUrl, 
-  onSetThumbnail, 
-  showThumbnailOption 
+const NodeOptionsMenu = ({
+  nodeId,
+  onDuplicate,
+  onDelete,
+  downloadUrl,
+  onSetThumbnail,
+  showThumbnailOption,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
@@ -23,9 +23,9 @@ const NodeOptionsMenu = ({
       }
     };
     if (isOpen) {
-      document.addEventListener("pointerdown", handleClickOutside);
+      document.addEventListener('pointerdown', handleClickOutside);
     }
-    return () => document.removeEventListener("pointerdown", handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
   }, [isOpen]);
 
   return (

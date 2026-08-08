@@ -1,24 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { generateImage, generateI2I, uploadFile } from "../apiClient.js";
-import { formatErrorMessage } from "../utils/formatError.js";
-import { scopedPersistKey, migrateLegacyPersistKey } from "../persistKey.js";
-import { useStudioPersistedState } from "../hooks/useStudioPersistedState.js";
-import DrawModal from "./DrawModal.jsx";
-import MobileGenerationActions, {
-  GenerationCopyButtons,
-} from "./MobileGenerationActions.jsx";
-import AdvancedOptionsPanel from "./AdvancedOptionsPanel.jsx";
-import { UploadButton } from "./UploadButton.jsx";
-import { ModelDropdown, PROVIDER_LOGOS, invertLogos } from "./ModelDropdown.jsx";
-import { SettingsContext } from "../contexts/SettingsContext.jsx";
-import QuickToolsPanel from "./QuickToolsPanel.jsx";
-import { StudioGallery } from "./shared/StudioGallery.jsx";
-import { EmptyStateHero } from "./shared/EmptyStateHero.jsx";
-import { localAI, isLocalAIAvailable } from "../../../../src/lib/localInferenceClient.js";
-import { LOCAL_MODEL_CATALOG, getLocalModelById } from "../../../../src/lib/localModels.js";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { generateImage, generateI2I, uploadFile } from '../apiClient.js';
+import { formatErrorMessage } from '../utils/formatError.js';
+import { scopedPersistKey, migrateLegacyPersistKey } from '../persistKey.js';
+import { useStudioPersistedState } from '../hooks/useStudioPersistedState.js';
+import DrawModal from './DrawModal.jsx';
+import MobileGenerationActions, { GenerationCopyButtons } from './MobileGenerationActions.jsx';
+import AdvancedOptionsPanel from './AdvancedOptionsPanel.jsx';
+import { UploadButton } from './UploadButton.jsx';
+import { ModelDropdown, PROVIDER_LOGOS, invertLogos } from './ModelDropdown.jsx';
+import { SettingsContext } from '../contexts/SettingsContext.jsx';
+import QuickToolsPanel from './QuickToolsPanel.jsx';
+import { StudioGallery } from './shared/StudioGallery.jsx';
+import { EmptyStateHero } from './shared/EmptyStateHero.jsx';
+import { localAI, isLocalAIAvailable } from '../../../../src/lib/localInferenceClient.js';
+import { LOCAL_MODEL_CATALOG, getLocalModelById } from '../../../../src/lib/localModels.js';
 import {
   t2iModels,
   i2iModels,
@@ -32,7 +30,7 @@ import {
   getEffectsForI2IModel,
   getDefaultEffectForI2IModel,
   getI2IModelById,
-} from "../models.js";
+} from '../models.js';
 import {
   PROMPT_CONTROL_LABEL_CLASS,
   PROMPT_MEDIA_PREVIEW_CLASS,
@@ -50,7 +48,7 @@ import {
   PromptTextarea,
   promptControlClassName,
   promptMediaButtonClassName,
-} from "./prompt/PromptComposer.jsx";
+} from './prompt/PromptComposer.jsx';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -59,7 +57,7 @@ async function downloadImage(url, filename) {
     const response = await fetch(url);
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = blobUrl;
     a.download = filename;
     document.body.appendChild(a);
@@ -67,11 +65,9 @@ async function downloadImage(url, filename) {
     document.body.removeChild(a);
     URL.revokeObjectURL(blobUrl);
   } catch {
-    window.open(url, "_blank");
+    window.open(url, '_blank');
   }
 }
-
-
 
 // ─── SimpleDropdown ───────────────────────────────────────────────────────────
 
@@ -110,7 +106,7 @@ export default function ImageStudio({
   droppedFiles,
   onFilesHandled,
 }) {
-  const LEGACY_PERSIST_KEY = "hg_image_studio_persistent";
+  const LEGACY_PERSIST_KEY = 'hg_image_studio_persistent';
   const PERSIST_KEY = scopedPersistKey(LEGACY_PERSIST_KEY, apiKey);
   useEffect(() => {
     migrateLegacyPersistKey(LEGACY_PERSIST_KEY, PERSIST_KEY);
@@ -120,18 +116,16 @@ export default function ImageStudio({
   const [imageMode, setImageMode] = useState(false); // false=t2i, true=i2i
   const [selectedModelId, setSelectedModelId] = useState(t2iModels[0].id);
   const [selectedModelName, setSelectedModelName] = useState(t2iModels[0].name);
-  const [selectedAr, setSelectedAr] = useState(
-    t2iModels[0].inputs?.aspect_ratio?.default || "1:1",
-  );
+  const [selectedAr, setSelectedAr] = useState(t2iModels[0].inputs?.aspect_ratio?.default || '1:1');
   const [selectedQuality, setSelectedQuality] = useState(() => {
     const resolutions = getResolutionsForModel(t2iModels[0].id);
     return resolutions[0] || null;
   });
-  const [selectedEffect, setSelectedEffect] = useState("");
+  const [selectedEffect, setSelectedEffect] = useState('');
   const [maxImages, setMaxImages] = useState(1);
 
   // ── Local AI State ──────────────────────────────────────────────────────
-  const LOCAL_IMAGE_MODELS = LOCAL_MODEL_CATALOG.filter(m => m.type !== 'video');
+  const LOCAL_IMAGE_MODELS = LOCAL_MODEL_CATALOG.filter((m) => m.type !== 'video');
   const [useLocalModel, setUseLocalModel] = useState(false);
   const [selectedLocalModel, setSelectedLocalModel] = useState(LOCAL_IMAGE_MODELS[0]?.id || null);
   const [localGenProgress, setLocalGenProgress] = useState(0);
@@ -139,19 +133,19 @@ export default function ImageStudio({
   // ── Advanced Options State ──────────────────────────────────────────────
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showToolsPanel, setShowToolsPanel] = useState(false);
-  const [negativePrompt, setNegativePrompt] = useState("");
+  const [negativePrompt, setNegativePrompt] = useState('');
   const [guidanceScale, setGuidanceScale] = useState(7.5);
   const [steps, setSteps] = useState(25);
   const [seed, setSeed] = useState(-1);
-  const [selectedStyle, setSelectedStyle] = useState("None");
+  const [selectedStyle, setSelectedStyle] = useState('None');
   const [customWidth, setCustomWidth] = useState(0);
   const [customHeight, setCustomHeight] = useState(0);
   const [referenceStrength, setReferenceStrength] = useState(50);
-  const [selectedLora, setSelectedLora] = useState("");
+  const [selectedLora, setSelectedLora] = useState('');
   const [loraWeight, setLoraWeight] = useState(1.0);
 
   // ── Prompt / upload state ───────────────────────────────────────────────
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState('');
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
   const [swapImageUrl, setSwapImageUrl] = useState(null);
   const [uploadHistory, setUploadHistory] = useState([]); // persisted reference images history
@@ -185,29 +179,64 @@ export default function ImageStudio({
         setDropdownOpen(null);
       }
     };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
   }, [dropdownOpen]);
 
   // ── Persistence ──────────────────────────────────────────────────────────
   useStudioPersistedState(
     PERSIST_KEY,
     {
-      imageMode, selectedModelId, selectedModelName, selectedAr, selectedQuality,
-      selectedEffect, maxImages, prompt, uploadedImageUrls, uploadHistory,
-      batchSize, localHistory, useLocalModel, selectedLocalModel, negativePrompt,
-      guidanceScale, steps, seed, selectedStyle, customWidth, customHeight,
-      referenceStrength, selectedLora, loraWeight,
+      imageMode,
+      selectedModelId,
+      selectedModelName,
+      selectedAr,
+      selectedQuality,
+      selectedEffect,
+      maxImages,
+      prompt,
+      uploadedImageUrls,
+      uploadHistory,
+      batchSize,
+      localHistory,
+      useLocalModel,
+      selectedLocalModel,
+      negativePrompt,
+      guidanceScale,
+      steps,
+      seed,
+      selectedStyle,
+      customWidth,
+      customHeight,
+      referenceStrength,
+      selectedLora,
+      loraWeight,
     },
     {
-      imageMode: setImageMode, selectedModelId: setSelectedModelId, selectedModelName: setSelectedModelName,
-      selectedAr: setSelectedAr, selectedQuality: setSelectedQuality, selectedEffect: setSelectedEffect,
-      maxImages: setMaxImages, prompt: setPrompt, uploadedImageUrls: setUploadedImageUrls,
-      uploadHistory: setUploadHistory, batchSize: setBatchSize, localHistory: setLocalHistory,
-      useLocalModel: setUseLocalModel, selectedLocalModel: setSelectedLocalModel, negativePrompt: setNegativePrompt,
-      guidanceScale: setGuidanceScale, steps: setSteps, seed: setSeed, selectedStyle: setSelectedStyle,
-      customWidth: setCustomWidth, customHeight: setCustomHeight, referenceStrength: setReferenceStrength,
-      selectedLora: setSelectedLora, loraWeight: setLoraWeight,
+      imageMode: setImageMode,
+      selectedModelId: setSelectedModelId,
+      selectedModelName: setSelectedModelName,
+      selectedAr: setSelectedAr,
+      selectedQuality: setSelectedQuality,
+      selectedEffect: setSelectedEffect,
+      maxImages: setMaxImages,
+      prompt: setPrompt,
+      uploadedImageUrls: setUploadedImageUrls,
+      uploadHistory: setUploadHistory,
+      batchSize: setBatchSize,
+      localHistory: setLocalHistory,
+      useLocalModel: setUseLocalModel,
+      selectedLocalModel: setSelectedLocalModel,
+      negativePrompt: setNegativePrompt,
+      guidanceScale: setGuidanceScale,
+      steps: setSteps,
+      seed: setSeed,
+      selectedStyle: setSelectedStyle,
+      customWidth: setCustomWidth,
+      customHeight: setCustomHeight,
+      referenceStrength: setReferenceStrength,
+      selectedLora: setSelectedLora,
+      loraWeight: setLoraWeight,
     }
   );
 
@@ -218,25 +247,20 @@ export default function ImageStudio({
     const tooLarge = files.filter((f) => f.size > MAX_IMAGE_SIZE);
     if (tooLarge.length > 0) {
       alert(
-        `The following images are too large (max 10MB): ${tooLarge.map((f) => f.name).join(", ")}`
+        `The following images are too large (max 10MB): ${tooLarge.map((f) => f.name).join(', ')}`
       );
       return;
     }
 
     setGenerating(true); // Show as generating/busy
     try {
-      const toUpload =
-        maxImages === 1 ? files.slice(0, 1) : files.slice(0, maxImages);
+      const toUpload = maxImages === 1 ? files.slice(0, 1) : files.slice(0, maxImages);
       const urls = await Promise.all(
         toUpload.map(async (file) => {
           try {
             return await uploadFile(apiKey, file);
           } catch (err) {
-            console.error(
-              "[ImageStudio] Drop upload failed for",
-              file.name,
-              err
-            );
+            console.error('[ImageStudio] Drop upload failed for', file.name, err);
             throw err;
           }
         })
@@ -253,7 +277,7 @@ export default function ImageStudio({
   // ── Handle Dropped Files ────────────────────────────────────────────────
   useEffect(() => {
     if (droppedFiles && droppedFiles.length > 0) {
-      const imageFiles = droppedFiles.filter(f => f.type.startsWith('image/'));
+      const imageFiles = droppedFiles.filter((f) => f.type.startsWith('image/'));
       if (imageFiles.length > 0) {
         processDroppedImages(imageFiles);
       }
@@ -292,15 +316,15 @@ export default function ImageStudio({
 
         // Hardcoded exceptions for models with irregular t2i → i2i naming
         const EXCEPTIONS = {
-          'reve-text-to-image':          'reve-image-edit',
-          'wan2.1-text-to-image':        'wan2.5-image-edit',   // no wan2.1 i2i — closest
-          'wan2.5-text-to-image':        'wan2.5-image-edit',
-          'wan2.6-text-to-image':        'wan2.6-image-edit',
-          'kling-o1-text-to-image':      'kling-o1-edit-image',
-          'vidu-q2-text-to-image':       'vidu-q2-reference-to-image',
-          'bytedance-seedream-v3':       'bytedance-seededit-v3',
-          'bytedance-seedream-v4':       'bytedance-seedream-edit-v4',
-          'ideogram-v3-t2i':             'ideogram-v3-reframe',
+          'reve-text-to-image': 'reve-image-edit',
+          'wan2.1-text-to-image': 'wan2.5-image-edit', // no wan2.1 i2i — closest
+          'wan2.5-text-to-image': 'wan2.5-image-edit',
+          'wan2.6-text-to-image': 'wan2.6-image-edit',
+          'kling-o1-text-to-image': 'kling-o1-edit-image',
+          'vidu-q2-text-to-image': 'vidu-q2-reference-to-image',
+          'bytedance-seedream-v3': 'bytedance-seededit-v3',
+          'bytedance-seedream-v4': 'bytedance-seedream-edit-v4',
+          'ideogram-v3-t2i': 'ideogram-v3-reframe',
         };
 
         const findI2I = (id) => i2iModels.find((m) => m.id === id) ?? null;
@@ -315,7 +339,8 @@ export default function ImageStudio({
           // 3. -t2i → -i2i (e.g. flux-kontext-dev-t2i → flux-kontext-dev-i2i)
           (curId.includes('-t2i') && findI2I(curId.replace('-t2i', '-i2i'))) ||
           // 4. text-to-image → image-to-image (e.g. gpt4o-text-to-image, midjourney-v7, grok-imagine)
-          (curId.includes('text-to-image') && findI2I(curId.replace('text-to-image', 'image-to-image'))) ||
+          (curId.includes('text-to-image') &&
+            findI2I(curId.replace('text-to-image', 'image-to-image'))) ||
           // 5. Prefix match fallback (e.g. minimax-image-01 → minimax-image-01-subject-reference)
           i2iModels.find((m) => m.id.startsWith(curId)) ||
           // 6. No sibling exists — use first i2i model
@@ -327,13 +352,15 @@ export default function ImageStudio({
         setImageMode(true);
         setSelectedModelId(target.id);
         setSelectedModelName(target.name);
-        setSelectedAr(ars[0] || "1:1");
+        setSelectedAr(ars[0] || '1:1');
         setSelectedQuality(resolutions[0] || null);
-        setSelectedEffect(effects.length > 0 ? (getDefaultEffectForI2IModel(target.id) || effects[0]) : "");
+        setSelectedEffect(
+          effects.length > 0 ? getDefaultEffectForI2IModel(target.id) || effects[0] : ''
+        );
         setMaxImages(getMaxImagesForI2IModel(target.id));
       }
     },
-    [imageMode, selectedModelId],
+    [imageMode, selectedModelId]
   );
 
   const handleUploadClear = useCallback(() => {
@@ -342,18 +369,18 @@ export default function ImageStudio({
 
     // Find the t2i parent of the currently selected i2i model (reverse of upload logic)
     const curId = selectedModelId;
-    const findT2I = (id) => id ? (t2iModels.find((m) => m.id === id) ?? null) : null;
+    const findT2I = (id) => (id ? (t2iModels.find((m) => m.id === id) ?? null) : null);
 
     // Reverse exceptions map (i2i → t2i for irregular names)
     const REVERSE_EXCEPTIONS = {
-      'reve-image-edit':               'reve-text-to-image',
-      'wan2.5-image-edit':             'wan2.5-text-to-image',
-      'wan2.6-image-edit':             'wan2.6-text-to-image',
-      'kling-o1-edit-image':           'kling-o1-text-to-image',
-      'vidu-q2-reference-to-image':    'vidu-q2-text-to-image',
-      'bytedance-seededit-v3':         'bytedance-seedream-v3',
-      'bytedance-seedream-edit-v4':    'bytedance-seedream-v4',
-      'ideogram-v3-reframe':           'ideogram-v3-t2i',
+      'reve-image-edit': 'reve-text-to-image',
+      'wan2.5-image-edit': 'wan2.5-text-to-image',
+      'wan2.6-image-edit': 'wan2.6-text-to-image',
+      'kling-o1-edit-image': 'kling-o1-text-to-image',
+      'vidu-q2-reference-to-image': 'vidu-q2-text-to-image',
+      'bytedance-seededit-v3': 'bytedance-seedream-v3',
+      'bytedance-seedream-edit-v4': 'bytedance-seedream-v4',
+      'ideogram-v3-reframe': 'ideogram-v3-t2i',
     };
 
     const target =
@@ -366,7 +393,8 @@ export default function ImageStudio({
       // 3. -i2i → -t2i (e.g. flux-kontext-dev-i2i → flux-kontext-dev-t2i)
       (curId.includes('-i2i') && findT2I(curId.replace('-i2i', '-t2i'))) ||
       // 4. image-to-image → text-to-image (e.g. gpt4o-image-to-image → gpt4o-text-to-image)
-      (curId.includes('image-to-image') && findT2I(curId.replace('image-to-image', 'text-to-image'))) ||
+      (curId.includes('image-to-image') &&
+        findT2I(curId.replace('image-to-image', 'text-to-image'))) ||
       // 5. No parent found — use first t2i model
       t2iModels[0];
 
@@ -374,9 +402,9 @@ export default function ImageStudio({
     const resolutions = getResolutionsForModel(target.id);
     setSelectedModelId(target.id);
     setSelectedModelName(target.name);
-    setSelectedAr(ars[0] || "1:1");
+    setSelectedAr(ars[0] || '1:1');
     setSelectedQuality(resolutions[0] || null);
-    setSelectedEffect("");
+    setSelectedEffect('');
     setMaxImages(1);
   }, [selectedModelId]);
 
@@ -385,27 +413,23 @@ export default function ImageStudio({
     if (useLocalModel) {
       setSelectedLocalModel(m.id);
       setSelectedModelName(m.name);
-      setSelectedAr(m.aspectRatios?.[0] || "1:1");
+      setSelectedAr(m.aspectRatios?.[0] || '1:1');
       return;
     }
 
-    const ars = imageMode
-      ? getAspectRatiosForI2IModel(m.id)
-      : getAspectRatiosForModel(m.id);
-    const resolutions = imageMode
-      ? getResolutionsForI2IModel(m.id)
-      : getResolutionsForModel(m.id);
+    const ars = imageMode ? getAspectRatiosForI2IModel(m.id) : getAspectRatiosForModel(m.id);
+    const resolutions = imageMode ? getResolutionsForI2IModel(m.id) : getResolutionsForModel(m.id);
     setSelectedModelId(m.id);
     setSelectedModelName(m.name);
-    setSelectedAr(ars[0] || "1:1");
+    setSelectedAr(ars[0] || '1:1');
     setSelectedQuality(resolutions[0] || null);
     setSwapImageUrl(null);
     if (imageMode) {
       setMaxImages(getMaxImagesForI2IModel(m.id));
       const effects = getEffectsForI2IModel(m.id);
-      setSelectedEffect(effects.length > 0 ? (getDefaultEffectForI2IModel(m.id) || effects[0]) : "");
+      setSelectedEffect(effects.length > 0 ? getDefaultEffectForI2IModel(m.id) || effects[0] : '');
     } else {
-      setSelectedEffect("");
+      setSelectedEffect('');
     }
   };
 
@@ -418,14 +442,14 @@ export default function ImageStudio({
       setActiveHistoryIdx(0);
       setCurrentImageUrl(entry.url);
     },
-    [historyItems],
+    [historyItems]
   );
 
   // ── View state ─────────────────────────────────────
 
   const resetToPrompt = () => {
     setCurrentImageUrl(null);
-    setPrompt("");
+    setPrompt('');
     setUploadedImageUrls([]);
     setImageMode(false);
     const firstT2I = t2iModels[0];
@@ -433,9 +457,9 @@ export default function ImageStudio({
     const resolutions = getResolutionsForModel(firstT2I.id);
     setSelectedModelId(firstT2I.id);
     setSelectedModelName(firstT2I.name);
-    setSelectedAr(ars[0] || "1:1");
+    setSelectedAr(ars[0] || '1:1');
     setSelectedQuality(resolutions[0] || null);
-    setSelectedEffect("");
+    setSelectedEffect('');
     setMaxImages(1);
   };
 
@@ -445,17 +469,17 @@ export default function ImageStudio({
 
     if (imageMode) {
       if (uploadedImageUrls.length === 0) {
-        alert("Please upload a reference image first.");
+        alert('Please upload a reference image first.');
         return;
       }
       const modelInfo = getI2IModelById(selectedModelId);
       if (modelInfo?.swapField && !swapImageUrl) {
-        alert("Please upload a swap face image.");
+        alert('Please upload a swap face image.');
         return;
       }
     } else {
       if (!prompt.trim()) {
-        alert("Please enter a prompt to generate an image.");
+        alert('Please enter a prompt to generate an image.');
         return;
       }
     }
@@ -473,24 +497,27 @@ export default function ImageStudio({
                 const pct = Math.round((progress ?? 0) * 100);
                 setLocalGenProgress(pct);
               });
-              
-              localAI.generate({
-                model: selectedLocalModel,
-                prompt: prompt.trim(),
-                negative_prompt: negativePrompt || undefined,
-                aspect_ratio: selectedAr,
-                steps: steps,
-                guidance_scale: guidanceScale,
-                seed,
-              }).then(res => {
-                unsub();
-                setLocalGenProgress(0);
-                resolve(res);
-              }).catch(err => {
-                unsub();
-                setLocalGenProgress(0);
-                reject(err);
-              });
+
+              localAI
+                .generate({
+                  model: selectedLocalModel,
+                  prompt: prompt.trim(),
+                  negative_prompt: negativePrompt || undefined,
+                  aspect_ratio: selectedAr,
+                  steps: steps,
+                  guidance_scale: guidanceScale,
+                  seed,
+                })
+                .then((res) => {
+                  unsub();
+                  setLocalGenProgress(0);
+                  resolve(res);
+                })
+                .catch((err) => {
+                  unsub();
+                  setLocalGenProgress(0);
+                  reject(err);
+                });
             });
           }
 
@@ -560,13 +587,13 @@ export default function ImageStudio({
             url: res.url,
             model: useLocalModel ? `local:${selectedLocalModel}` : selectedModelId,
             prompt: prompt.trim(),
-            type: "image",
+            type: 'image',
           });
         }
       });
     } catch (e) {
-      console.error("[ImageStudio] Generation failed:", e);
-      const errMsg = formatErrorMessage(e, "Image generation failed");
+      console.error('[ImageStudio] Generation failed:', e);
+      const errMsg = formatErrorMessage(e, 'Image generation failed');
       if (onGenerationError) onGenerationError(errMsg);
       else toast.error(errMsg);
     } finally {
@@ -579,26 +606,27 @@ export default function ImageStudio({
     uploadedImageUrls.length > 1
       ? `${uploadedImageUrls.length} images selected — describe the transformation (optional)`
       : imageMode
-        ? "Describe how to transform this image (optional)"
-        : "Describe the image you want to create";
+        ? 'Describe how to transform this image (optional)'
+        : 'Describe the image you want to create';
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-app-bg relative p-4 md:p-6 overflow-hidden">
-      
       {/* ── CENTRAL GALLERY AREA ── */}
       <div className="flex-1 w-full max-w-7xl mx-auto overflow-y-auto custom-scrollbar pb-40 lg:pb-32 px-2">
         {history.length > 0 ? (
-          <StudioGallery 
+          <StudioGallery
             history={history}
             onSelectFullscreen={setFullscreenUrl}
-            onDownload={(entry, idx) => downloadImage(entry.url, `Local API-${entry.id || idx}.jpg`)}
-            onDelete={(entry, idx) => setLocalHistory(prev => prev.filter((_, i) => i !== idx))}
+            onDownload={(entry, idx) =>
+              downloadImage(entry.url, `Local API-${entry.id || idx}.jpg`)
+            }
+            onDelete={(entry, idx) => setLocalHistory((prev) => prev.filter((_, i) => i !== idx))}
             onCopyError={onGenerationError}
             studioName="Image Studio"
           />
         ) : (
-          <EmptyStateHero 
+          <EmptyStateHero
             selectedModelName={selectedModelName}
             title="START CREATING WITH"
             subtitle="Describe a scene, character, mood, or style — and watch it come to life"
@@ -609,14 +637,14 @@ export default function ImageStudio({
       {/* ── PANELS ── */}
       <div className="w-full max-w-4xl mx-auto px-4 z-10 flex flex-col gap-4 mb-4">
         {showToolsPanel && (
-          <QuickToolsPanel 
+          <QuickToolsPanel
             onClose={() => setShowToolsPanel(false)}
             onSelectStarter={(p) => setPrompt(p)}
             onUseEnhancedPrompt={(p) => setPrompt(p)}
           />
         )}
         {showAdvanced && (
-          <AdvancedOptionsPanel 
+          <AdvancedOptionsPanel
             onClose={() => setShowAdvanced(false)}
             selectedStyle={selectedStyle}
             setSelectedStyle={setSelectedStyle}
@@ -647,11 +675,13 @@ export default function ImageStudio({
 
       {/* ── BOTTOM PROMPT BAR ── */}
       <PromptComposer>
-          {/* Top row: upload picker + textarea */}
-          <div className="flex flex-col gap-3">
-            {/* Inline list of uploaded files */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {uploadedImageUrls && uploadedImageUrls.length > 0 && uploadedImageUrls.map((url, idx) => (
+        {/* Top row: upload picker + textarea */}
+        <div className="flex flex-col gap-3">
+          {/* Inline list of uploaded files */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {uploadedImageUrls &&
+              uploadedImageUrls.length > 0 &&
+              uploadedImageUrls.map((url, idx) => (
                 <div key={url} className={PROMPT_MEDIA_PREVIEW_CLASS}>
                   <img src={url} alt="" className="w-full h-full object-cover" />
                   <button
@@ -667,292 +697,309 @@ export default function ImageStudio({
                   </button>
                 </div>
               ))}
-              
-              {/* Main Upload Trigger */}
-              {uploadedImageUrls.length < maxImages && (
-                <UploadButton
-                  apiKey={apiKey}
-                  maxImages={maxImages}
-                  onSelect={handleUploadSelect}
-                  onClear={handleUploadClear}
-                  initialUrls={uploadedImageUrls}
-                  persistedHistory={uploadHistory}
-                  onHistoryChange={setUploadHistory}
-                />
-              )}
 
-              {/* Swap Image Upload Trigger */}
-              {imageMode && getI2IModelById(selectedModelId)?.swapField && (
-                <UploadButton
-                  apiKey={apiKey}
-                  maxImages={1}
-                  onSelect={({ urls }) => setSwapImageUrl(urls[0] || null)}
-                  onClear={() => setSwapImageUrl(null)}
-                  initialUrls={swapImageUrl ? [swapImageUrl] : []}
-                  label="Swap Face"
-                />
+            {/* Main Upload Trigger */}
+            {uploadedImageUrls.length < maxImages && (
+              <UploadButton
+                apiKey={apiKey}
+                maxImages={maxImages}
+                onSelect={handleUploadSelect}
+                onClear={handleUploadClear}
+                initialUrls={uploadedImageUrls}
+                persistedHistory={uploadHistory}
+                onHistoryChange={setUploadHistory}
+              />
+            )}
+
+            {/* Swap Image Upload Trigger */}
+            {imageMode && getI2IModelById(selectedModelId)?.swapField && (
+              <UploadButton
+                apiKey={apiKey}
+                maxImages={1}
+                onSelect={({ urls }) => setSwapImageUrl(urls[0] || null)}
+                onClear={() => setSwapImageUrl(null)}
+                initialUrls={swapImageUrl ? [swapImageUrl] : []}
+                label="Swap Face"
+              />
+            )}
+          </div>
+
+          {/* Input prompt text area */}
+          <PromptTextarea
+            ref={textareaRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder={placeholderText}
+          />
+        </div>
+
+        {/* Bottom row: controls + generate */}
+        <PromptFooter>
+          {/* Left controls */}
+          <PromptControls ref={dropdownRef}>
+            {/* Local AI Toggle (Only if available) */}
+            {isLocalAIAvailable() && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const nextUseLocal = !useLocalModel;
+                  setUseLocalModel(nextUseLocal);
+                  if (nextUseLocal) {
+                    const lm = getLocalModelById(selectedLocalModel);
+                    if (lm) setSelectedModelName(lm.name);
+                  } else {
+                    const apiModel = currentModels.find((m) => m.id === selectedModelId);
+                    if (apiModel) setSelectedModelName(apiModel.name);
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border text-xs font-bold whitespace-nowrap ${useLocalModel ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-white/5 border-white/5 text-white/60 hover:bg-white/10'}`}
+              >
+                {useLocalModel ? 'Local' : 'API'}
+              </button>
+            )}
+
+            {/* Model button */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdownOpen((o) => (o === 'model' ? null : 'model'));
+                }}
+                className={promptControlClassName({
+                  active: dropdownOpen === 'model',
+                })}
+              >
+                <div className="w-4 h-4 rounded overflow-hidden shrink-0 flex items-center justify-center bg-white/5">
+                  {(() => {
+                    const selectedModelObj = currentModels.find((m) => m.id === selectedModelId);
+                    const selectedModelProvider = selectedModelObj?.provider || 'Local API';
+                    return PROVIDER_LOGOS[selectedModelProvider] ? (
+                      <img
+                        src={PROVIDER_LOGOS[selectedModelProvider]}
+                        alt=""
+                        className={`w-full h-full object-contain ${invertLogos.includes(selectedModelProvider) ? 'invert' : ''}`}
+                      />
+                    ) : (
+                      <span className="text-[9px] font-bold text-black uppercase">G</span>
+                    );
+                  })()}
+                </div>
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedModelName}</span>
+                <PromptChevronIcon />
+              </button>
+
+              {dropdownOpen === 'model' && (
+                <PromptPopover
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-[calc(100vw-2rem)] md:w-[480px] max-w-md md:max-w-none max-h-[70vh]"
+                >
+                  <PromptPopoverHeader>Model</PromptPopoverHeader>
+                  <ModelDropdown
+                    models={useLocalModel ? LOCAL_IMAGE_MODELS : currentModels}
+                    selectedModel={useLocalModel ? selectedLocalModel : selectedModelId}
+                    onSelect={handleModelSelect}
+                    onClose={() => setDropdownOpen(null)}
+                    useLocalModel={useLocalModel}
+                  />
+                </PromptPopover>
               )}
             </div>
 
-            {/* Input prompt text area */}
-            <PromptTextarea
-              ref={textareaRef}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder={placeholderText}
-            />
-          </div>
+            {/* Aspect ratio button */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdownOpen((o) => (o === 'ar' ? null : 'ar'));
+                }}
+                className={promptControlClassName({
+                  active: dropdownOpen === 'ar',
+                })}
+              >
+                <PromptAspectRatioIcon />
+                <span className={PROMPT_CONTROL_LABEL_CLASS}>{selectedAr}</span>
+              </button>
 
-          {/* Bottom row: controls + generate */}
-          <PromptFooter>
-            {/* Left controls */}
-            <PromptControls ref={dropdownRef}>
-              {/* Local AI Toggle (Only if available) */}
-              {isLocalAIAvailable() && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const nextUseLocal = !useLocalModel;
-                    setUseLocalModel(nextUseLocal);
-                    if (nextUseLocal) {
-                      const lm = getLocalModelById(selectedLocalModel);
-                      if (lm) setSelectedModelName(lm.name);
-                    } else {
-                      const apiModel = currentModels.find(m => m.id === selectedModelId);
-                      if (apiModel) setSelectedModelName(apiModel.name);
-                    }
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all border text-xs font-bold whitespace-nowrap ${useLocalModel ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-white/5 border-white/5 text-white/60 hover:bg-white/10'}`}
-                >
-                  {useLocalModel ? 'Local' : 'API'}
-                </button>
+              {dropdownOpen === 'ar' && (
+                <PromptPopover onClick={(e) => e.stopPropagation()}>
+                  <SimpleDropdown
+                    title="Aspect Ratio"
+                    options={currentAspectRatios}
+                    selected={selectedAr}
+                    onSelect={(val) => setSelectedAr(val)}
+                    onClose={() => setDropdownOpen(null)}
+                  />
+                </PromptPopover>
               )}
+            </div>
 
-              {/* Model button */}
+            {/* Quality/resolution button (represented as Diamond icon) */}
+            {showQualityBtn && (
               <div className="relative">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setDropdownOpen((o) => (o === "model" ? null : "model"));
+                    setDropdownOpen((o) => (o === 'quality' ? null : 'quality'));
                   }}
                   className={promptControlClassName({
-                    active: dropdownOpen === "model",
+                    active: dropdownOpen === 'quality',
                   })}
                 >
-                  <div className="w-4 h-4 rounded overflow-hidden shrink-0 flex items-center justify-center bg-white/5">
-                    {(() => {
-                      const selectedModelObj = currentModels.find(m => m.id === selectedModelId);
-                      const selectedModelProvider = selectedModelObj?.provider || 'Local API';
-                      return PROVIDER_LOGOS[selectedModelProvider] ? (
-                        <img 
-                          src={PROVIDER_LOGOS[selectedModelProvider]} 
-                          alt="" 
-                          className={`w-full h-full object-contain ${invertLogos.includes(selectedModelProvider) ? "invert" : ""}`} 
-                        />
-                      ) : (
-                        <span className="text-[9px] font-bold text-black uppercase">G</span>
-                      );
-                    })()}
-                  </div>
+                  <PromptQualityIcon />
                   <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {selectedModelName}
-                  </span>
-                  <PromptChevronIcon />
-                </button>
-
-                {dropdownOpen === "model" && (
-                  <PromptPopover
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-[calc(100vw-2rem)] md:w-[480px] max-w-md md:max-w-none max-h-[70vh]"
-                  >
-                    <PromptPopoverHeader>Model</PromptPopoverHeader>
-                    <ModelDropdown
-                      models={useLocalModel ? LOCAL_IMAGE_MODELS : currentModels}
-                      selectedModel={useLocalModel ? selectedLocalModel : selectedModelId}
-                      onSelect={handleModelSelect}
-                      onClose={() => setDropdownOpen(null)}
-                      useLocalModel={useLocalModel}
-                    />
-                  </PromptPopover>
-                )}
-              </div>
-
-              {/* Aspect ratio button */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDropdownOpen((o) => (o === "ar" ? null : "ar"));
-                  }}
-                  className={promptControlClassName({
-                    active: dropdownOpen === "ar",
-                  })}
-                >
-                  <PromptAspectRatioIcon />
-                  <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                    {selectedAr}
+                    {selectedQuality || currentResolutions[0]}
                   </span>
                 </button>
 
-                {dropdownOpen === "ar" && (
-                  <PromptPopover
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                {dropdownOpen === 'quality' && (
+                  <PromptPopover onClick={(e) => e.stopPropagation()}>
                     <SimpleDropdown
-                      title="Aspect Ratio"
-                      options={currentAspectRatios}
-                      selected={selectedAr}
-                      onSelect={(val) => setSelectedAr(val)}
+                      title="Resolution"
+                      options={currentResolutions}
+                      selected={selectedQuality}
+                      onSelect={(val) => setSelectedQuality(val)}
                       onClose={() => setDropdownOpen(null)}
                     />
                   </PromptPopover>
                 )}
               </div>
+            )}
 
-              {/* Quality/resolution button (represented as Diamond icon) */}
-              {showQualityBtn && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDropdownOpen((o) => (o === "quality" ? null : "quality"));
-                    }}
-                    className={promptControlClassName({
-                      active: dropdownOpen === "quality",
-                    })}
+            {/* Effect type button */}
+            {showEffectBtn && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDropdownOpen((o) => (o === 'effect' ? null : 'effect'));
+                  }}
+                  className={promptControlClassName({
+                    active: dropdownOpen === 'effect',
+                  })}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="opacity-40 text-white"
                   >
-                    <PromptQualityIcon />
-                    <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                      {selectedQuality || currentResolutions[0]}
-                    </span>
-                  </button>
+                    <path d="M5 3l14 9-14 9V3z" />
+                  </svg>
+                  <span className={`${PROMPT_CONTROL_LABEL_CLASS} max-w-[140px] truncate`}>
+                    {selectedEffect || 'Effect'}
+                  </span>
+                </button>
 
-                  {dropdownOpen === "quality" && (
-                    <PromptPopover
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <SimpleDropdown
-                        title="Resolution"
-                        options={currentResolutions}
-                        selected={selectedQuality}
-                        onSelect={(val) => setSelectedQuality(val)}
-                        onClose={() => setDropdownOpen(null)}
-                      />
-                    </PromptPopover>
-                  )}
-                </div>
-              )}
+                {dropdownOpen === 'effect' && (
+                  <PromptPopover onClick={(e) => e.stopPropagation()} className="min-w-[200px]">
+                    <SimpleDropdown
+                      title="Effect Type"
+                      options={currentEffects}
+                      selected={selectedEffect}
+                      onSelect={(val) => setSelectedEffect(val)}
+                      onClose={() => setDropdownOpen(null)}
+                    />
+                  </PromptPopover>
+                )}
+              </div>
+            )}
 
-              {/* Effect type button */}
-              {showEffectBtn && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDropdownOpen((o) => (o === "effect" ? null : "effect"));
-                    }}
-                    className={promptControlClassName({
-                      active: dropdownOpen === "effect",
-                    })}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-40 text-white">
-                      <path d="M5 3l14 9-14 9V3z" />
-                    </svg>
-                    <span className={`${PROMPT_CONTROL_LABEL_CLASS} max-w-[140px] truncate`}>
-                      {selectedEffect || "Effect"}
-                    </span>
-                  </button>
-
-                  {dropdownOpen === "effect" && (
-                    <PromptPopover
-                      onClick={(e) => e.stopPropagation()}
-                      className="min-w-[200px]"
-                    >
-                      <SimpleDropdown
-                        title="Effect Type"
-                        options={currentEffects}
-                        selected={selectedEffect}
-                        onSelect={(val) => setSelectedEffect(val)}
-                        onClose={() => setDropdownOpen(null)}
-                      />
-                    </PromptPopover>
-                  )}
-                </div>
-              )}
-
-              {/* Tools button */}
-              <button
-                type="button"
-                className={promptControlClassName({ active: showToolsPanel })}
-                onClick={() => {
-                  setShowToolsPanel(!showToolsPanel);
-                  if (!showToolsPanel && showAdvanced) setShowAdvanced(false);
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60 text-secondary">
-                  <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-                </svg>
-                <span className={PROMPT_CONTROL_LABEL_CLASS}>Tools</span>
-              </button>
-
-              {/* Advanced button */}
-              <button
-                type="button"
-                className={promptControlClassName({ active: showAdvanced })}
-                onClick={() => {
-                  setShowAdvanced(!showAdvanced);
-                  if (!showAdvanced && showToolsPanel) setShowToolsPanel(false);
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60 text-secondary">
-                  <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 001.82-.33 1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-1.82.33A1.65 1.65 0 0019.4 9a1.65 1.65 0 00-1.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-                </svg>
-                <span className={PROMPT_CONTROL_LABEL_CLASS}>Advanced</span>
-              </button>
-
-              {/* Draw button */}
-              <button
-                type="button"
-                className={promptControlClassName()}
-                onClick={() => setIsDrawModalOpen(true)}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-40 text-white group-hover:text-primary transition-colors">
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
-                <span className={PROMPT_CONTROL_LABEL_CLASS}>
-                  Draw
-                </span>
-              </button>
-            </PromptControls>
-
-            {/* Generate button */}
-            <PromptAction
-              onClick={handleGenerate}
-              disabled={generating}
+            {/* Tools button */}
+            <button
+              type="button"
+              className={promptControlClassName({ active: showToolsPanel })}
+              onClick={() => {
+                setShowToolsPanel(!showToolsPanel);
+                if (!showToolsPanel && showAdvanced) setShowAdvanced(false);
+              }}
             >
-              {generating ? (
-                <>
-                  <span className="animate-spin inline-block text-black">◌</span>
-                  {useLocalModel && localGenProgress > 0 ? `${localGenProgress}%` : 'Generating...'}
-                </>
-              ) : (
-                <>
-                  <span>Generate ✦</span>
-                </>
-              )}
-            </PromptAction>
-          </PromptFooter>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="opacity-60 text-secondary"
+              >
+                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+              </svg>
+              <span className={PROMPT_CONTROL_LABEL_CLASS}>Tools</span>
+            </button>
+
+            {/* Advanced button */}
+            <button
+              type="button"
+              className={promptControlClassName({ active: showAdvanced })}
+              onClick={() => {
+                setShowAdvanced(!showAdvanced);
+                if (!showAdvanced && showToolsPanel) setShowToolsPanel(false);
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="opacity-60 text-secondary"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 001.82-.33 1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-1.82.33A1.65 1.65 0 0019.4 9a1.65 1.65 0 00-1.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+              </svg>
+              <span className={PROMPT_CONTROL_LABEL_CLASS}>Advanced</span>
+            </button>
+
+            {/* Draw button */}
+            <button
+              type="button"
+              className={promptControlClassName()}
+              onClick={() => setIsDrawModalOpen(true)}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="opacity-40 text-white group-hover:text-primary transition-colors"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+              <span className={PROMPT_CONTROL_LABEL_CLASS}>Draw</span>
+            </button>
+          </PromptControls>
+
+          {/* Generate button */}
+          <PromptAction onClick={handleGenerate} disabled={generating}>
+            {generating ? (
+              <>
+                <span className="animate-spin inline-block text-black">◌</span>
+                {useLocalModel && localGenProgress > 0 ? `${localGenProgress}%` : 'Generating...'}
+              </>
+            ) : (
+              <>
+                <span>Generate ✦</span>
+              </>
+            )}
+          </PromptAction>
+        </PromptFooter>
       </PromptComposer>
 
       {/* ── FULLSCREEN IMAGE MODAL ── */}
       {fullscreenUrl && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-fade-in"
           onClick={() => setFullscreenUrl(null)}
         >
@@ -964,15 +1011,24 @@ export default function ImageStudio({
               setFullscreenUrl(null);
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <img 
-            src={fullscreenUrl} 
-            alt="Fullscreen Preview" 
-            className="max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl object-contain animate-scale-up" 
+          <img
+            src={fullscreenUrl}
+            alt="Fullscreen Preview"
+            className="max-w-[95vw] max-h-[95vh] rounded-2xl shadow-2xl object-contain animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -986,7 +1042,6 @@ export default function ImageStudio({
         batchSize={1}
         onAddHistoryItem={addToHistory}
       />
-
     </div>
   );
 }

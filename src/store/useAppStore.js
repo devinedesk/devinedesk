@@ -35,11 +35,11 @@ export const useAppStore = create(
       name: 'devinedesk-app-storage',
       partialize: (state) => ({
         theme: state.theme,
-        isSidebarOpen: state.isSidebarOpen
+        isSidebarOpen: state.isSidebarOpen,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
-      }
+      },
     }
   )
 );

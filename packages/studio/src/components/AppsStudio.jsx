@@ -1,67 +1,90 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  FaUserTie, FaImage, FaMagic, FaVideo, FaFileAlt, 
-  FaBriefcase, FaHome, FaMicrophone, FaHandSparkles, FaBuilding,
-  FaUserInjured, FaStethoscope, FaCar, FaPaw, FaBalanceScale, FaTruck, FaMapMarkerAlt,
-  FaGithub, FaExternalLinkAlt, FaDollarSign, FaRocket, FaCreditCard 
-} from "react-icons/fa";
+import {
+  FaUserTie,
+  FaImage,
+  FaMagic,
+  FaVideo,
+  FaFileAlt,
+  FaBriefcase,
+  FaHome,
+  FaMicrophone,
+  FaHandSparkles,
+  FaBuilding,
+  FaUserInjured,
+  FaStethoscope,
+  FaCar,
+  FaPaw,
+  FaBalanceScale,
+  FaTruck,
+  FaMapMarkerAlt,
+  FaGithub,
+  FaExternalLinkAlt,
+  FaDollarSign,
+  FaRocket,
+  FaCreditCard,
+} from 'react-icons/fa';
 import { registerAppInterest, getAppInterests } from '../apiClient.js';
 import toast, { Toaster } from 'react-hot-toast';
 import { Button } from '../../../../components/ui/Button.jsx';
 
 const templateApps = [
   {
-    name: "AI Headshot Studio",
-    description: "Launch a headshot SaaS in minutes. Charge $5–$20 per set, keep all profits. Stripe payments & user accounts included.",
+    name: 'AI Headshot Studio',
+    description:
+      'Launch a headshot SaaS in minutes. Charge $5–$20 per set, keep all profits. Stripe payments & user accounts included.',
     icon: FaUserTie,
-    color: "blue",
-    repo: "https://github.com/SamurAIGPT/ai-headshot-generator",
-    hosted: "https://ai-headshot-generator-xi.vercel.app/",
-    thumbnail: "https://cdn.api.ai/apps/d9c39378f60e48098f6b6ce657dc18b5.png",
-    isTemplate: true
+    color: 'blue',
+    repo: 'https://github.com/SamurAIGPT/ai-headshot-generator',
+    hosted: 'https://ai-headshot-generator-xi.vercel.app/',
+    thumbnail: 'https://cdn.api.ai/apps/d9c39378f60e48098f6b6ce657dc18b5.png',
+    isTemplate: true,
   },
   {
-    name: "Nano Banana Studio",
-    description: "Your own AI image generation platform, ready to monetize. Add credit packs or subscriptions and start earning from day one.",
+    name: 'Nano Banana Studio',
+    description:
+      'Your own AI image generation platform, ready to monetize. Add credit packs or subscriptions and start earning from day one.',
     icon: FaHandSparkles,
-    color: "amber",
-    repo: "https://github.com/SamurAIGPT/nano-banana-generator",
-    hosted: "https://nano-banana-generator-psi.vercel.app",
-    thumbnail: "https://cdn.api.ai/data/2/874086171651/Screenshot_2026-04-15_103743.png",
-    isTemplate: true
+    color: 'amber',
+    repo: 'https://github.com/SamurAIGPT/nano-banana-generator',
+    hosted: 'https://nano-banana-generator-psi.vercel.app',
+    thumbnail: 'https://cdn.api.ai/data/2/874086171651/Screenshot_2026-04-15_103743.png',
+    isTemplate: true,
   },
   {
-    name: "Seedance V2 Studio",
-    description: "Deploy a premium AI art studio and sell access to users. Full Stripe integration lets you collect revenue immediately after launch.",
+    name: 'Seedance V2 Studio',
+    description:
+      'Deploy a premium AI art studio and sell access to users. Full Stripe integration lets you collect revenue immediately after launch.',
     icon: FaMagic,
-    color: "purple",
-    repo: "https://github.com/SamurAIGPT/seedance-2-generator",
-    hosted: "https://seedance-2-generator.vercel.app/",
-    thumbnail: "https://cdn.api.ai/apps/4cd1f49d48934d448e7f493f9d5e476e.png",
-    isTemplate: true
+    color: 'purple',
+    repo: 'https://github.com/SamurAIGPT/seedance-2-generator',
+    hosted: 'https://seedance-2-generator.vercel.app/',
+    thumbnail: 'https://cdn.api.ai/apps/4cd1f49d48934d448e7f493f9d5e476e.png',
+    isTemplate: true,
   },
   {
-    name: "AI Clipping Studio",
-    description: "Launch your own AI-powered video clipping SaaS. Download YouTube videos and extract viral highlights with ease.",
+    name: 'AI Clipping Studio',
+    description:
+      'Launch your own AI-powered video clipping SaaS. Download YouTube videos and extract viral highlights with ease.',
     icon: FaVideo,
-    color: "emerald",
-    repo: "https://github.com/SamurAIGPT/ai-clipping-generator",
-    hosted: "https://ai-clipping-generator.vercel.app/",
-    thumbnail: "https://cdn.api.ai/data/2/883345778103/cca8b5bb-25f1-40fe-928e-53dce2c8c928.png",
-    isTemplate: true
+    color: 'emerald',
+    repo: 'https://github.com/SamurAIGPT/ai-clipping-generator',
+    hosted: 'https://ai-clipping-generator.vercel.app/',
+    thumbnail: 'https://cdn.api.ai/data/2/883345778103/cca8b5bb-25f1-40fe-928e-53dce2c8c928.png',
+    isTemplate: true,
   },
   {
-    name: "EasyVeo Studio",
-    description: "The complete Veo 3.1 video generation suite. Monetize text-to-video, image-to-video, and reference-to-video workflows with ease.",
+    name: 'EasyVeo Studio',
+    description:
+      'The complete Veo 3.1 video generation suite. Monetize text-to-video, image-to-video, and reference-to-video workflows with ease.',
     icon: FaVideo,
-    color: "indigo",
-    repo: "https://github.com/SamurAIGPT/veo4-video-generator",
-    hosted: "https://veo4-video-generator.vercel.app/",
-    thumbnail: "https://cdn.api.ai/data/2/901343404247/94ac6d86-be4e-4b70-b1e6-96d7e3692604.png",
-    isTemplate: true
-  }
+    color: 'indigo',
+    repo: 'https://github.com/SamurAIGPT/veo4-video-generator',
+    hosted: 'https://veo4-video-generator.vercel.app/',
+    thumbnail: 'https://cdn.api.ai/data/2/901343404247/94ac6d86-be4e-4b70-b1e6-96d7e3692604.png',
+    isTemplate: true,
+  },
 ];
 
 export default function AppsStudio({ apiKey }) {
@@ -73,22 +96,22 @@ export default function AppsStudio({ apiKey }) {
     if (apiKey) {
       getAppInterests(apiKey)
         .then(setRequestedApps)
-        .catch(err => console.error("Error fetching interests:", err));
+        .catch((err) => console.error('Error fetching interests:', err));
     }
   }, [apiKey]);
 
   const handleRequestAccess = async () => {
     if (!selectedApp || !apiKey) return;
-    
+
     setIsRequesting(true);
     try {
       await registerAppInterest(apiKey, selectedApp.name);
-      setRequestedApps(prev => [...prev, selectedApp.name]);
+      setRequestedApps((prev) => [...prev, selectedApp.name]);
       toast.success("Got it! We'll send you the template details shortly.");
       setTimeout(() => setSelectedApp(null), 1500);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to register interest. Please try again later.");
+      toast.error('Failed to register interest. Please try again later.');
     } finally {
       setIsRequesting(false);
     }
@@ -97,17 +120,17 @@ export default function AppsStudio({ apiKey }) {
   const renderAppCard = (app, index = 0) => {
     // Premium Vibrant Gradients for placeholders
     const gradients = [
-      "from-blue-600/20 to-indigo-600/20",
-      "from-purple-600/20 to-pink-600/20",
-      "from-amber-500/20 to-orange-600/20",
-      "from-emerald-500/20 to-teal-600/20",
-      "from-rose-500/20 to-red-600/20",
-      "from-cyan-500/20 to-blue-600/20",
+      'from-blue-600/20 to-indigo-600/20',
+      'from-purple-600/20 to-pink-600/20',
+      'from-amber-500/20 to-orange-600/20',
+      'from-emerald-500/20 to-teal-600/20',
+      'from-rose-500/20 to-red-600/20',
+      'from-cyan-500/20 to-blue-600/20',
     ];
     const cardGradient = gradients[index % gradients.length];
-    
+
     return (
-      <div 
+      <div
         key={app.name}
         className="group bg-panel-bg border border-white/5 rounded-lg flex flex-col overflow-hidden transition-all duration-300 hover:border-white/10 hover:bg-[#0f0f0f] hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1"
       >
@@ -120,8 +143,12 @@ export default function AppsStudio({ apiKey }) {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
-            <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${cardGradient} transition-colors group-hover:scale-110 duration-700`}>
-              <app.icon className={`text-4xl opacity-20 group-hover:opacity-40 transition-opacity text-white`} />
+            <div
+              className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${cardGradient} transition-colors group-hover:scale-110 duration-700`}
+            >
+              <app.icon
+                className={`text-4xl opacity-20 group-hover:opacity-40 transition-opacity text-white`}
+              />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
@@ -134,33 +161,39 @@ export default function AppsStudio({ apiKey }) {
               <app.icon />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate">{app.name}</h3>
-              <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">{app.category || 'Template'}</p>
+              <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate">
+                {app.name}
+              </h3>
+              <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest">
+                {app.category || 'Template'}
+              </p>
             </div>
           </div>
-          
-          <p className="text-xs text-white/50 leading-relaxed font-medium line-clamp-2 min-h-[2.5rem]">{app.description}</p>
-          
+
+          <p className="text-xs text-white/50 leading-relaxed font-medium line-clamp-2 min-h-[2.5rem]">
+            {app.description}
+          </p>
+
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-2">
-                <a
-                  href={app.repo || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2 bg-white/5 text-white rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 transition-all border border-white/5 active:scale-95"
-                >
-                  <FaGithub className="text-xs" />
-                  Github
-                </a>
-                <a
-                  href={app.hosted || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 py-2 bg-primary/10 text-primary rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary/20 transition-all border border-primary/20 active:scale-95"
-                >
-                  <FaExternalLinkAlt className="text-[9px]" />
-                  Demo
-                </a>
+            <a
+              href={app.repo || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2 bg-white/5 text-white rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 transition-all border border-white/5 active:scale-95"
+            >
+              <FaGithub className="text-xs" />
+              Github
+            </a>
+            <a
+              href={app.hosted || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2 bg-primary/10 text-primary rounded-md text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary/20 transition-all border border-primary/20 active:scale-95"
+            >
+              <FaExternalLinkAlt className="text-[9px]" />
+              Demo
+            </a>
           </div>
         </div>
       </div>
@@ -169,21 +202,23 @@ export default function AppsStudio({ apiKey }) {
 
   return (
     <div className="h-full w-full flex flex-col items-center bg-app-bg overflow-y-auto custom-scrollbar relative">
-      
       <div className="flex flex-col gap-10 items-center w-full max-w-7xl pt-12 pb-24 px-6">
-        
         {/* Header Section */}
         <div className="text-center space-y-6 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
             <FaDollarSign className="text-primary text-xs" />
-            <span className="text-[10px] font-black text-primary uppercase tracking-widest">Revenue-Ready Templates</span>
+            <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+              Revenue-Ready Templates
+            </span>
           </div>
           <h1 className="text-5xl font-black text-white tracking-tighter leading-[0.9]">
-            LAUNCH AN AI APP.<br />START EARNING TODAY.
+            LAUNCH AN AI APP.
+            <br />
+            START EARNING TODAY.
           </h1>
           <p className="text-white/60 text-sm font-medium leading-relaxed max-w-xl mx-auto">
-            Each template is a fully-functional, Stripe-integrated AI SaaS you can deploy in minutes.
-            Charge your users, keep the revenue — app handles the AI infrastructure.
+            Each template is a fully-functional, Stripe-integrated AI SaaS you can deploy in
+            minutes. Charge your users, keep the revenue — app handles the AI infrastructure.
           </p>
         </div>
 
@@ -192,29 +227,34 @@ export default function AppsStudio({ apiKey }) {
           {[
             {
               icon: FaRocket,
-              step: "01",
-              title: "Deploy in Minutes",
-              body: "Fork the open-source template, add your app key, and push to Vercel. No backend setup needed."
+              step: '01',
+              title: 'Deploy in Minutes',
+              body: 'Fork the open-source template, add your app key, and push to Vercel. No backend setup needed.',
             },
             {
               icon: FaCreditCard,
-              step: "02",
-              title: "Collect Payments",
-              body: "Stripe is pre-wired. Set your own pricing — one-time credits, subscriptions, or pay-per-use."
+              step: '02',
+              title: 'Collect Payments',
+              body: 'Stripe is pre-wired. Set your own pricing — one-time credits, subscriptions, or pay-per-use.',
             },
             {
               icon: FaDollarSign,
-              step: "03",
-              title: "Keep the Revenue",
-              body: "Payments go straight to your Stripe account. You own the product, the brand, and the profits."
-            }
+              step: '03',
+              title: 'Keep the Revenue',
+              body: 'Payments go straight to your Stripe account. You own the product, the brand, and the profits.',
+            },
           ].map(({ icon: Icon, step, title, body }) => (
-            <div key={step} className="flex items-start gap-4 bg-panel-bg border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-colors">
+            <div
+              key={step}
+              className="flex items-start gap-4 bg-panel-bg border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-colors"
+            >
               <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5">
                 <Icon className="text-lg" />
               </div>
               <div>
-                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Step {step}</p>
+                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">
+                  Step {step}
+                </p>
                 <h3 className="text-sm font-bold text-white mb-1.5">{title}</h3>
                 <p className="text-xs text-white/60 leading-relaxed font-medium">{body}</p>
               </div>
@@ -231,7 +271,9 @@ export default function AppsStudio({ apiKey }) {
         <div className="pt-24 pb-12 flex flex-col items-center gap-4">
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/5">
             <span className="block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">Local API Ecosystem — More templates coming soon</span>
+            <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">
+              Local API Ecosystem — More templates coming soon
+            </span>
           </div>
         </div>
       </div>
@@ -239,7 +281,10 @@ export default function AppsStudio({ apiKey }) {
       {/* Get Template Modal */}
       {selectedApp && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedApp(null)} />
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in"
+            onClick={() => setSelectedApp(null)}
+          />
           <div className="relative bg-panel-bg border border-white/10 w-full max-w-md rounded-2xl p-8 space-y-8 animate-scale-up shadow-2xl">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="w-20 h-20 rounded-[28px] bg-primary/10 border border-primary/20 flex items-center justify-center text-4xl text-primary mb-2">
@@ -249,12 +294,13 @@ export default function AppsStudio({ apiKey }) {
                 Deploy {selectedApp.name}
               </h2>
               <p className="text-sm font-medium text-white/60 leading-relaxed px-4">
-                Enter your details and we&apos;ll send you the <b>{selectedApp.name}</b> template along with setup instructions so you can deploy and start earning immediately.
+                Enter your details and we&apos;ll send you the <b>{selectedApp.name}</b> template
+                along with setup instructions so you can deploy and start earning immediately.
               </p>
             </div>
 
             <div className="space-y-3">
-              <Button 
+              <Button
                 onClick={handleRequestAccess}
                 disabled={isRequesting}
                 variant="primary"
@@ -265,7 +311,7 @@ export default function AppsStudio({ apiKey }) {
               >
                 {isRequesting ? 'Sending Details...' : 'Get Template'}
               </Button>
-              <Button 
+              <Button
                 onClick={() => setSelectedApp(null)}
                 variant="ghost"
                 fullWidth
@@ -281,15 +327,29 @@ export default function AppsStudio({ apiKey }) {
 
       <style jsx global>{`
         @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         @keyframes scaleUp {
-          from { opacity: 0; transform: scale(0.95) translateY(10px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
         }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        .animate-scale-up { animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out;
+        }
+        .animate-scale-up {
+          animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
       `}</style>
     </div>
   );

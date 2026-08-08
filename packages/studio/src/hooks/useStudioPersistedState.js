@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 /**
  * A custom hook that abstracts the loading and debounced saving of a massive state object
  * to and from localStorage. This replaces the huge boilerplate useEffects in Studio components.
- * 
+ *
  * @param {string} key - The localStorage key
  * @param {Object} stateObject - The current state values as an object
  * @param {Object} setStateFunctions - The corresponding setter functions for each state key
@@ -15,16 +15,15 @@ export function useStudioPersistedState(key, stateObject, setStateFunctions) {
       const stored = localStorage.getItem(key);
       if (stored) {
         const data = JSON.parse(stored);
-        Object.keys(data).forEach(k => {
+        Object.keys(data).forEach((k) => {
           if (data[k] !== undefined && setStateFunctions[k]) {
             setStateFunctions[k](data[k]);
           }
         });
       }
     } catch (err) {
-      console.warn("Failed to load studio persistence:", err);
+      console.warn('Failed to load studio persistence:', err);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]); // Only run on mount or key change
 
   // Persistence: Save
@@ -35,10 +34,9 @@ export function useStudioPersistedState(key, stateObject, setStateFunctions) {
           localStorage.setItem(key, JSON.stringify(stateObject));
         }
       } catch (err) {
-        console.warn("Failed to save studio persistence:", err);
+        console.warn('Failed to save studio persistence:', err);
       }
     }, 500); // 500ms debounce
     return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, ...Object.values(stateObject)]);
 }

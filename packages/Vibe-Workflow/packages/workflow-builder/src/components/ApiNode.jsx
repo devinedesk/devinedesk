@@ -1,20 +1,18 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from "react";
-import { Handle, Position, useReactFlow, useStore, useUpdateNodeInternals } from "reactflow";
-import { FaAngleLeft, FaAngleRight } from "react-icons/fa6";
-import { apiNodeModels } from "./utility";
-import { getRunId, getWorkflowId } from "./WorkflowStore";
-import axios from "axios";
-import { toast } from "react-hot-toast";
-import { IoClose, IoTrashOutline } from "react-icons/io5";
-import { RiInputMethodLine } from "react-icons/ri";
-import NodeSendButton from "./NodeSendButton";
-import NodeOptionsMenu from "./NodeOptionsMenu";
+import React, { useEffect, useRef, useState } from 'react';
+import { Handle, Position, useReactFlow, useStore, useUpdateNodeInternals } from 'reactflow';
+import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6';
+import { apiNodeModels } from './utility';
+import { getRunId, getWorkflowId } from './WorkflowStore';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { IoClose, IoTrashOutline } from 'react-icons/io5';
+import { RiInputMethodLine } from 'react-icons/ri';
+import NodeSendButton from './NodeSendButton';
+import NodeOptionsMenu from './NodeOptionsMenu';
 
-const outputHandles = [
-  "apiOutput",
-];
+const outputHandles = ['apiOutput'];
 
 const ApiNode = ({ id, data, selected }) => {
   const [selectedModel, setSelectedModel] = useState(data.selectedModel || apiNodeModels[0]);
@@ -35,7 +33,7 @@ const ApiNode = ({ id, data, selected }) => {
   const { setNodes, setEdges } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
   const edges = useStore((state) => state.edges);
-  const modelSchema = nodeSchemas?.categories?.api?.models[selectedModel.id];  
+  const modelSchema = nodeSchemas?.categories?.api?.models[selectedModel.id];
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -49,8 +47,8 @@ const ApiNode = ({ id, data, selected }) => {
     const fieldEntries = Object.entries(schemaProperties || {});
 
     fieldEntries.forEach(([fieldName, fieldSchema]) => {
-      if (fieldSchema.type === "array") {
-        if (fieldSchema.items?.type === "object") {
+      if (fieldSchema.type === 'array') {
+        if (fieldSchema.items?.type === 'object') {
           const examples = fieldSchema.examples;
           if (Array.isArray(examples) && examples.length > 0) {
             initialData[fieldName] = examples.map((ex) => ({ ...ex }));
@@ -60,28 +58,24 @@ const ApiNode = ({ id, data, selected }) => {
         } else {
           initialData[fieldName] = fieldSchema.examples || [];
         }
-
-      } else if (fieldSchema.type === "object") {
+      } else if (fieldSchema.type === 'object') {
         const nestedProps = fieldSchema.properties || {};
         initialData[fieldName] = initializeFormData(nestedProps);
-
       } else if (fieldSchema.default !== undefined) {
         initialData[fieldName] = fieldSchema.default;
-
       } else if (fieldSchema.examples && fieldSchema.examples.length > 0) {
         initialData[fieldName] = fieldSchema.examples[0];
-
       } else {
         switch (fieldSchema.type) {
-          case "boolean":
+          case 'boolean':
             initialData[fieldName] = false;
             break;
-          case "int":
-          case "number":
+          case 'int':
+          case 'number':
             initialData[fieldName] = 0;
             break;
           default:
-            initialData[fieldName] = "";
+            initialData[fieldName] = '';
         }
       }
     });
@@ -104,10 +98,13 @@ const ApiNode = ({ id, data, selected }) => {
       (acc, [key, val]) => {
         const meta = properties[key];
         if (meta?.enum) {
-          const optionValues = meta.enum.map(opt => typeof opt === 'object' ? opt.value : opt);
+          const optionValues = meta.enum.map((opt) => (typeof opt === 'object' ? opt.value : opt));
           if (!optionValues?.includes(val)) {
             const firstOption = meta.enum[0];
-            acc[key] = meta.default ?? (typeof firstOption === 'object' ? firstOption.value : firstOption) ?? "";
+            acc[key] =
+              meta.default ??
+              (typeof firstOption === 'object' ? firstOption.value : firstOption) ??
+              '';
           } else {
             acc[key] = val;
           }
@@ -120,22 +117,23 @@ const ApiNode = ({ id, data, selected }) => {
     );
 
     // Preserve UI-only flags that are not part of the model schema
-    const UI_KEYS = ["make_output", "make_input"];
+    const UI_KEYS = ['make_output', 'make_input'];
     UI_KEYS.forEach((k) => {
       if (data.formValues?.[k] !== undefined) merged[k] = data.formValues[k];
     });
 
     setFormValues(merged);
   };
-  
+
   const fetchSchema = (workflowId) => {
     if (!workflowId) {
-      toast.error("Failed to save workflow before running node");
+      toast.error('Failed to save workflow before running node');
       setLoading(0);
       return;
     }
 
-    axios.get(`/api/workflow/${workflowId}/api-node-schemas`)
+    axios
+      .get(`/api/workflow/${workflowId}/api-node-schemas`)
       .then((response) => {
         const schemas = response.data.api_node_schemas;
         if (schemas[id]) {
@@ -143,117 +141,129 @@ const ApiNode = ({ id, data, selected }) => {
           const inputSchema = schemaObj?.input_schema;
           const modelProps = selectedModel.input_params?.properties || {};
           const configProps = {};
-        
-        Object.entries(modelProps).forEach(([key, schema]) => {
-          configProps[key] = {
-            ...schema,
-            default: formValues[key] || schema.default || "",
-            required: selectedModel.input_params?.required?.includes(key) || schema.required
-          };
-        });
 
-        if (selectedModel.id === 'straico') {
-          const currentDynamicSchemas = modelSchema?.dynamic_schemas || data.dynamicSchemas;
-          if (currentDynamicSchemas) {
-            const modelNames = Object.values(currentDynamicSchemas).map(m => m.model_id);
-            if (configProps['model_name']) {
+          Object.entries(modelProps).forEach(([key, schema]) => {
+            configProps[key] = {
+              ...schema,
+              default: formValues[key] || schema.default || '',
+              required: selectedModel.input_params?.required?.includes(key) || schema.required,
+            };
+          });
+
+          if (selectedModel.id === 'straico') {
+            const currentDynamicSchemas = modelSchema?.dynamic_schemas || data.dynamicSchemas;
+            if (currentDynamicSchemas) {
+              const modelNames = Object.values(currentDynamicSchemas).map((m) => m.model_id);
+              if (configProps['model_name']) {
+                configProps['model_name'] = {
+                  ...configProps['model_name'],
+                  enum: modelNames,
+                  allowManual: true,
+                };
+              }
+            }
+          }
+
+          if (selectedModel.id === 'runware') {
+            const runwareModels =
+              schemaObj?.dynamic_schemas?.models ||
+              inputSchema?.model_name?.enum ||
+              inputSchema?.model_id?.enum;
+            if (runwareModels && configProps['model_name']) {
               configProps['model_name'] = {
                 ...configProps['model_name'],
-                enum: modelNames,
-                allowManual: true
+                enum: runwareModels,
+                allowManual: true,
               };
             }
           }
-        }
 
-        if (selectedModel.id === 'runware') {
-          const runwareModels = schemaObj?.dynamic_schemas?.models || inputSchema?.model_name?.enum || inputSchema?.model_id?.enum;
-          if (runwareModels && configProps['model_name']) {
-            configProps['model_name'] = {
-              ...configProps['model_name'],
-              enum: runwareModels,
-              allowManual: true
-            };
+          const fullProps = {
+            ...configProps,
+            ...inputSchema,
+          };
+          addFormValuesInTaskData(fullProps);
+          setTaskData(fullProps);
+
+          const keysToExpose = Object.entries(inputSchema || {})
+            .filter(([key, schema]) => schema?.ui?.can_link_from_node === true)
+            .map(([key]) => key);
+
+          if (keysToExpose.length > 0) {
+            setNodes((nds) =>
+              nds.map((n) => {
+                if (n.id === id) {
+                  const currentExposed = n.data.exposedHandles || [];
+                  const uniqueExposed = [...new Set([...currentExposed, ...keysToExpose])];
+
+                  if (uniqueExposed.length !== currentExposed.length) {
+                    return { ...n, data: { ...n.data, exposedHandles: uniqueExposed } };
+                  }
+                }
+                return n;
+              })
+            );
           }
+        } else {
+          toast.warn(`No schema found for id: ${id}`);
         }
-
-        const fullProps = {
-          ...configProps,
-          ...inputSchema,
-        };
-        addFormValuesInTaskData(fullProps);
-        setTaskData(fullProps);
-
-        const keysToExpose = Object.entries(inputSchema || {})
-          .filter(([key, schema]) => schema?.ui?.can_link_from_node === true)
-          .map(([key]) => key);
-
-        if (keysToExpose.length > 0) {
-          setNodes((nds) => nds.map((n) => {
-            if (n.id === id) {
-              const currentExposed = n.data.exposedHandles || [];
-              const uniqueExposed = [...new Set([...currentExposed, ...keysToExpose])];
-              
-              if (uniqueExposed.length !== currentExposed.length) {
-                return { ...n, data: { ...n.data, exposedHandles: uniqueExposed } };
-              }
-            }
-            return n;
-          }));
-        }
-      } else {
-        toast.warn(`No schema found for id: ${id}`);
-      }
-      setLoading(0);
-    })
+        setLoading(0);
+      })
       .catch((error) => {
-      setLoading(0);
-      toast.error(error.response?.data?.detail || "Failed to fetch model details.");
-      console.error(error);
-    })
+        setLoading(0);
+        toast.error(error.response?.data?.detail || 'Failed to fetch model details.');
+        console.error(error);
+      });
   };
 
-  useEffect(() => {    
+  useEffect(() => {
     let baseProperties = { ...(selectedModel.input_params?.properties || {}) };
-    
+
     if (selectedModel.id === 'straico' && modelSchema?.dynamic_schemas) {
-      const modelNames = Object.values(modelSchema.dynamic_schemas).map(m => m.model_id);
+      const modelNames = Object.values(modelSchema.dynamic_schemas).map((m) => m.model_id);
       if (baseProperties['model_name']) {
-        baseProperties['model_name'] = { 
-          ...baseProperties['model_name'], 
+        baseProperties['model_name'] = {
+          ...baseProperties['model_name'],
           enum: modelNames,
-          allowManual: true 
+          allowManual: true,
         };
       }
     }
 
     if (selectedModel.id === 'runware' && modelSchema?.dynamic_schemas) {
-      const taskType = formValues.task_type || "imageInference";
+      const taskType = formValues.task_type || 'imageInference';
       const taskSchema = modelSchema.dynamic_schemas[taskType];
-      
+
       if (taskSchema && taskSchema.schema?.input_schema) {
         const inputSchema = taskSchema.schema.input_schema;
         const modelEnum = inputSchema.model_name?.enum || inputSchema.model_id?.enum;
-        
+
         if (modelEnum && baseProperties['model_name']) {
-          baseProperties['model_name'] = { 
-            ...baseProperties['model_name'], 
+          baseProperties['model_name'] = {
+            ...baseProperties['model_name'],
             enum: modelEnum,
-            allowManual: true 
+            allowManual: true,
           };
         }
       }
     }
     setTaskData(baseProperties);
-    
+
     // Ensure formValues has defaults for the current model
-    if (Object.keys(formValues).length === 0 || (selectedModel.id === 'runware' && !formValues.task_type)) {
+    if (
+      Object.keys(formValues).length === 0 ||
+      (selectedModel.id === 'runware' && !formValues.task_type)
+    ) {
       addFormValuesInTaskData(baseProperties);
     }
 
     const requiredFields = selectedModel.input_params?.required || [];
-    const allRequiredPresent = requiredFields.every(field => (formValues?.[field] || data?.formValues?.[field]) && (formValues?.[field] || data?.formValues?.[field]) !== "");
-    
+    const allRequiredPresent = requiredFields.every(
+      (field) =>
+        (formValues?.[field] || data?.formValues?.[field]) &&
+        (formValues?.[field] || data?.formValues?.[field]) !== ''
+    );
+
     if (requiredFields.length > 0 && allRequiredPresent) {
       fetchSchema(workflowId);
     }
@@ -286,13 +296,13 @@ const ApiNode = ({ id, data, selected }) => {
     }
     prevHistoryLengthRef.current = data.outputHistory?.length || 0;
   }, [data.isLoading, data.selectedModel, data.triggerRun, data.triggerInputs, data.outputHistory]);
-  
+
   useEffect(() => {
     updateNodeInternals(id);
   }, [formValues, id]);
 
   const handleChange = (key, value) => {
-    setFormValues(prev => ({ ...prev, [key]: value }));
+    setFormValues((prev) => ({ ...prev, [key]: value }));
     setDropDown(-1);
   };
 
@@ -301,16 +311,14 @@ const ApiNode = ({ id, data, selected }) => {
     const isRemoving = current?.includes(field);
 
     if (isRemoving) {
-      setEdges((eds) => eds.filter(e => !(e.target === id && e.targetHandle === field)));
+      setEdges((eds) => eds.filter((e) => !(e.target === id && e.targetHandle === field)));
     }
 
-    const updated = isRemoving
-      ? current.filter(h => h !== field)
-      : [...current, field];
-    
-    setNodes((nds) => nds.map((n) => 
-      n.id === id ? { ...n, data: { ...n.data, exposedHandles: updated } } : n
-    ));
+    const updated = isRemoving ? current.filter((h) => h !== field) : [...current, field];
+
+    setNodes((nds) =>
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, exposedHandles: updated } } : n))
+    );
   };
 
   useEffect(() => {
@@ -334,56 +342,69 @@ const ApiNode = ({ id, data, selected }) => {
 
   const pollNodeStatus = (run_id) => {
     const interval = setInterval(() => {
-      axios.get(`/api/workflow/run/${run_id}/status`)
-      .then((response) => {
-        const nodesInRes = response.data.nodes || {};
-        const nodeData = nodesInRes[id] || Object.entries(nodesInRes).find(([key]) => 
-          key.toLowerCase().replace(/\s+/g, '') === id.toLowerCase().replace(/\s+/g, '')
-        )?.[1];
-        
-        console.log(`[ApiNode ${id}] Polling status. Node data found:`, !!nodeData);
-        if (!nodeData || nodeData.length === 0) {
-          console.log(`[ApiNode ${id}] No data for this ID. Available keys:`, Object.keys(nodesInRes));
-          return;
-        }
-        const latest = nodeData[nodeData.length - 1];
-        console.log(`[ApiNode ${id}] Latest status:`, latest.status);
-        if (latest.status === "succeeded" || latest.status === "completed") {
-          const output = latest.result.outputs;
-          const val = output[0]?.value || "";
-          
-          const currentHistory = data.outputHistory || [];
-          const result = latest.result;
-          const isAlreadyInHistory = currentHistory.some(h => h.result?.id === result.id);
-          const newHistory = isAlreadyInHistory 
-            ? currentHistory.map(h => h.result?.id === result.id ? latest : h)
-            : [...currentHistory, latest];
+      axios
+        .get(`/api/workflow/run/${run_id}/status`)
+        .then((response) => {
+          const nodesInRes = response.data.nodes || {};
+          const nodeData =
+            nodesInRes[id] ||
+            Object.entries(nodesInRes).find(
+              ([key]) =>
+                key.toLowerCase().replace(/\s+/g, '') === id.toLowerCase().replace(/\s+/g, '')
+            )?.[1];
 
-          data?.onDataChange?.(id, { outputs: output, resultUrl: val, isLoading: false, errorMsg: null, outputHistory: newHistory });
-          setCurrentHistoryIndex(newHistory.length - 1);
-          setCurrentOutputIndex(0);
-          clearInterval(interval);
-        }
-
-        if (latest.status === "failed") {
-          const outputs = latest?.result?.outputs;
-          let errorMsg = "Generation failed";
-
-          if (outputs && outputs[0]?.value?.error) {
-            errorMsg = outputs[0].value.error; 
+          console.log(`[ApiNode ${id}] Polling status. Node data found:`, !!nodeData);
+          if (!nodeData || nodeData.length === 0) {
+            console.log(
+              `[ApiNode ${id}] No data for this ID. Available keys:`,
+              Object.keys(nodesInRes)
+            );
+            return;
           }
-          toast.error(`Node ${id} failed`);
-          const currentHistory = data.outputHistory || [];
-          data.onDataChange(id, { isLoading: false, errorMsg, outputHistory: currentHistory }); 
+          const latest = nodeData[nodeData.length - 1];
+          console.log(`[ApiNode ${id}] Latest status:`, latest.status);
+          if (latest.status === 'succeeded' || latest.status === 'completed') {
+            const output = latest.result.outputs;
+            const val = output[0]?.value || '';
+
+            const currentHistory = data.outputHistory || [];
+            const result = latest.result;
+            const isAlreadyInHistory = currentHistory.some((h) => h.result?.id === result.id);
+            const newHistory = isAlreadyInHistory
+              ? currentHistory.map((h) => (h.result?.id === result.id ? latest : h))
+              : [...currentHistory, latest];
+
+            data?.onDataChange?.(id, {
+              outputs: output,
+              resultUrl: val,
+              isLoading: false,
+              errorMsg: null,
+              outputHistory: newHistory,
+            });
+            setCurrentHistoryIndex(newHistory.length - 1);
+            setCurrentOutputIndex(0);
+            clearInterval(interval);
+          }
+
+          if (latest.status === 'failed') {
+            const outputs = latest?.result?.outputs;
+            let errorMsg = 'Generation failed';
+
+            if (outputs && outputs[0]?.value?.error) {
+              errorMsg = outputs[0].value.error;
+            }
+            toast.error(`Node ${id} failed`);
+            const currentHistory = data.outputHistory || [];
+            data.onDataChange(id, { isLoading: false, errorMsg, outputHistory: currentHistory });
+            clearInterval(interval);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
           clearInterval(interval);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        clearInterval(interval);
-        data.onDataChange(id, { isLoading: false });
-        toast.error(`Failed to get workflow status Api ${id.replace(/^\D+/g, "")}`);
-      });
+          data.onDataChange(id, { isLoading: false });
+          toast.error(`Failed to get workflow status Api ${id.replace(/^\D+/g, '')}`);
+        });
     }, 3000);
   };
 
@@ -397,13 +418,13 @@ const ApiNode = ({ id, data, selected }) => {
       const workflow_id = await data.handleSaveWorkFlow();
 
       if (!workflow_id) {
-        toast.error("Failed to save workflow before running node");
+        toast.error('Failed to save workflow before running node');
         data.onDataChange(id, { isLoading: false });
         return;
       }
 
       if (!modelSchema || !modelSchema.input_schema) {
-        toast.error("No input schema found for this model");
+        toast.error('No input schema found for this model');
         data.onDataChange(id, { isLoading: false });
         return;
       }
@@ -419,27 +440,26 @@ const ApiNode = ({ id, data, selected }) => {
       }
 
       const filteredInputParams = Object.fromEntries(
-        Object.entries(formValues).filter(([key]) =>
-          key !== "model_url" && key !== "api_key" && key !== "model_type" && key !== "model_name"
+        Object.entries(formValues).filter(
+          ([key]) =>
+            key !== 'model_url' && key !== 'api_key' && key !== 'model_type' && key !== 'model_name'
         )
       );
-      params["params"] = filteredInputParams;
+      params['params'] = filteredInputParams;
 
-      const response = await axios.post(`/api/workflow/${workflow_id}/node/${id}/run`,
-        {
-          run_id: runId,
-          model: selectedModel.id,
-          params: params,
-          cost: 0.025,
-          node_id: "API Node"
-        }
-      );
+      const response = await axios.post(`/api/workflow/${workflow_id}/node/${id}/run`, {
+        run_id: runId,
+        model: selectedModel.id,
+        params: params,
+        cost: 0.025,
+        node_id: 'API Node',
+      });
       pollNodeStatus(response.data.run_id);
-    } catch(error) {
+    } catch (error) {
       data.onDataChange(id, { isLoading: false });
-      toast.error(error.response?.data?.detail || "Error running node");
+      toast.error(error.response?.data?.detail || 'Error running node');
       console.error(error);
-    };
+    }
   };
 
   const handleDeleteNode = () => {
@@ -447,12 +467,14 @@ const ApiNode = ({ id, data, selected }) => {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
       toast.success(`Deleted node ${id}`);
-    };
+    }
   };
 
   const fetchInputs = async () => {
     const requiredFields = selectedModel.input_params?.required || [];
-    const missingFields = requiredFields.filter(field => !formValues?.[field] || !formValues[field].trim());
+    const missingFields = requiredFields.filter(
+      (field) => !formValues?.[field] || !formValues[field].trim()
+    );
 
     if (missingFields.length > 0) {
       toast.error(`${missingFields} required before fetching schema`);
@@ -463,7 +485,7 @@ const ApiNode = ({ id, data, selected }) => {
     const workflow_id = await data.handleSaveWorkFlow();
 
     if (!workflow_id) {
-      toast.error("Failed to save workflow before running node");
+      toast.error('Failed to save workflow before running node');
       setLoading(0);
       return;
     }
@@ -473,16 +495,12 @@ const ApiNode = ({ id, data, selected }) => {
   useEffect(() => {
     const connectedOutputs = {};
     outputHandles.forEach((h) => {
-      connectedOutputs[h] = edges.some(
-        (e) => e.source === id && e.sourceHandle === h
-      );
+      connectedOutputs[h] = edges.some((e) => e.source === id && e.sourceHandle === h);
     });
 
     const connectedInputs = {};
     Object.keys(taskData).forEach((key) => {
-      connectedInputs[key] = edges.some(
-        (e) => e.target === id && e.targetHandle === key
-      );
+      connectedInputs[key] = edges.some((e) => e.target === id && e.targetHandle === key);
     });
 
     setConnectedOutputs(connectedOutputs);
@@ -496,12 +514,14 @@ const ApiNode = ({ id, data, selected }) => {
       setCurrentHistoryIndex(newIndex);
 
       const viewing = outputHistory[newIndex]?.result?.outputs?.[0]?.value;
-      setNodes((nds) => nds.map((n) => {
-        if (n.id === id) {
-          return { ...n, data: { ...n.data, viewingOutput: viewing } };
-        }
-        return n;
-      }));
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === id) {
+            return { ...n, data: { ...n.data, viewingOutput: viewing } };
+          }
+          return n;
+        })
+      );
     }
   };
 
@@ -512,12 +532,14 @@ const ApiNode = ({ id, data, selected }) => {
       setCurrentHistoryIndex(newIndex);
 
       const viewing = outputHistory[newIndex]?.result?.outputs?.[0]?.value;
-      setNodes((nds) => nds.map((n) => {
-        if (n.id === id) {
-          return { ...n, data: { ...n.data, viewingOutput: viewing } };
-        }
-        return n;
-      }));
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === id) {
+            return { ...n, data: { ...n.data, viewingOutput: viewing } };
+          }
+          return n;
+        })
+      );
     }
   };
 
@@ -526,14 +548,14 @@ const ApiNode = ({ id, data, selected }) => {
     const currentHistory = outputHistory[currentHistoryIndex];
     if (!currentHistory || !currentHistory.node_run_id) return;
 
-    if (window.confirm("Are you sure you want to delete this history entry?")) {
+    if (window.confirm('Are you sure you want to delete this history entry?')) {
       try {
         await axios.delete(`/api/workflow/node-run/${currentHistory.node_run_id}`);
         const newHistory = outputHistory.filter((_, i) => i !== currentHistoryIndex);
-        
-        data?.onDataChange?.(id, { 
+
+        data?.onDataChange?.(id, {
           outputHistory: newHistory,
-          ...(newHistory.length === 0 ? { outputs: [], resultUrl: null } : {})
+          ...(newHistory.length === 0 ? { outputs: [], resultUrl: null } : {}),
         });
 
         if (newHistory.length === 0) {
@@ -541,50 +563,58 @@ const ApiNode = ({ id, data, selected }) => {
         } else {
           setCurrentHistoryIndex(Math.max(0, currentHistoryIndex - 1));
         }
-        toast.success("History entry deleted");
+        toast.success('History entry deleted');
       } catch (error) {
-        toast.error(error.response?.data?.detail || "Failed to delete history entry");
+        toast.error(error.response?.data?.detail || 'Failed to delete history entry');
         console.error(error);
       }
     }
   };
 
-  const currentOutputList = currentHistoryIndex !== -1 && outputHistory[currentHistoryIndex]
-    ? outputHistory[currentHistoryIndex]?.result?.outputs || []
-    : (data.outputs || []);
+  const currentOutputList =
+    currentHistoryIndex !== -1 && outputHistory[currentHistoryIndex]
+      ? outputHistory[currentHistoryIndex]?.result?.outputs || []
+      : data.outputs || [];
 
-  const currentOutput = currentOutputList.length > 0
-    ? currentOutputList[currentOutputIndex]?.value || currentOutputList[0]?.value || data.resultUrl
-    : data.resultUrl;
+  const currentOutput =
+    currentOutputList.length > 0
+      ? currentOutputList[currentOutputIndex]?.value ||
+        currentOutputList[0]?.value ||
+        data.resultUrl
+      : data.resultUrl;
 
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "0px";
+      textarea.style.height = '0px';
       const scrollHeight = textarea.scrollHeight;
       textarea.style.height = `${Math.max(scrollHeight, 60)}px`;
     }
   }, [currentOutput, currentHistoryIndex]);
 
   const hardcodedKeys = Object.keys(selectedModel.input_params?.properties || {});
-  const filteredTaskDataEntries = Object.entries(taskData).filter(([key]) => !hardcodedKeys?.includes(key));
+  const filteredTaskDataEntries = Object.entries(taskData).filter(
+    ([key]) => !hardcodedKeys?.includes(key)
+  );
   const minHeight = Math.max(208, 150 + filteredTaskDataEntries.length * 50);
 
   return (
-    <div 
-      style={{ minHeight }} 
+    <div
+      style={{ minHeight }}
       className={`
         nowheel group flex flex-col w-80 
         rounded-2xl border-2 relative transition-all duration-300 ease-in-out 
-        ${selected 
-          ? "border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20" 
-          : "border-zinc-800 hover:border-zinc-700 shadow-lg"} 
+        ${
+          selected
+            ? 'border-cyan-500 shadow-[0_0_25px_rgba(37,99,235,0.3)] scale-[1.02] ring-1 ring-cyan-400/20'
+            : 'border-zinc-800 hover:border-zinc-700 shadow-lg'
+        } 
         bg-[#0c0d0f]/95 backdrop-blur-sm
       `}
     >
       <div className="flex items-center gap-2 absolute -top-5 left-0">
         <h3 className="text-zinc-400 text-[10px] font-medium tracking-wider uppercase">
-          Api {id.replace(/^\D+/g, "")}
+          Api {id.replace(/^\D+/g, '')}
         </h3>
         <span className="text-xs text-cyan-400 -mt-0.5 font-medium flex items-center gap-1 opacity-80">
           $0.025
@@ -593,16 +623,16 @@ const ApiNode = ({ id, data, selected }) => {
       <div className="flex flex-col">
         <div className="flex items-center justify-between bg-gradient-to-r from-panel-bg to-card-bg rounded-t-2xl border-b border-zinc-800 py-2 px-3">
           <div className="flex items-center gap-2.5">
-            <div className={`p-1.5 rounded-lg ${selected ? "bg-cyan-500 text-white" : "bg-zinc-800 text-zinc-400"} transition-colors`}>
+            <div
+              className={`p-1.5 rounded-lg ${selected ? 'bg-cyan-500 text-white' : 'bg-zinc-800 text-zinc-400'} transition-colors`}
+            >
               <RiInputMethodLine size={14} />
             </div>
-            <h3 className="text-xs font-bold text-zinc-100">
-              {selectedModel.name}
-            </h3>
+            <h3 className="text-xs font-bold text-zinc-100">{selectedModel.name}</h3>
           </div>
           {outputHistory.length > 0 && (
             <div className="absolute -top-10 right-0 bg-[#0c0d0f]/95 flex items-center gap-1 p-1 border border-white/10 rounded-full ml-auto">
-              <button 
+              <button
                 type="button"
                 suppressHydrationWarning={true}
                 onClick={handlePrev}
@@ -617,7 +647,7 @@ const ApiNode = ({ id, data, selected }) => {
                   {currentHistoryIndex + 1}/{outputHistory.length}
                 </span>
                 <div className="w-[1px] h-2.5 bg-white/10" />
-                <button 
+                <button
                   type="button"
                   suppressHydrationWarning={true}
                   onClick={handleDeleteHistory}
@@ -627,15 +657,15 @@ const ApiNode = ({ id, data, selected }) => {
                   <IoTrashOutline size={10} />
                 </button>
                 <div className="w-[1px] h-2.5 bg-white/10" />
-                <NodeSendButton 
-                  id={id} 
-                  data={data} 
-                  outputHistory={outputHistory} 
-                  currentHistoryIndex={currentHistoryIndex} 
+                <NodeSendButton
+                  id={id}
+                  data={data}
+                  outputHistory={outputHistory}
+                  currentHistoryIndex={currentHistoryIndex}
                   currentOutputIndex={currentOutputIndex}
                 />
               </div>
-              <button 
+              <button
                 type="button"
                 suppressHydrationWarning={true}
                 onClick={handleNext}
@@ -647,7 +677,7 @@ const ApiNode = ({ id, data, selected }) => {
               </button>
             </div>
           )}
-          <NodeOptionsMenu 
+          <NodeOptionsMenu
             nodeId={id}
             onDuplicate={data.duplicateNode}
             onDelete={handleDeleteNode}
@@ -660,12 +690,14 @@ const ApiNode = ({ id, data, selected }) => {
           <div className="flex items-center justify-center w-full h-full overflow-hidden aspect-[1/1] bg-white/5 animate-pulse rounded-b-2xl">
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase">Processing...</span>
+              <span className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase">
+                Processing...
+              </span>
             </div>
           </div>
         ) : data.errorMsg ? (
           <div className="text-red-400 text-xs font-medium p-3 bg-red-500/10 rounded-xl border border-red-500/20 m-3 w-full">
-            {data.errorMsg || "API failure"}
+            {data.errorMsg || 'API failure'}
           </div>
         ) : currentOutput && !data.isLoading ? (
           <div className="w-full h-full relative group/api">
@@ -676,7 +708,8 @@ const ApiNode = ({ id, data, selected }) => {
                   controls
                   className="w-full h-full rounded-md object-contain"
                 />
-              ) : (currentOutputList[currentOutputIndex]?.type === 'image_url' || currentOutputList[currentOutputIndex]?.type === 'image') ? (
+              ) : currentOutputList[currentOutputIndex]?.type === 'image_url' ||
+                currentOutputList[currentOutputIndex]?.type === 'image' ? (
                 <img
                   src={currentOutput}
                   alt="Generated"
@@ -692,9 +725,13 @@ const ApiNode = ({ id, data, selected }) => {
                   <textarea
                     ref={textareaRef}
                     readOnly
-                    value={typeof currentOutput === 'object' ? JSON.stringify(currentOutput, null, 2) : String(currentOutput)}
+                    value={
+                      typeof currentOutput === 'object'
+                        ? JSON.stringify(currentOutput, null, 2)
+                        : String(currentOutput)
+                    }
                     className="w-full text-[10px] leading-relaxed outline-none bg-[#1c1e21] border border-gray-700 rounded-lg p-2 resize-none overflow-hidden text-white font-medium shadow-inner"
-                    style={{ minHeight: "60px" }}
+                    style={{ minHeight: '60px' }}
                   />
                 </div>
               )}
@@ -706,7 +743,9 @@ const ApiNode = ({ id, data, selected }) => {
                   suppressHydrationWarning={true}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCurrentOutputIndex((prev) => (prev > 0 ? prev - 1 : currentOutputList.length - 1));
+                    setCurrentOutputIndex((prev) =>
+                      prev > 0 ? prev - 1 : currentOutputList.length - 1
+                    );
                   }}
                   className="text-white hover:text-blue-400 p-0.5"
                 >
@@ -720,7 +759,9 @@ const ApiNode = ({ id, data, selected }) => {
                   suppressHydrationWarning={true}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCurrentOutputIndex((prev) => (prev < currentOutputList.length - 1 ? prev + 1 : 0));
+                    setCurrentOutputIndex((prev) =>
+                      prev < currentOutputList.length - 1 ? prev + 1 : 0
+                    );
                   }}
                   className="text-white hover:text-blue-400 p-0.5"
                 >
@@ -735,72 +776,69 @@ const ApiNode = ({ id, data, selected }) => {
             <span className="text-[10px] italic">Result appeared here...</span>
           </div>
         )}
-      </div>    
+      </div>
       {(() => {
-        let outputColor = "green";
-        let activeClass = "!bg-green-500 !border-white shadow-[0_0_20px_rgba(34,197,94,1)]";
-        let inactiveClass = "!bg-black !border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.5)]";
-        let labelText = "Image";
-        let labelColor = "text-green-500";
-        
+        let outputColor = 'green';
+        let activeClass = '!bg-green-500 !border-white shadow-[0_0_20px_rgba(34,197,94,1)]';
+        let inactiveClass = '!bg-black !border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.5)]';
+        let labelText = 'Image';
+        let labelColor = 'text-green-500';
+
         const output = data.outputs?.[0];
         const modelType = formValues.model_type; // || selectedModel.model_type?
 
         if (output?.type === 'text' || modelType === 'chat') {
-          outputColor = "blue";
-          activeClass = "!bg-cyan-500 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]";
-          inactiveClass = "!bg-zinc-900 !border-cyan-500/50 hover:!border-cyan-500 shadow-sm";
-          labelText = "Text";
-          labelColor = "text-cyan-400";
+          outputColor = 'blue';
+          activeClass = '!bg-cyan-500 !border-zinc-900 shadow-[0_0_15px_rgba(37,99,235,0.8)]';
+          inactiveClass = '!bg-zinc-900 !border-cyan-500/50 hover:!border-cyan-500 shadow-sm';
+          labelText = 'Text';
+          labelColor = 'text-cyan-400';
         } else if (output?.type === 'video_url' || modelType === 'video') {
-          outputColor = "orange";
-          activeClass = "!bg-orange-600 !border-zinc-900 shadow-[0_0_15px_rgba(249,115,22,0.8)]";
-          inactiveClass = "!bg-zinc-900 !border-orange-600/50 hover:!border-orange-600 shadow-sm";
-          labelText = "Video";
-          labelColor = "text-orange-500";
+          outputColor = 'orange';
+          activeClass = '!bg-orange-600 !border-zinc-900 shadow-[0_0_15px_rgba(249,115,22,0.8)]';
+          inactiveClass = '!bg-zinc-900 !border-orange-600/50 hover:!border-orange-600 shadow-sm';
+          labelText = 'Video';
+          labelColor = 'text-orange-500';
         } else if (output?.type === 'audio_url' || modelType === 'audio') {
-          outputColor = "yellow";
-          activeClass = "!bg-yellow-500 !border-zinc-900 shadow-[0_0_15px_rgba(234,179,8,0.8)]";
-          inactiveClass = "!bg-zinc-900 !border-yellow-500/50 hover:!border-yellow-500 shadow-sm";
-          labelText = "Audio";
-          labelColor = "text-yellow-500";
+          outputColor = 'yellow';
+          activeClass = '!bg-yellow-500 !border-zinc-900 shadow-[0_0_15px_rgba(234,179,8,0.8)]';
+          inactiveClass = '!bg-zinc-900 !border-yellow-500/50 hover:!border-yellow-500 shadow-sm';
+          labelText = 'Audio';
+          labelColor = 'text-yellow-500';
         } else {
-          outputColor = "green";
-          activeClass = "!bg-emerald-600 !border-zinc-900 shadow-[0_0_15px_rgba(16,185,129,0.8)]";
-          inactiveClass = "!bg-zinc-900 !border-emerald-600/50 hover:!border-emerald-600 shadow-sm";
-          labelText = "Image";
-          labelColor = "text-emerald-500";
+          outputColor = 'green';
+          activeClass = '!bg-emerald-600 !border-zinc-900 shadow-[0_0_15px_rgba(16,185,129,0.8)]';
+          inactiveClass = '!bg-zinc-900 !border-emerald-600/50 hover:!border-emerald-600 shadow-sm';
+          labelText = 'Image';
+          labelColor = 'text-emerald-500';
         }
 
         return (
           <>
-          <Handle 
-            type="source" 
-            position={Position.Right} 
-            id="apiOutput" 
-            style={{ 
-              top: 100,
-              width: 12,
-              height: 12,
-              transition: 'all 0.2s ease-in-out',
-            }} 
-            className={`!rounded-full !border-2 transition-all duration-200 !right-[-7px]
-              ${connectedOutputs.apiOutput 
-                ? activeClass
-                : inactiveClass
-              }
+            <Handle
+              type="source"
+              position={Position.Right}
+              id="apiOutput"
+              style={{
+                top: 100,
+                width: 12,
+                height: 12,
+                transition: 'all 0.2s ease-in-out',
+              }}
+              className={`!rounded-full !border-2 transition-all duration-200 !right-[-7px]
+              ${connectedOutputs.apiOutput ? activeClass : inactiveClass}
             `}
-            data-type={outputColor}
-          />
-          <p 
-            className={`absolute -right-10 top-[100px] text-xs ${labelColor} transition-opacity duration-200 ${
-              data.activeHandleColor === outputColor
-                ? "opacity-100" 
-                : "opacity-0 group-hover:opacity-100"
-            }`}
-          > 
-            {labelText}
-          </p>
+              data-type={outputColor}
+            />
+            <p
+              className={`absolute -right-10 top-[100px] text-xs ${labelColor} transition-opacity duration-200 ${
+                data.activeHandleColor === outputColor
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100'
+              }`}
+            >
+              {labelText}
+            </p>
           </>
         );
       })()}
@@ -809,35 +847,38 @@ const ApiNode = ({ id, data, selected }) => {
         const isExposed = connectedInputs[key] || exposedHandles?.includes(key);
         return (
           <React.Fragment key={key}>
-            <Handle 
-              type="target" 
-              position={Position.Left} 
-              id={key} 
-              style={{ 
+            <Handle
+              type="target"
+              position={Position.Left}
+              id={key}
+              style={{
                 top: 150 + idx * 50,
                 width: 12,
                 height: 12,
                 transition: 'all 0.2s ease-in-out',
                 opacity: isExposed ? 1 : 0,
                 pointerEvents: isExposed ? 'all' : 'none',
-              }} 
+              }}
               className={`!rounded-full !border-[3px] !left-[-8px] transition-all
-                ${connectedInputs[key] 
-                  ? '!bg-white !border-zinc-900 shadow-[0_0_15px_rgba(255,255,255,0.8)]' 
-                  : '!bg-zinc-900 !border-white hover:!border-zinc-500 shadow-sm'
+                ${
+                  connectedInputs[key]
+                    ? '!bg-white !border-zinc-900 shadow-[0_0_15px_rgba(255,255,255,0.8)]'
+                    : '!bg-zinc-900 !border-white hover:!border-zinc-500 shadow-sm'
                 }
               `}
               data-type="white"
             />
-            <p 
+            <p
               className={`absolute -left-20 top-[${150 + idx * 50}px] text-xs text-white text-right w-16 transition-opacity duration-200 ${
-                isExposed
-                  ? "opacity-100" 
-                  : "opacity-0 group-hover:opacity-100"
+                isExposed ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
               }`}
-               style={{ top: 150 + idx * 50, opacity: isExposed ? undefined : 0, pointerEvents: isExposed ? 'all' : 'none' }} 
-            > 
-              {key} 
+              style={{
+                top: 150 + idx * 50,
+                opacity: isExposed ? undefined : 0,
+                pointerEvents: isExposed ? 'all' : 'none',
+              }}
+            >
+              {key}
             </p>
           </React.Fragment>
         );

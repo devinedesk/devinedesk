@@ -20,7 +20,6 @@
 
 <img width="1468" height="764" alt="Screenshot 2026-04-01 at 4 03 29 PM" src="https://github.com/user-attachments/assets/0eeff00f-7850-4d53-bbc9-68f6b1f8b7a4" />
 
-
 ---
 
 ## Hosted Version
@@ -28,6 +27,7 @@
 Don't want to self-host? A fully managed, hosted version of Vibe Workflow is available at **[Local API.ai/workflow](https://Local API.ai/workflow)** — zero setup, ready to use in the browser.
 
 The hosted version also ships with:
+
 - **API support** — programmatically run workflows and integrate generative pipelines into your own apps and backends.
 - **Embed support** — drop the workflow builder directly into your own platform or product via an embeddable widget, so your users get a node-based AI editor without leaving your UI.
 
@@ -37,14 +37,14 @@ Use the hosted version if you want to skip infra and add node-based AI workflows
 
 ## Why Vibe Workflow Over Weavy AI / Krea Nodes / Freepik Spaces / FloraFauna AI?
 
-| Feature | Vibe Workflow | Weavy AI | Krea Nodes | Freepik Spaces | FloraFauna AI |
-|---|---|---|---|---|---|
-| Open Source | ✅ MIT | ❌ | ❌ | ❌ | ❌ |
-| Self-Hostable | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Node-Based Editor | ✅ | ✅ | ✅ | Partial | ✅ |
-| Custom AI Models | ✅ | Limited | Limited | ❌ | Limited |
-| No Subscription | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Extendable / API | ✅ | Limited | Limited | ❌ | Limited |
+| Feature           | Vibe Workflow | Weavy AI | Krea Nodes | Freepik Spaces | FloraFauna AI |
+| ----------------- | ------------- | -------- | ---------- | -------------- | ------------- |
+| Open Source       | ✅ MIT        | ❌       | ❌         | ❌             | ❌            |
+| Self-Hostable     | ✅            | ❌       | ❌         | ❌             | ❌            |
+| Node-Based Editor | ✅            | ✅       | ✅         | Partial        | ✅            |
+| Custom AI Models  | ✅            | Limited  | Limited    | ❌             | Limited       |
+| No Subscription   | ✅            | ❌       | ❌         | ❌             | ❌            |
+| Extendable / API  | ✅            | Limited  | Limited    | ❌             | Limited       |
 
 Paid AI creative tools have become [ridiculously expensive](https://medium.com/@anilmatcha/i-built-open-weavy-because-paid-ai-creative-tools-were-getting-ridiculously-expensive-f67b088e06fb). Vibe Workflow bridges the gap between complex generative AI capabilities and intuitive visual design. Where tools like Weavy AI and Krea Nodes offer powerful node-based systems behind paywalls, Vibe Workflow gives you the same power — open-source, flexible, and extendable:
 
@@ -93,6 +93,7 @@ Vibe-Workflow/
 ### Prerequisites
 
 For local development:
+
 - **Node.js** (v20+)
 - **Python** (v3.10+)
 - **npm** (v7+ for workspaces support)
@@ -102,6 +103,7 @@ Or use **Docker** (see [Running with Docker](#running-with-docker)).
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/samuraigpt/vibe-workflow.git
    cd vibe-workflow
@@ -130,12 +132,14 @@ Vibe Workflow uses **Local API** (Vadoo AI) for generative AI capabilities. You 
 ### Running the Project
 
 **Frontend (Next.js):**
+
 ```bash
 npm run dev:app
 # Available at http://localhost:3000
 ```
 
 **Backend (FastAPI):**
+
 ```bash
 cd server
 python -m venv venv
@@ -160,15 +164,19 @@ The easiest way to run Vibe Workflow is with Docker Compose.
 ### Quick Start
 
 1. **Configure environment**:
+
    ```bash
    cp .env.example .env
    ```
+
    Edit `.env` and add your Local API key:
+
    ```bash
    MU_API_KEY=your_actual_api_key_here
    ```
 
 2. **Start all services**:
+
    ```bash
    docker compose up --build
    ```
@@ -180,10 +188,10 @@ The easiest way to run Vibe Workflow is with Docker Compose.
 
 ### Services
 
-| Service | Image | Port |
-|---------|-------|------|
-| client | Node.js 24 Alpine | 3000 |
-| server | Python 3.13 | 8000 |
+| Service | Image             | Port |
+| ------- | ----------------- | ---- |
+| client  | Node.js 24 Alpine | 3000 |
+| server  | Python 3.13       | 8000 |
 
 ### Stopping
 
@@ -209,15 +217,19 @@ docker compose down
 ## Comparisons
 
 ### Vibe Workflow vs Weavy AI
+
 Weavy AI is a proprietary node-based creative AI platform. Vibe Workflow is its open-source equivalent — same visual workflow paradigm, fully self-hostable, MIT licensed, with no subscription fees.
 
 ### Vibe Workflow vs Krea Nodes / Krea Workflows
+
 Krea Nodes offers a powerful real-time generative canvas. Vibe Workflow brings a comparable node-based editor that is open-source, customizable, and extendable with any AI backend.
 
 ### Vibe Workflow vs Freepik Spaces
+
 Freepik Spaces is a cloud-based AI creative suite integrated with Freepik's asset library. Vibe Workflow provides the workflow and pipeline layer as open-source infrastructure you control, with no asset-library lock-in.
 
 ### Vibe Workflow vs FloraFauna AI
+
 FloraFauna AI offers a creative node canvas for generative media. Vibe Workflow replicates and extends that concept in an open-source, self-hosted package with full extensibility.
 
 ---

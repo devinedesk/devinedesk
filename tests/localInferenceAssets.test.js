@@ -2,35 +2,32 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const {
-    pickBinaryAssetForPlatform,
-    getBundledBinaryResourceDir,
+  pickBinaryAssetForPlatform,
+  getBundledBinaryResourceDir,
 } = require('../electron/lib/localInferenceAssets');
 
 test('pickBinaryAssetForPlatform prefers native linux arm64 assets', () => {
-    const zipNames = [
-        'sd-master-abc-bin-Linux-Ubuntu-24.04-x86_64.zip',
-        'sd-master-abc-bin-Linux-Ubuntu-24.04-aarch64.zip',
-        'sd-master-abc-bin-Linux-Ubuntu-24.04-aarch64-vulkan.zip',
-    ];
+  const zipNames = [
+    'sd-master-abc-bin-Linux-Ubuntu-24.04-x86_64.zip',
+    'sd-master-abc-bin-Linux-Ubuntu-24.04-aarch64.zip',
+    'sd-master-abc-bin-Linux-Ubuntu-24.04-aarch64-vulkan.zip',
+  ];
 
-    const picked = pickBinaryAssetForPlatform({
-        platform: 'linux',
-        arch: 'arm64',
-        zipNames,
-    });
+  const picked = pickBinaryAssetForPlatform({
+    platform: 'linux',
+    arch: 'arm64',
+    zipNames,
+  });
 
-    assert.equal(picked, 'sd-master-abc-bin-Linux-Ubuntu-24.04-aarch64.zip');
+  assert.equal(picked, 'sd-master-abc-bin-Linux-Ubuntu-24.04-aarch64.zip');
 });
 
 test('getBundledBinaryResourceDir resolves linux arm64 bundled path', () => {
-    const bundledDir = getBundledBinaryResourceDir({
-        resourcesPath: '/opt/devinedesk/resources',
-        platform: 'linux',
-        arch: 'arm64',
-    });
+  const bundledDir = getBundledBinaryResourceDir({
+    resourcesPath: '/opt/devinedesk/resources',
+    platform: 'linux',
+    arch: 'arm64',
+  });
 
-    assert.equal(
-        bundledDir,
-        '/opt/devinedesk/resources/local-ai/linux-arm64/bin'
-    );
+  assert.equal(bundledDir, '/opt/devinedesk/resources/local-ai/linux-arm64/bin');
 });

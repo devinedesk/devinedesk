@@ -3,7 +3,7 @@ services:
     build: .
     container_name: devinedesk
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/devinedesk?schema=public
@@ -21,7 +21,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: devinedesk
     ports:
-      - "5434:5432"
+      - '5434:5432'
     volumes:
       - pgdata2:/var/lib/postgresql/data
     restart: always
@@ -30,7 +30,7 @@ services:
     image: redis:7-alpine
     container_name: devinedesk_redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     restart: always
 
 volumes:

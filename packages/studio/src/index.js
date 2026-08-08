@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 export { default as ImageStudio } from './components/ImageStudio';
 export { default as VideoStudio } from './components/VideoStudio';

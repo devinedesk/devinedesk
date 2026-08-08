@@ -5,15 +5,43 @@
   "extensions": {
     "colorMeta": {
       "primary": { "role": "primary", "displayName": "Electric Cyan", "canonical": "#22d3ee" },
-      "primary-hover": { "role": "primary", "displayName": "Electric Cyan Hover", "canonical": "#06b6d4" },
-      "neutral-app-bg": { "role": "neutral", "displayName": "App Background", "canonical": "#030303" },
-      "neutral-panel-bg": { "role": "neutral", "displayName": "Panel Background", "canonical": "#0a0a0a" },
-      "neutral-card-bg": { "role": "neutral", "displayName": "Card Background", "canonical": "#111111" }
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Electric Cyan Hover",
+        "canonical": "#06b6d4"
+      },
+      "neutral-app-bg": {
+        "role": "neutral",
+        "displayName": "App Background",
+        "canonical": "#030303"
+      },
+      "neutral-panel-bg": {
+        "role": "neutral",
+        "displayName": "Panel Background",
+        "canonical": "#0a0a0a"
+      },
+      "neutral-card-bg": {
+        "role": "neutral",
+        "displayName": "Card Background",
+        "canonical": "#111111"
+      }
     },
     "shadows": [
-      { "name": "glow", "value": "0 0 20px rgba(34, 211, 238, 0.4)", "purpose": "Ambient emission for active states and primary actions." },
-      { "name": "glow-accent", "value": "0 0 20px rgba(168, 85, 247, 0.4)", "purpose": "Ambient emission for secondary active states." },
-      { "name": "3xl", "value": "0 35px 60px -15px rgba(0, 0, 0, 0.8)", "purpose": "Deep grounding shadow for floating dialogs and modals." }
+      {
+        "name": "glow",
+        "value": "0 0 20px rgba(34, 211, 238, 0.4)",
+        "purpose": "Ambient emission for active states and primary actions."
+      },
+      {
+        "name": "glow-accent",
+        "value": "0 0 20px rgba(168, 85, 247, 0.4)",
+        "purpose": "Ambient emission for secondary active states."
+      },
+      {
+        "name": "3xl",
+        "value": "0 35px 60px -15px rgba(0, 0, 0, 0.8)",
+        "purpose": "Deep grounding shadow for floating dialogs and modals."
+      }
     ]
   },
   "components": [
@@ -35,7 +63,11 @@
       "Minimalist typography using Inter."
     ],
     "rules": [
-      { "name": "The Void Rule", "body": "The background should remain as dark as possible (#030303). Do not use light grays for large surface areas; elevation is achieved through subtle lightness shifts and glassmorphism.", "section": "colors" }
+      {
+        "name": "The Void Rule",
+        "body": "The background should remain as dark as possible (#030303). Do not use light grays for large surface areas; elevation is achieved through subtle lightness shifts and glassmorphism.",
+        "section": "colors"
+      }
     ],
     "dos": [
       "Do use Electric Cyan (#22d3ee) sparingly, only for primary actions, active states, or generation triggers.",

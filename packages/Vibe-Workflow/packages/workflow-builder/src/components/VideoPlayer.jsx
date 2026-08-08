@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
-import { IoPlay, IoPause, IoVolumeHigh, IoVolumeMute, IoExpand, IoContract } from "react-icons/io5";
-import { toast } from "react-hot-toast";
+import React, { useState, useRef, useEffect } from 'react';
+import { IoPlay, IoPause, IoVolumeHigh, IoVolumeMute, IoExpand, IoContract } from 'react-icons/io5';
+import { toast } from 'react-hot-toast';
 
-const VideoPlayer = ({ 
-  src, 
-  poster, 
-  autoPlay = true, 
-  muted = true, 
-  loop = true, 
-  className = "w-full h-full object-contain",
-  accentColor = "#f97316"
+const VideoPlayer = ({
+  src,
+  poster,
+  autoPlay = true,
+  muted = true,
+  loop = true,
+  className = 'w-full h-full object-contain',
+  accentColor = '#f97316',
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -17,7 +17,7 @@ const VideoPlayer = ({
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(muted);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
+
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -39,7 +39,7 @@ const VideoPlayer = ({
   const handleToggleFullscreen = (e) => {
     e?.stopPropagation();
     if (!containerRef.current) return;
-    
+
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen().catch((err) => {
         toast.error(`Error attempting to enable full-screen mode: ${err.message}`);
@@ -54,8 +54,8 @@ const VideoPlayer = ({
       setIsFullscreen(!!document.fullscreenElement);
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
   const formatTime = (seconds) => {
@@ -65,8 +65,8 @@ const VideoPlayer = ({
   };
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={`relative group/video w-full h-full bg-black/90 overflow-hidden flex items-center justify-center ${isFullscreen ? '' : 'rounded-b-2xl'}`}
     >
       <video
@@ -87,7 +87,7 @@ const VideoPlayer = ({
 
       {/* Center Play Icon Overlay */}
       {!isPlaying && (
-        <div 
+        <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover/video:opacity-100 transition-opacity duration-300"
           onClick={togglePlay}
         >
@@ -112,10 +112,10 @@ const VideoPlayer = ({
           }}
           className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer hover:h-1.5 transition-all seek-bar"
           style={{
-            background: `linear-gradient(to right, ${accentColor} 0%, ${accentColor} ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`
+            background: `linear-gradient(to right, ${accentColor} 0%, ${accentColor} ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) ${(currentTime / (duration || 1)) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
           }}
         />
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -126,7 +126,7 @@ const VideoPlayer = ({
             >
               {isPlaying ? <IoPause size={18} /> : <IoPlay size={18} />}
             </button>
-            
+
             <div className="flex items-center gap-2 group/volume">
               <button
                 type="button"
@@ -151,7 +151,7 @@ const VideoPlayer = ({
                 className="w-0 group-hover/volume:w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer accent-white transition-all overflow-hidden"
               />
             </div>
-            
+
             <span className="text-[10px] text-white/70 font-medium tabular-nums">
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>

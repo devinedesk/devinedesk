@@ -1,0 +1,70 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: ['main', 'develop']
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: devinedesk_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Prisma Generate
+        run: npx prisma generate
+
+      - name: Push Database Schema
+        env:
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/devinedesk_test'
+        run: npx prisma db push --accept-data-loss
+
+      - name: Build Next.js
+        env:
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/devinedesk_test'
+          NEXTAUTH_SECRET: 'ci_secret'
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm run test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E Tests
+        env:
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/devinedesk_test'
+          NEXTAUTH_SECRET: 'ci_secret'
+        run: npm run test:e2e

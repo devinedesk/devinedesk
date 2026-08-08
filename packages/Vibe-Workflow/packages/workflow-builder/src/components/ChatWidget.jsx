@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { IoMdClose, IoMdSend, IoMdTrash, IoMdCopy, IoMdCheckmark } from "react-icons/io";
-import { BsStars } from "react-icons/bs";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { FaRegCirclePause, FaRegCopy, FaRobot } from "react-icons/fa6";
-import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import React, { useState, useEffect, useRef } from 'react';
+import { IoMdClose, IoMdSend, IoMdTrash, IoMdCopy, IoMdCheckmark } from 'react-icons/io';
+import { BsStars } from 'react-icons/bs';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { FaRegCirclePause, FaRegCopy, FaRobot } from 'react-icons/fa6';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 
 const preprocessContent = (content) => {
-  if (!content) return "";
+  if (!content) return '';
 
-  let lines = content.split("\n");
+  let lines = content.split('\n');
   let processedLines = [];
   let inTable = false;
   let tableRows = [];
 
   const isTableLine = (line) => {
     const trimmed = line.trim();
-    if (trimmed.startsWith("+")) return true;
+    if (trimmed.startsWith('+')) return true;
     const pipes = (trimmed.match(/\|/g) || []).length;
     return pipes >= 2;
   };
@@ -27,10 +27,10 @@ const preprocessContent = (content) => {
 
   const normalizeTableLine = (line) => {
     const trimmed = line.trim();
-    if (trimmed.startsWith("+")) return null; // Ignore decorative borders
+    if (trimmed.startsWith('+')) return null; // Ignore decorative borders
     let row = trimmed;
-    if (!row.startsWith("|")) row = "| " + row;
-    if (!row.endsWith("|")) row = row + " |";
+    if (!row.startsWith('|')) row = '| ' + row;
+    if (!row.endsWith('|')) row = row + ' |';
     return row;
   };
 
@@ -46,7 +46,7 @@ const preprocessContent = (content) => {
           processedLines.push(tableRows[0]);
           const columnCount = (tableRows[0].match(/\|/g) || []).length - 1;
           if (columnCount > 0) {
-            processedLines.push("|" + "---|".repeat(columnCount));
+            processedLines.push('|' + '---|'.repeat(columnCount));
           }
           for (let j = 1; j < tableRows.length; j++) {
             processedLines.push(tableRows[j]);
@@ -63,89 +63,132 @@ const preprocessContent = (content) => {
     processedLines.push(tableRows[0]);
     const columnCount = (tableRows[0].match(/\|/g) || []).length - 1;
     if (columnCount > 0) {
-      processedLines.push("|" + "---|".repeat(columnCount));
+      processedLines.push('|' + '---|'.repeat(columnCount));
     }
     for (let j = 1; j < tableRows.length; j++) {
       processedLines.push(tableRows[j]);
     }
   }
 
-  let processed = processedLines.join("\n");
+  let processed = processedLines.join('\n');
 
   // Smart Code Block Detection: Detect loose code across multiple languages
   const codePatterns = [
-    /^const\s+\w+\s+=/m, /^let\s+\w+\s+=/m, /^var\s+\w+\s+=/m,
-    /^function\s+\w+\s*\(/m, /^class\s+\w+/m, /^def\s+\w+\s*\(/m,
-    /^import\s+.*\s+from/m, /^import\s+[\'\"]\w+/m, /^fetch\s*\(/m,
-    /JSON\.(parse|stringify)\(/g, /\w+\.then\(/g, /\w+\.forEach\(/g,
-    /\w+\.map\(/g, /^if\s*\(.*\)\s*\{/m, /^while\s*\(.*\)\s*\{/m,
-    /^for\s*\(.*\)\s*\{/m, /^for\s+.*\s+in\s+.*:/m, /^if\s+.*:/m,
-    /^async\s+function/m, /^await\s+\w+/m, /^#\s+.*/gm, /^\s*\/\/.*/gm,
-    /^return\s+/m, /^print\s*\(/m, /console\.(log|error|warn|info)\(/g, /assert\s+/g,
+    /^const\s+\w+\s+=/m,
+    /^let\s+\w+\s+=/m,
+    /^var\s+\w+\s+=/m,
+    /^function\s+\w+\s*\(/m,
+    /^class\s+\w+/m,
+    /^def\s+\w+\s*\(/m,
+    /^import\s+.*\s+from/m,
+    /^import\s+[\'\"]\w+/m,
+    /^fetch\s*\(/m,
+    /JSON\.(parse|stringify)\(/g,
+    /\w+\.then\(/g,
+    /\w+\.forEach\(/g,
+    /\w+\.map\(/g,
+    /^if\s*\(.*\)\s*\{/m,
+    /^while\s*\(.*\)\s*\{/m,
+    /^for\s*\(.*\)\s*\{/m,
+    /^for\s+.*\s+in\s+.*:/m,
+    /^if\s+.*:/m,
+    /^async\s+function/m,
+    /^await\s+\w+/m,
+    /^#\s+.*/gm,
+    /^\s*\/\/.*/gm,
+    /^return\s+/m,
+    /^print\s*\(/m,
+    /console\.(log|error|warn|info)\(/g,
+    /assert\s+/g,
     /[{(:\[,]$/, // Lines ending in structural chars
     /^[ \t]*[})\]]/, // Lines starting with closing brackets
   ];
 
-  if (!processed.includes("```")) {
-    const lines = processed.split("\n");
+  if (!processed.includes('```')) {
+    const lines = processed.split('\n');
     let isInsideCode = false;
     let newProcessedLines = [];
-    let currentLang = "javascript";
-    
+    let currentLang = 'javascript';
+
     // Patterns that strongly indicate a state change at line start
     const openPatterns = [
-      /^const\s+/, /^let\s+/, /^var\s+/, /^function\s+/, /^class\s+/, /^def\s+/, 
-      /^import\s+/, /^async\s+/, /^for\s+/, /^while\s+/, /^if\s+/, /^\/\//, /^#/
+      /^const\s+/,
+      /^let\s+/,
+      /^var\s+/,
+      /^function\s+/,
+      /^class\s+/,
+      /^def\s+/,
+      /^import\s+/,
+      /^async\s+/,
+      /^for\s+/,
+      /^while\s+/,
+      /^if\s+/,
+      /^\/\//,
+      /^#/,
     ];
 
     for (let i = 0; i < lines.length; i++) {
-       const line = lines[i];
-       const trimmed = line.trim();
-       const isMarkdownTable = trimmed.startsWith("|");
-       const isMarkdownList = /^[ \t]*([-*+]|\d+\.)[ \t]+/.test(line);
-       
-       const hasPattern = codePatterns.some(pattern => pattern.test(line));
-       const hasOpenPattern = openPatterns.some(p => p.test(line));
+      const line = lines[i];
+      const trimmed = line.trim();
+      const isMarkdownTable = trimmed.startsWith('|');
+      const isMarkdownList = /^[ \t]*([-*+]|\d+\.)[ \t]+/.test(line);
 
-       if (!isInsideCode) {
-         // Only open if it looks like code AND isn't markdown
-         if (hasOpenPattern && !isMarkdownTable && !isMarkdownList) {
-           if (line.includes("def ") || line.includes("elif ") || line.startsWith("#")) currentLang = "python";
-           else currentLang = "javascript";
-           
-           newProcessedLines.push("```" + currentLang);
-           isInsideCode = true;
-         }
-       } else {
-         // Inside code: look ahead to see if we should close
-         const nextLines = lines.slice(i + 1, i + 3);
-         const nextIsCode = nextLines.some(nl => {
-           const t = nl.trim();
-           return t !== "" && !t.startsWith("|") && !/^[ \t]*([-*+]|\d+\.)[ \t]+/.test(nl) && codePatterns.some(p => p.test(nl));
-         });
-         
-         const currentIsCodeOrEmpty = trimmed === "" || (hasPattern && !isMarkdownTable && !isMarkdownList) || /^[ \t]+/.test(line);
+      const hasPattern = codePatterns.some((pattern) => pattern.test(line));
+      const hasOpenPattern = openPatterns.some((p) => p.test(line));
 
-         if (!currentIsCodeOrEmpty && !nextIsCode) {
-           newProcessedLines.push("```");
-           isInsideCode = false;
-           currentLang = "javascript";
-         }
-       }
-       newProcessedLines.push(line);
+      if (!isInsideCode) {
+        // Only open if it looks like code AND isn't markdown
+        if (hasOpenPattern && !isMarkdownTable && !isMarkdownList) {
+          if (line.includes('def ') || line.includes('elif ') || line.startsWith('#'))
+            currentLang = 'python';
+          else currentLang = 'javascript';
+
+          newProcessedLines.push('```' + currentLang);
+          isInsideCode = true;
+        }
+      } else {
+        // Inside code: look ahead to see if we should close
+        const nextLines = lines.slice(i + 1, i + 3);
+        const nextIsCode = nextLines.some((nl) => {
+          const t = nl.trim();
+          return (
+            t !== '' &&
+            !t.startsWith('|') &&
+            !/^[ \t]*([-*+]|\d+\.)[ \t]+/.test(nl) &&
+            codePatterns.some((p) => p.test(nl))
+          );
+        });
+
+        const currentIsCodeOrEmpty =
+          trimmed === '' ||
+          (hasPattern && !isMarkdownTable && !isMarkdownList) ||
+          /^[ \t]+/.test(line);
+
+        if (!currentIsCodeOrEmpty && !nextIsCode) {
+          newProcessedLines.push('```');
+          isInsideCode = false;
+          currentLang = 'javascript';
+        }
+      }
+      newProcessedLines.push(line);
     }
-    if (isInsideCode) newProcessedLines.push("```");
-    processed = newProcessedLines.join("\n");
+    if (isInsideCode) newProcessedLines.push('```');
+    processed = newProcessedLines.join('\n');
   }
 
   // Existing title and list bolding logic
   processed = processed.replace(/^([A-Z][A-Za-z0-9\s\(\)\/-]+)(?=\n)/gm, (match) => {
-    if (match.length < 50 && !match.startsWith("-") && !match.startsWith("#") && !match.startsWith("|")) {
+    if (
+      match.length < 50 &&
+      !match.startsWith('-') &&
+      !match.startsWith('#') &&
+      !match.startsWith('|')
+    ) {
       return `### ${match}`;
     }
     return match;
   });
-  processed = processed.replace(/^- ([^:\n]+):/gm, "- **$1**:");
+  processed = processed.replace(/^- ([^:\n]+):/gm, '- **$1**:');
 
   return processed;
 };
@@ -163,7 +206,7 @@ const CodeBlock = ({ language, value }) => {
     <div className="my-4 rounded-xl overflow-hidden border border-white/10 bg-black/60 shadow-2xl group/code">
       <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
         <span className="text-[10px] uppercase tracking-widest font-bold text-gray-400">
-          {language || "code"}
+          {language || 'code'}
         </span>
         <button
           type="button"
@@ -194,19 +237,19 @@ const CodeBlock = ({ language, value }) => {
 };
 
 const DEFAULT_SUGGESTIONS = [
-  "Create a workflow that generates an image and then a video from it.",
-  "Help me build a YouTube Shorts automation pipeline.",
-  "Add a text-to-speech node to my current workflow.",
-  "Can you create a multi-model image generation grid?"
+  'Create a workflow that generates an image and then a video from it.',
+  'Help me build a YouTube Shorts automation pipeline.',
+  'Add a text-to-speech node to my current workflow.',
+  'Can you create a multi-model image generation grid?',
 ];
 
 const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, onClearHistory }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [loadingStep, setLoadingStep] = useState(0);
   const [copiedId, setCopiedId] = useState(null);
   const [isWide, setIsWide] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const loadingTexts = ["Thinking", "Analyzing", "Generating", "Refining", "Processing", "Running"];
+  const loadingTexts = ['Thinking', 'Analyzing', 'Generating', 'Refining', 'Processing', 'Running'];
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const widgetRef = useRef(null);
@@ -228,7 +271,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
   }, []);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -247,11 +290,11 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
     };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside, true);
+      document.addEventListener('mousedown', handleClickOutside, true);
     }
-    
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside, true);
+      document.removeEventListener('mousedown', handleClickOutside, true);
     };
   }, [isOpen, toggleChat]);
 
@@ -259,29 +302,29 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
     e.preventDefault();
     if (inputValue.trim()) {
       onSendMessage(inputValue);
-      setInputValue("");
+      setInputValue('');
       if (inputRef.current) {
-        inputRef.current.style.height = "auto";
+        inputRef.current.style.height = 'auto';
       }
     }
   };
 
   const formatMessageDate = (isoString) => {
-    if (!isoString) return "";
+    if (!isoString) return '';
     const date = new Date(isoString);
     const now = new Date();
     const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   };
 
   const formatMessageTime = (isoString) => {
-    if (!isoString) return "";
+    if (!isoString) return '';
     return new Date(isoString).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -292,18 +335,21 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
   };
 
   return (
-    <div ref={widgetRef} className="fixed bottom-10 right-10 z-50 flex flex-col items-end gap-2 font-sans">
+    <div
+      ref={widgetRef}
+      className="fixed bottom-10 right-10 z-50 flex flex-col items-end gap-2 font-sans"
+    >
       {isOpen && (
-        <div className={`${isWide ? 'w-[800px]' : 'w-[380px]'} max-w-[100vw] h-[600px] max-h-[100%] flex flex-col bg-[#0B0F17]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in text-left`}>
+        <div
+          className={`${isWide ? 'w-[800px]' : 'w-[380px]'} max-w-[100vw] h-[600px] max-h-[100%] flex flex-col bg-[#0B0F17]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in text-left`}
+        >
           <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600/20 to-cyan-500/20 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-cyan-500 rounded-lg shadow-lg">
                 <FaRobot className="text-white text-lg" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">
-                  AI Assistant
-                </h3>
+                <h3 className="font-semibold text-white">AI Assistant</h3>
                 <p className="text-xs text-gray-400 flex items-center gap-1">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                   Online
@@ -315,7 +361,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                 type="button"
                 suppressHydrationWarning={true}
                 onClick={() => setIsWide(!isWide)}
-                title={isWide ? "Narrow View" : "Wide View"}
+                title={isWide ? 'Narrow View' : 'Wide View'}
                 className="hidden md:flex p-2 text-gray-400 hover:text-blue-400 transition-colors rounded-full hover:bg-white/5"
               >
                 {isWide ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
@@ -349,10 +395,12 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                     <FaRobot className="text-3xl text-blue-400 opacity-80" />
                   </div>
                   <h4 className="text-lg font-semibold text-white mt-2">Welcome!</h4>
-                  <p className="text-sm max-w-[250px]">How can I help you today? Choose a suggestion below or type your own.</p>
+                  <p className="text-sm max-w-[250px]">
+                    How can I help you today? Choose a suggestion below or type your own.
+                  </p>
                 </div>
-                
-                <div className={`grid ${isWide ? "grid-cols-2" : "grid-cols-1"} gap-2 w-full`}>
+
+                <div className={`grid ${isWide ? 'grid-cols-2' : 'grid-cols-1'} gap-2 w-full`}>
                   {DEFAULT_SUGGESTIONS.map((suggestion, sIdx) => (
                     <button
                       type="button"
@@ -361,7 +409,10 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                       onClick={() => onSendMessage(suggestion)}
                       className="px-4 py-3 text-xs font-medium bg-white/5 text-gray-300 rounded-xl hover:bg-cyan-500/20 hover:text-blue-400 hover:border-cyan-400/50 transition-all text-left border border-white/10 shadow-sm cursor-pointer flex items-center gap-3 group"
                     >
-                      <BsStars size={12} className="text-blue-400/50 group-hover:text-blue-400 transition-colors" />
+                      <BsStars
+                        size={12}
+                        className="text-blue-400/50 group-hover:text-blue-400 transition-colors"
+                      />
                       {suggestion}
                     </button>
                   ))}
@@ -379,64 +430,118 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                     {showDateLabel && (
                       <div className="flex justify-center my-2">
                         <span className="px-3 py-1 bg-white/5 text-[10px] uppercase font-bold text-gray-500 rounded-full border border-white/10">
-                          {isMounted ? formatMessageDate(msg.timestamp) : "---"}
+                          {isMounted ? formatMessageDate(msg.timestamp) : '---'}
                         </span>
                       </div>
                     )}
                     <div
                       className={`flex flex-col ${
-                        msg.role === "user" ? "items-end" : "items-start"
+                        msg.role === 'user' ? 'items-end' : 'items-start'
                       }`}
                     >
                       <div
                         className={`flex flex-col gap-4 max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm break-words whitespace-pre-wrap ${
-                          msg.role === "user"
-                            ? "bg-cyan-500 text-white rounded-br-none"
-                            : "bg-[#1A1F2B] text-gray-200 rounded-bl-none border border-white/5"
+                          msg.role === 'user'
+                            ? 'bg-cyan-500 text-white rounded-br-none'
+                            : 'bg-[#1A1F2B] text-gray-200 rounded-bl-none border border-white/5'
                         }`}
                       >
-                        <ReactMarkdown 
+                        <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
-                            h1: ({node, ...props}) => <h1 className="text-xl font-bold text-white" {...props} />,
-                            h2: ({node, ...props}) => <h2 className="text-lg font-bold text-white" {...props} />,
-                            h3: ({node, ...props}) => <h3 className="text-base font-bold text-blue-400" {...props} />,
-                            p: ({node, ...props}) => <div className="leading-relaxed text-gray-300 whitespace-pre-wrap" {...props} />,
-                            ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-1.5 text-gray-300" {...props} />,
-                            ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-1.5 text-gray-300" {...props} />,
-                            li: ({node, ...props}) => <li className="pl-1" {...props} />,
-                            strong: ({node, ...props}) => <strong className="font-extrabold text-white" {...props} />,
-                            em: ({node, ...props}) => <em className="italic text-gray-400" {...props} />,
-                            a: ({node, ...props}) => <a className="text-blue-400 hover:text-blue-300 underline underline-offset-4 decoration-cyan-400/30 break-all transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
-                            code: ({node, inline, className, children, ...props}) => {
-                              const match = /language-(\w+)/.exec(className || "");
-                              const lang = match ? match[1] : "";
+                            h1: ({ node, ...props }) => (
+                              <h1 className="text-xl font-bold text-white" {...props} />
+                            ),
+                            h2: ({ node, ...props }) => (
+                              <h2 className="text-lg font-bold text-white" {...props} />
+                            ),
+                            h3: ({ node, ...props }) => (
+                              <h3 className="text-base font-bold text-blue-400" {...props} />
+                            ),
+                            p: ({ node, ...props }) => (
+                              <div
+                                className="leading-relaxed text-gray-300 whitespace-pre-wrap"
+                                {...props}
+                              />
+                            ),
+                            ul: ({ node, ...props }) => (
+                              <ul className="list-disc pl-5 space-y-1.5 text-gray-300" {...props} />
+                            ),
+                            ol: ({ node, ...props }) => (
+                              <ol
+                                className="list-decimal pl-5 space-y-1.5 text-gray-300"
+                                {...props}
+                              />
+                            ),
+                            li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                            strong: ({ node, ...props }) => (
+                              <strong className="font-extrabold text-white" {...props} />
+                            ),
+                            em: ({ node, ...props }) => (
+                              <em className="italic text-gray-400" {...props} />
+                            ),
+                            a: ({ node, ...props }) => (
+                              <a
+                                className="text-blue-400 hover:text-blue-300 underline underline-offset-4 decoration-cyan-400/30 break-all transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                {...props}
+                              />
+                            ),
+                            code: ({ node, inline, className, children, ...props }) => {
+                              const match = /language-(\w+)/.exec(className || '');
+                              const lang = match ? match[1] : '';
                               return inline ? (
-                                <code className="bg-white/10 rounded-md px-1.5 py-0.5 text-[13px] font-mono text-pink-400" {...props}>{children}</code>
+                                <code
+                                  className="bg-white/10 rounded-md px-1.5 py-0.5 text-[13px] font-mono text-pink-400"
+                                  {...props}
+                                >
+                                  {children}
+                                </code>
                               ) : (
-                                <CodeBlock language={lang} value={String(children).replace(/\n$/, "")} />
+                                <CodeBlock
+                                  language={lang}
+                                  value={String(children).replace(/\n$/, '')}
+                                />
                               );
                             },
-                            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-purple-500/50 pl-4 py-1 italic text-gray-500 bg-white/5 rounded-r-lg" {...props} />,
-                            table: ({node, ...props}) => (
+                            blockquote: ({ node, ...props }) => (
+                              <blockquote
+                                className="border-l-4 border-purple-500/50 pl-4 py-1 italic text-gray-500 bg-white/5 rounded-r-lg"
+                                {...props}
+                              />
+                            ),
+                            table: ({ node, ...props }) => (
                               <div className="my-4 overflow-hidden border border-white/10 rounded-2xl shadow-xl bg-black/20 backdrop-blur-sm">
                                 <div className="overflow-x-auto custom-scrollbar">
-                                  <table className="min-w-full divide-y divide-white/10 border-collapse" {...props} />
+                                  <table
+                                    className="min-w-full divide-y divide-white/10 border-collapse"
+                                    {...props}
+                                  />
                                 </div>
                               </div>
                             ),
-                            th: ({node, ...props}) => (
-                              <th className="px-4 py-3 bg-gradient-to-b from-white/10 to-white/5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-400 border-b border-white/10" {...props} />
+                            th: ({ node, ...props }) => (
+                              <th
+                                className="px-4 py-3 bg-gradient-to-b from-white/10 to-white/5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-400 border-b border-white/10"
+                                {...props}
+                              />
                             ),
-                            td: ({node, ...props}) => (
-                              <td className="px-4 py-2.5 text-[13px] text-gray-300 border-b border-white/5 transition-colors" {...props} />
+                            td: ({ node, ...props }) => (
+                              <td
+                                className="px-4 py-2.5 text-[13px] text-gray-300 border-b border-white/5 transition-colors"
+                                {...props}
+                              />
                             ),
-                            tr: ({node, ...props}) => (
-                              <tr className="group transition-colors odd:bg-transparent even:bg-white-[0.02]" {...props} />
+                            tr: ({ node, ...props }) => (
+                              <tr
+                                className="group transition-colors odd:bg-transparent even:bg-white-[0.02]"
+                                {...props}
+                              />
                             ),
                           }}
                         >
-                          {preprocessContent(msg.content) || ""}
+                          {preprocessContent(msg.content) || ''}
                         </ReactMarkdown>
                         {msg.suggestions && msg.suggestions.length > 0 && (
                           <div className="flex flex-col gap-2">
@@ -459,7 +564,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                       </div>
                       <div className="flex items-center gap-2 mt-1 px-1">
                         <span className="text-[10px] text-gray-400">
-                          {isMounted ? formatMessageTime(msg.timestamp) : "--:--"}
+                          {isMounted ? formatMessageTime(msg.timestamp) : '--:--'}
                         </span>
                         <button
                           type="button"
@@ -468,7 +573,11 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                           className="text-gray-400 hover:text-cyan-400 transition-colors cursor-pointer"
                           title="Copy Message"
                         >
-                          {copiedId === idx ? <IoMdCheckmark size={12} className="text-green-500" /> : <FaRegCopy size={12} />}
+                          {copiedId === idx ? (
+                            <IoMdCheckmark size={12} className="text-green-500" />
+                          ) : (
+                            <FaRegCopy size={12} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -485,7 +594,9 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                       <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
                       <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" />
                     </div>
-                    <span className="text-[10px] font-medium text-gray-500 tracking-widest ml-1">{loadingTexts[loadingStep]}...</span>
+                    <span className="text-[10px] font-medium text-gray-500 tracking-widest ml-1">
+                      {loadingTexts[loadingStep]}...
+                    </span>
                   </div>
                 </div>
               </div>
@@ -502,7 +613,7 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
+                  if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
                   }
@@ -511,9 +622,9 @@ const ChatWidget = ({ isOpen, toggleChat, messages, onSendMessage, isLoading, on
                 rows={1}
                 autoFocus
                 className="flex-1 bg-transparent outline-none text-sm text-gray-200 placeholder-gray-500 resize-none p-1 max-h-32 scrollbar-none border-none"
-                style={{ height: "auto" }}
+                style={{ height: 'auto' }}
                 onInput={(e) => {
-                  e.target.style.height = "auto";
+                  e.target.style.height = 'auto';
                   e.target.style.height = `${e.target.scrollHeight}px`;
                 }}
               />

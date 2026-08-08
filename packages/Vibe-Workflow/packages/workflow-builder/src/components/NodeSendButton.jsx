@@ -1,7 +1,13 @@
-import React, { useState } from "react";
-import { useReactFlow } from "reactflow";
+import React, { useState } from 'react';
+import { useReactFlow } from 'reactflow';
 
-const NodeSendButton = ({ id, data, outputHistory, currentHistoryIndex, currentOutputIndex = 0 }) => {
+const NodeSendButton = ({
+  id,
+  data,
+  outputHistory,
+  currentHistoryIndex,
+  currentOutputIndex = 0,
+}) => {
   const [showMenu, setShowMenu] = useState(false);
   const connectedEdges = data.connectedEdges || [];
   if (connectedEdges.length === 0) return null;
@@ -54,7 +60,8 @@ const NodeSendButton = ({ id, data, outputHistory, currentHistoryIndex, currentO
                   setShowMenu(false);
                 }}
               >
-                Send to {edge.target} {targetCounts[edge.target] > 1 ? `(${edge.targetHandle})` : ""}
+                Send to {edge.target}{' '}
+                {targetCounts[edge.target] > 1 ? `(${edge.targetHandle})` : ''}
               </button>
             ));
           })()}
@@ -62,12 +69,12 @@ const NodeSendButton = ({ id, data, outputHistory, currentHistoryIndex, currentO
       )}
 
       {showMenu && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={(e) => {
             e.stopPropagation();
             setShowMenu(false);
-          }} 
+          }}
         />
       )}
     </div>

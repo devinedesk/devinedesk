@@ -1,8 +1,8 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../api/auth/[...nextauth]/route";
-import AgentChatClient from "./AgentChatClient";
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../api/auth/[...nextauth]/route';
+import AgentChatClient from './AgentChatClient';
 import prisma from '@/src/lib/prisma';
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   const { agent_id } = await params;
@@ -16,13 +16,13 @@ export default async function AgentPage({ params }) {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
-    redirect("/auth/login");
+    redirect('/auth/login');
   }
 
   console.log(`[AgentPage] Loading page for agent slug: ${agent_id}, user: ${session.user.id}`);
 
   const agent = await prisma.agent.findUnique({
-    where: { slug: agent_id }
+    where: { slug: agent_id },
   });
 
   if (!agent) {
@@ -33,20 +33,14 @@ export default async function AgentPage({ params }) {
   const agentDetails = {
     ...agent,
     system_prompt: agent.systemPrompt,
-    agent_id: agent.id
+    agent_id: agent.id,
   };
 
   const userData = {
     balance: session.user.credits || 0,
     email: session.user.email,
-    name: session.user.name
+    name: session.user.name,
   };
 
-  return (
-    <AgentChatClient 
-      agentDetails={agentDetails} 
-      initialHistory={null} 
-      userData={userData}
-    />
-  );
+  return <AgentChatClient agentDetails={agentDetails} initialHistory={null} userData={userData} />;
 }

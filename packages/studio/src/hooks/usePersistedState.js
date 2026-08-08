@@ -26,7 +26,7 @@ export function usePersistedState(key, initialValue) {
       // Allow value to be a function so we have same API as useState
       const valueToStore = value instanceof Function ? value(state) : value;
       setState(valueToStore);
-      if (typeof window !== "undefined") {
+      if (typeof window !== 'undefined') {
         localStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {

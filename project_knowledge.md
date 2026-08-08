@@ -40,33 +40,39 @@ src/
 ## 3. Key Components & Logic
 
 ### `ImageStudio.js` (The Brain)
+
 This is the most complex component. It handles:
+
 - **State:** Selected model (`selectedModel`), aspect ratio (`selectedAr`), and generation status.
 - **Prompt Input:** A textarea with auto-grow logic and max-height constraints (fixed in `bf2efdb`).
 - **Dynamic Controls:**
-    - **Model Picker:** Lists models from `models.js`.
-    - **Quality/Resolution:** Only appears for models with explicit resolution support (like `nano-banana-pro`). Hidden for others (like `flux-schnell`).
+  - **Model Picker:** Lists models from `models.js`.
+  - **Quality/Resolution:** Only appears for models with explicit resolution support (like `nano-banana-pro`). Hidden for others (like `flux-schnell`).
 - **Generation Flow:**
-    1. Checks for API key in `localStorage`. If missing, opens `AuthModal`.
-    2. Calls `Local API.generateImage()`.
-    3. Polling loop waits for result.
-    4. On success, adds result to `generationHistory` and displays it.
+  1. Checks for API key in `localStorage`. If missing, opens `AuthModal`.
+  2. Calls `Local API.generateImage()`.
+  3. Polling loop waits for result.
+  4. On success, adds result to `generationHistory` and displays it.
 - **History:**
-    - Stored in `localStorage` key `Local API_history`.
-    - Slides in from the right sidebar.
-    - Thumbnails are clickable to re-view; hover to download.
+  - Stored in `localStorage` key `Local API_history`.
+  - Slides in from the right sidebar.
+  - Thumbnails are clickable to re-view; hover to download.
 
 ### `Local API.js` (The Engine)
+
 Encapsulates all communication with `api.Local API.ai`.
+
 - **Authentication:** Uses `x-api-key` header (NOT `Authorization: Bearer`).
 - **Pattern:** Submit -> Poll.
-    - `POST` to endpoint (e.g., `/api/v1/nano-banana-pro`).
-    - API returns a `request_id`.
-    - `POST` / `GET` loop on `/api/v1/predictions/{id}/result` until status is `completed`, `succeeded`, or `failed`.
+  - `POST` to endpoint (e.g., `/api/v1/nano-banana-pro`).
+  - API returns a `request_id`.
+  - `POST` / `GET` loop on `/api/v1/predictions/{id}/result` until status is `completed`, `succeeded`, or `failed`.
 - **Normalization:** The polling response structure varies. `Local API.js` normalizes the result to ensure `url` is always populated (extracting from `outputs[0]` if necessary).
 
 ### `models.js` (The Data)
+
 Contains the `t2iModels` array.
+
 - Each model has an `id`, `name`, `inputs` schema (resolution, aspect ratio support), and a crucial `endpoint` property.
 - **Crucial:** The `endpoint` property maps the internal ID to the API path (e.g., `flux-schnell` -> `flux-schnell-image`).
 
@@ -76,8 +82,8 @@ Contains the `t2iModels` array.
 - **Accent:** Electric Cyan (`#22d3ee`) used for primary actions and glows.
 - **Glassmorphism:** Extensive use of `backdrop-blur` and `bg-white/5` or `bg-black/60` for panels, headers, and modals.
 - **Responsiveness:**
-    - **Mobile:** Stacked layout, simplified controls, hidden sidebar.
-    - **Desktop:** Wide canvas, floating prompt bar, side-by-side history.
+  - **Mobile:** Stacked layout, simplified controls, hidden sidebar.
+  - **Desktop:** Wide canvas, floating prompt bar, side-by-side history.
 - **Animations:** Custom keyframes in `global.css` for `fade-in-up`, `pulse-glow`, etc.
 
 ## 5. Development Setup
@@ -88,7 +94,7 @@ Contains the `t2iModels` array.
 ## 6. Known Gotchas & Fixes
 
 - **Prompt Bar Overflow:** Fixed by limiting textarea max-height and enabling scrolling.
-- **Flux Resolution Picker:** Fixed logic to only show the resolution picker if the model *explicitly* lists enum values for resolution/megapixels.
+- **Flux Resolution Picker:** Fixed logic to only show the resolution picker if the model _explicitly_ lists enum values for resolution/megapixels.
 - **Hero Visibility:** The "Nano Banana Pro" hero text is completely hidden (`display: none`) when an image is shown to prevent bleed-through.
 - **API Key Logging:** Debug logs printing the API key were removed for security.
 

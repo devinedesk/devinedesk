@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
   getTemplateWorkflows,
   getUserWorkflows,
@@ -13,10 +13,10 @@ import {
   executeWorkflow,
   getAllNodeSchemas,
   getWorkflowData,
-} from "../apiClient.js";
-import dynamic from "next/dynamic";
+} from '../apiClient.js';
+import dynamic from 'next/dynamic';
 
-const WorkflowUI = dynamic(() => import("./WorkflowUI"), {
+const WorkflowUI = dynamic(() => import('./WorkflowUI'), {
   ssr: false,
   loading: () => (
     <div className="absolute inset-0 flex items-center justify-center">
@@ -62,30 +62,48 @@ function WorkflowCard({ workflow, onClick, activeTab, onRename, onDelete }) {
         </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-      
+
       {/* Options Dropdown for My Workflows */}
       {activeTab === 'my-workflows' && (
-        <div 
+        <div
           className="absolute top-2 right-2 z-30"
-          onClick={(e) => { e.stopPropagation(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         >
           <button
             onClick={() => setShowOptions(!showOptions)}
             onBlur={() => setTimeout(() => setShowOptions(false), 200)}
             className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <circle cx="12" cy="5" r="1" />
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="12" cy="19" r="1" />
             </svg>
           </button>
-          
+
           {showOptions && (
             <div className="absolute top-10 right-0 w-32 bg-[#111] border border-white/10 rounded-lg shadow-2xl py-1 animate-in fade-in zoom-in duration-200">
               <button
                 onClick={() => onRename(workflow)}
                 className="w-full px-4 py-2 text-left text-[11px] font-bold text-white/70 hover:text-primary hover:bg-white/5 transition-colors flex items-center gap-2"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                   <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
@@ -95,7 +113,14 @@ function WorkflowCard({ workflow, onClick, activeTab, onRename, onDelete }) {
                 onClick={() => onDelete(workflow.id)}
                 className="w-full px-4 py-2 text-left text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors flex items-center gap-2"
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                 </svg>
                 Delete
@@ -108,17 +133,23 @@ function WorkflowCard({ workflow, onClick, activeTab, onRename, onDelete }) {
       {/* Community Profile Info */}
       {activeTab === 'published' && workflow.user_name && (
         <div className="absolute top-2 left-2 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-          <img src={workflow.user_profile || "/user_profile.png"} alt="profile" className="w-4 h-4 rounded-full" />
-          <span className="text-[9px] font-black text-white/80 uppercase tracking-widest">{workflow.user_name}</span>
+          <img
+            src={workflow.user_profile || '/user_profile.png'}
+            alt="profile"
+            className="w-4 h-4 rounded-full"
+          />
+          <span className="text-[9px] font-black text-white/80 uppercase tracking-widest">
+            {workflow.user_name}
+          </span>
         </div>
       )}
 
       <div className="absolute inset-x-0 bottom-0 p-4">
         <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1 opacity-80">
-          {workflow.category || "General"}
+          {workflow.category || 'General'}
         </div>
         <h3 className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">
-          {workflow.name || "Untitled Flow"}
+          {workflow.name || 'Untitled Flow'}
         </h3>
       </div>
     </div>
@@ -136,8 +167,8 @@ export default function WorkflowStudio({
 }) {
   const params = useParams();
   const router = useRouter();
-  const idFromParams = params?.id;     // exists on /workflow/[id]/[tab] route
-  const tabFromParams = params?.tab;   // string on /workflow/[id]/[tab]; array on the [[...tab]] catch-all
+  const idFromParams = params?.id; // exists on /workflow/[id]/[tab] route
+  const tabFromParams = params?.tab; // string on /workflow/[id]/[tab]; array on the [[...tab]] catch-all
   // Catch-all routes (/studio/[brandSlug]/[[...tab]], /devinedesk/[[...tab]]) expose the
   // whole remaining path as params.tab (an array) — NOT params.slug, which doesn't exist on either
   // route and previously made this whole fallback branch permanently dead.
@@ -152,11 +183,11 @@ export default function WorkflowStudio({
     // Priority 2: Catch-all studio shell route — also recognizes the singular
     // "workflow" segment used by the standalone /workflow/[id]/[tab] URL scheme,
     // since a white-label custom domain's middleware rewrite lands here too.
-    const wfIndex = catchAllSegments.findIndex(s => s === 'workflows' || s === 'workflow');
+    const wfIndex = catchAllSegments.findIndex((s) => s === 'workflows' || s === 'workflow');
     if (wfIndex === -1) return { id: null, tab: null };
     return {
       id: catchAllSegments[wfIndex + 1] || null,
-      tab: catchAllSegments[wfIndex + 2] || null
+      tab: catchAllSegments[wfIndex + 2] || null,
     };
   }, [catchAllSegments, idFromParams, tabFromParams]);
 
@@ -165,10 +196,10 @@ export default function WorkflowStudio({
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
-  const [activeSubTab, setActiveSubTab] = useState("playground"); // 'playground' | 'builder'
-  const [activeMainTab, setActiveMainTab] = useState("templates"); // 'templates' | 'my-workflows' | 'published'
+  const [activeSubTab, setActiveSubTab] = useState('playground'); // 'playground' | 'builder'
+  const [activeMainTab, setActiveMainTab] = useState('templates'); // 'templates' | 'my-workflows' | 'published'
   const [renamingWorkflow, setRenamingWorkflow] = useState(null);
-  const [newWorkflowName, setNewWorkflowName] = useState("");
+  const [newWorkflowName, setNewWorkflowName] = useState('');
   const [isDeletingId, setIsDeletingId] = useState(null);
   const [inputSchema, setInputSchema] = useState(null);
   const [nodeSchemas, setNodeSchemas] = useState(null);
@@ -177,7 +208,6 @@ export default function WorkflowStudio({
   const [isExecuting, setIsExecuting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  
 
   // Handlers defined early so they can be used in effects
   const handleSelectWorkflow = useCallback(
@@ -185,8 +215,8 @@ export default function WorkflowStudio({
       setSelectedWorkflow(wf);
       setResult(null);
       setError(null);
-      
-      const targetTab = urlTab || "playground";
+
+      const targetTab = urlTab || 'playground';
       setActiveSubTab(targetTab);
 
       if (!fromUrl) {
@@ -194,7 +224,7 @@ export default function WorkflowStudio({
         router.push(`/workflow/${wf.id}/${targetTab}`);
       }
     },
-    [router, urlTab],
+    [router, urlTab]
   );
 
   // Dedicated data fetching effect for the active workflow
@@ -205,12 +235,12 @@ export default function WorkflowStudio({
       try {
         setLoading(true);
         const wfId = selectedWorkflow.id;
-        
+
         // Fetch everything in parallel with allSettled so one failure doesn't block the others
         const results = await Promise.allSettled([
           getWorkflowInputs(apiKey, wfId),
           getAllNodeSchemas(apiKey, wfId),
-          getWorkflowData(apiKey, wfId)
+          getWorkflowData(apiKey, wfId),
         ]);
 
         // Process Input Schema
@@ -224,11 +254,11 @@ export default function WorkflowStudio({
             initial[key] =
               prop.default ||
               (Array.isArray(prop.examples) ? prop.examples[0] : prop.examples) ||
-              "";
+              '';
           });
           setFormData(initial);
         } else {
-          console.warn("Input schema not available for this workflow:", results[0].reason);
+          console.warn('Input schema not available for this workflow:', results[0].reason);
           setInputSchema(null);
           setFormData({});
         }
@@ -241,14 +271,14 @@ export default function WorkflowStudio({
         setWorkflowDef(def);
 
         if (results[1].status === 'rejected' || results[2].status === 'rejected') {
-          console.error("Builder components failed to load:", results[1].reason, results[2].reason);
+          console.error('Builder components failed to load:', results[1].reason, results[2].reason);
           if (!nodes.length && !def.nodes?.length) {
-             setError("Failed to load full builder data. Some features may be disabled.");
+            setError('Failed to load full builder data. Some features may be disabled.');
           }
         }
       } catch (err) {
-        console.error("Critical error loading pulse details:", err);
-        setError("Critical error loading builder: " + err.message);
+        console.error('Critical error loading pulse details:', err);
+        setError('Critical error loading builder: ' + err.message);
         setNodeSchemas([]);
         setWorkflowDef({ nodes: [], edges: [] });
       } finally {
@@ -266,7 +296,7 @@ export default function WorkflowStudio({
         if (!fromUrl) {
           const payload = {
             workflow_id: null,
-            name: "Untitled Workflow",
+            name: 'Untitled Workflow',
             edges: [],
             data: { nodes: [] },
           };
@@ -274,34 +304,34 @@ export default function WorkflowStudio({
           // Route to /workflow/[id] so useParams().id works in the builder library.
           // That page has no white-label session of its own, so hand off our token
           // via sessionStorage — it reads "wl_workflow_token" on mount.
-          if (apiKey) sessionStorage.setItem("wl_workflow_token", apiKey);
+          if (apiKey) sessionStorage.setItem('wl_workflow_token', apiKey);
           router.push(`/workflow/${response.workflow_id}/builder`);
           return;
         }
 
         // Initialize state for the new flow
-        setSelectedWorkflow({ id: null, name: "Untitled Workflow" });
+        setSelectedWorkflow({ id: null, name: 'Untitled Workflow' });
         setNodeSchemas([]);
         setWorkflowDef({ nodes: [], edges: [] });
-        setActiveSubTab("builder");
+        setActiveSubTab('builder');
       } catch (err) {
-        setError("Failed to initialize workflow: " + err.message);
+        setError('Failed to initialize workflow: ' + err.message);
       } finally {
         setLoading(false);
       }
     },
-    [apiKey, router],
+    [apiKey, router]
   );
 
   const handleDeleteWorkflow = async (wfId) => {
-    if (!confirm("Are you sure you want to delete this workflow?")) return;
+    if (!confirm('Are you sure you want to delete this workflow?')) return;
     setIsDeletingId(wfId);
     try {
       await deleteWorkflow(apiKey, wfId);
       setWorkflows((prev) => prev.filter((w) => w.id !== wfId));
     } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Failed to delete workflow");
+      console.error('Delete failed:', err);
+      alert('Failed to delete workflow');
     } finally {
       setIsDeletingId(null);
     }
@@ -315,15 +345,15 @@ export default function WorkflowStudio({
     try {
       await updateWorkflowName(apiKey, wfId, newWorkflowName);
       setWorkflows((prev) =>
-        prev.map((w) => (w.id === wfId ? { ...w, name: newWorkflowName } : w)),
+        prev.map((w) => (w.id === wfId ? { ...w, name: newWorkflowName } : w))
       );
       if (selectedWorkflow?.id === wfId) {
         setSelectedWorkflow({ ...selectedWorkflow, name: newWorkflowName });
       }
       setRenamingWorkflow(null);
     } catch (err) {
-      console.error("Rename failed:", err);
-      alert("Failed to rename workflow");
+      console.error('Rename failed:', err);
+      alert('Failed to rename workflow');
     }
   };
 
@@ -344,7 +374,7 @@ export default function WorkflowStudio({
     if (loading) return;
 
     if (urlWorkflowId) {
-      if (urlWorkflowId === "new") {
+      if (urlWorkflowId === 'new') {
         if (!selectedWorkflow || selectedWorkflow.id !== null) {
           handleCreateWorkflow(true);
         }
@@ -354,16 +384,10 @@ export default function WorkflowStudio({
           if (!selectedWorkflow || selectedWorkflow.id !== urlWorkflowId) {
             handleSelectWorkflow(found, true);
           }
-        } else if (
-          !selectedWorkflow ||
-          selectedWorkflow.id !== urlWorkflowId
-        ) {
+        } else if (!selectedWorkflow || selectedWorkflow.id !== urlWorkflowId) {
           // Fallback for deep-linking: attempt to open even if not in the current tab's list
           // handleSelectWorkflow fetches official name/data anyway
-          handleSelectWorkflow(
-            { id: urlWorkflowId, name: "Loading..." },
-            true,
-          );
+          handleSelectWorkflow({ id: urlWorkflowId, name: 'Loading...' }, true);
         }
       }
     } else if (selectedWorkflow) {
@@ -380,9 +404,9 @@ export default function WorkflowStudio({
 
   // Handle reload on exit to clear builder CSS
   useEffect(() => {
-    const fromBuilder = sessionStorage.getItem("fromWorkflowBuilder");
-    if (fromBuilder && (!urlWorkflowId || activeSubTab !== "builder")) {
-      sessionStorage.removeItem("fromWorkflowBuilder");
+    const fromBuilder = sessionStorage.getItem('fromWorkflowBuilder');
+    if (fromBuilder && (!urlWorkflowId || activeSubTab !== 'builder')) {
+      sessionStorage.removeItem('fromWorkflowBuilder');
       window.location.reload();
     }
   }, [urlWorkflowId, activeSubTab]);
@@ -392,17 +416,17 @@ export default function WorkflowStudio({
       try {
         setLoading(true);
         let data = [];
-        if (activeMainTab === "templates") {
+        if (activeMainTab === 'templates') {
           data = await getTemplateWorkflows(apiKey);
-        } else if (activeMainTab === "my-workflows") {
+        } else if (activeMainTab === 'my-workflows') {
           data = await getUserWorkflows(apiKey);
-        } else if (activeMainTab === "published") {
+        } else if (activeMainTab === 'published') {
           data = await getPublishedWorkflows(apiKey);
         }
         setWorkflows(data);
       } catch (err) {
-        console.error("Failed to load workflows:", err);
-        setError("Failed to load workflows list.");
+        console.error('Failed to load workflows:', err);
+        setError('Failed to load workflows list.');
       } finally {
         setLoading(false);
       }
@@ -423,9 +447,9 @@ export default function WorkflowStudio({
       const inputs = {};
       Object.entries(formData).forEach(([key, value]) => {
         if (!value) return;
-        if (key.startsWith("text")) inputs[key] = { prompt: value };
-        else if (key.startsWith("image")) inputs[key] = { image_url: value };
-        else if (key.startsWith("video")) inputs[key] = { video_url: value };
+        if (key.startsWith('text')) inputs[key] = { prompt: value };
+        else if (key.startsWith('image')) inputs[key] = { image_url: value };
+        else if (key.startsWith('video')) inputs[key] = { video_url: value };
         else inputs[key] = value;
       });
 
@@ -433,11 +457,11 @@ export default function WorkflowStudio({
       setResult(data);
       onGenerationComplete?.({
         url: data?.url || data?.output?.url || data?.outputs?.[0]?.url || null,
-        type: "workflow",
+        type: 'workflow',
       });
     } catch (err) {
-      console.error("Execution failed:", err);
-      const message = err.message || "Execution failed";
+      console.error('Execution failed:', err);
+      const message = err.message || 'Execution failed';
       setError(message);
       onGenerationError?.(message);
     } finally {
@@ -462,11 +486,20 @@ export default function WorkflowStudio({
           <div className="flex-shrink-0 h-14 border-b border-white/5 flex items-center justify-between px-6 bg-black/40 z-30">
             <div className="flex items-center gap-8 h-full">
               <button
-                onClick={() => router.push("/studio/workflows")}
+                onClick={() => router.push('/studio/workflows')}
                 className="flex items-center gap-2 text-xs font-bold text-white/50 hover:text-white transition-colors"
                 type="button"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
                 All Workflows
@@ -478,31 +511,32 @@ export default function WorkflowStudio({
                 <div className="flex bg-white/5 p-1 rounded-lg my-auto">
                   <button
                     onClick={() => {
-                        setActiveSubTab("playground");
-                        if (selectedWorkflow?.id) router.push(`/workflow/${selectedWorkflow.id}/playground`);
+                      setActiveSubTab('playground');
+                      if (selectedWorkflow?.id)
+                        router.push(`/workflow/${selectedWorkflow.id}/playground`);
                     }}
                     type="button"
                     className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
-                      activeSubTab === "playground"
-                        ? "bg-primary text-black shadow-[0_0_15px_rgba(34, 211, 238,0.2)]"
-                        : "text-white/60 hover:text-white"
+                      activeSubTab === 'playground'
+                        ? 'bg-primary text-black shadow-[0_0_15px_rgba(34, 211, 238,0.2)]'
+                        : 'text-white/60 hover:text-white'
                     }`}
                   >
                     Playground
                   </button>
                   <button
                     onClick={() => {
-                        setActiveSubTab("builder");
-                        if (selectedWorkflow?.id) {
-                          if (apiKey) sessionStorage.setItem("wl_workflow_token", apiKey);
-                          router.push(`/workflow/${selectedWorkflow.id}/builder`);
-                        }
+                      setActiveSubTab('builder');
+                      if (selectedWorkflow?.id) {
+                        if (apiKey) sessionStorage.setItem('wl_workflow_token', apiKey);
+                        router.push(`/workflow/${selectedWorkflow.id}/builder`);
+                      }
                     }}
                     type="button"
                     className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
-                      activeSubTab === "builder"
-                        ? "bg-primary text-black shadow-[0_0_15px_rgba(34, 211, 238,0.2)]"
-                        : "text-white/60 hover:text-white"
+                      activeSubTab === 'builder'
+                        ? 'bg-primary text-black shadow-[0_0_15px_rgba(34, 211, 238,0.2)]'
+                        : 'text-white/60 hover:text-white'
                     }`}
                   >
                     Full Workflow
@@ -521,7 +555,14 @@ export default function WorkflowStudio({
                 title="Enter Zen Mode"
                 type="button"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
                   <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                 </svg>
               </button>
@@ -531,35 +572,44 @@ export default function WorkflowStudio({
           /* Floating Immersive Mode Controller */
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl animate-fade-in-down">
             <button
-               onClick={() => router.push("/studio/workflows")}
-               className="p-1.5 text-white/60 hover:text-white transition-colors"
-               title="Back to All Workflows"
-               type="button"
+              onClick={() => router.push('/studio/workflows')}
+              className="p-1.5 text-white/60 hover:text-white transition-colors"
+              title="Back to All Workflows"
+              type="button"
             >
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
             </button>
-            
+
             <div className="h-4 w-[1px] bg-white/10" />
-            
+
             <div className="flex bg-white/5 p-1 rounded-lg">
-               <button
-                 onClick={() => setActiveSubTab("playground")}
-                 type="button"
-                 className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${
-                   activeSubTab === "playground" ? "bg-primary text-black" : "text-white/60"
-                 }`}
-               >
-                 Play
-               </button>
-               <button
-                 onClick={() => setActiveSubTab("builder")}
-                 type="button"
-                 className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${
-                   activeSubTab === "builder" ? "bg-primary text-black" : "text-white/60"
-                 }`}
-               >
-                 Builder
-               </button>
+              <button
+                onClick={() => setActiveSubTab('playground')}
+                type="button"
+                className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${
+                  activeSubTab === 'playground' ? 'bg-primary text-black' : 'text-white/60'
+                }`}
+              >
+                Play
+              </button>
+              <button
+                onClick={() => setActiveSubTab('builder')}
+                type="button"
+                className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${
+                  activeSubTab === 'builder' ? 'bg-primary text-black' : 'text-white/60'
+                }`}
+              >
+                Builder
+              </button>
             </div>
 
             <div className="h-4 w-[1px] bg-white/10" />
@@ -569,14 +619,23 @@ export default function WorkflowStudio({
               className="px-3 py-1 bg-white/10 hover:bg-white/20 text-[9px] font-black text-white uppercase tracking-widest rounded-lg transition-colors flex items-center gap-2"
               type="button"
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M4 14h6v6M20 10h-6V4M10 20l-7-7M14 4l7 7"/></svg>
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <path d="M4 14h6v6M20 10h-6V4M10 20l-7-7M14 4l7 7" />
+              </svg>
               Exit Zen
             </button>
           </div>
         )}
 
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-          {activeSubTab === "playground" ? (
+          {activeSubTab === 'playground' ? (
             <>
               {/* Controls Panel */}
               <div className="w-full lg:w-[400px] border-r border-white/5 flex flex-col bg-black/20">
@@ -588,66 +647,56 @@ export default function WorkflowStudio({
                       </h3>
                       <div className="space-y-4">
                         {inputSchema &&
-                          Object.entries(inputSchema.properties || {}).map(
-                            ([key, prop]) => (
-                              <div key={key} className="space-y-2">
-                                <label className="block text-[11px] font-bold text-white/80 uppercase tracking-wider">
-                                  {prop.title || key}
-                                </label>
-                                {prop.type === "string" && !prop.enum ? (
-                                  <textarea
-                                    value={formData[key] || ""}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        [key]: e.target.value,
-                                      })
-                                    }
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors min-h-[80px] resize-none"
-                                    placeholder={
-                                      prop.description || `Enter ${key}...`
-                                    }
-                                  />
-                                ) : prop.enum ? (
-                                  <select
-                                    value={formData[key] || ""}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        [key]: e.target.value,
-                                      })
-                                    }
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-                                  >
-                                    {prop.enum.map((opt) => (
-                                      <option
-                                        key={opt}
-                                        value={opt}
-                                        className="bg-black"
-                                      >
-                                        {opt}
-                                      </option>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <input
-                                    type="text"
-                                    value={formData[key] || ""}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        [key]: e.target.value,
-                                      })
-                                    }
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
-                                    placeholder={
-                                      prop.description || `Enter ${key}...`
-                                    }
-                                  />
-                                )}
-                              </div>
-                            ),
-                          )}
+                          Object.entries(inputSchema.properties || {}).map(([key, prop]) => (
+                            <div key={key} className="space-y-2">
+                              <label className="block text-[11px] font-bold text-white/80 uppercase tracking-wider">
+                                {prop.title || key}
+                              </label>
+                              {prop.type === 'string' && !prop.enum ? (
+                                <textarea
+                                  value={formData[key] || ''}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      [key]: e.target.value,
+                                    })
+                                  }
+                                  className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors min-h-[80px] resize-none"
+                                  placeholder={prop.description || `Enter ${key}...`}
+                                />
+                              ) : prop.enum ? (
+                                <select
+                                  value={formData[key] || ''}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      [key]: e.target.value,
+                                    })
+                                  }
+                                  className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+                                >
+                                  {prop.enum.map((opt) => (
+                                    <option key={opt} value={opt} className="bg-black">
+                                      {opt}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={formData[key] || ''}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      [key]: e.target.value,
+                                    })
+                                  }
+                                  className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+                                  placeholder={prop.description || `Enter ${key}...`}
+                                />
+                              )}
+                            </div>
+                          ))}
                       </div>
                     </div>
 
@@ -708,9 +757,7 @@ export default function WorkflowStudio({
                       <span className="text-[10px] font-black text-red-500 uppercase tracking-widest block mb-1">
                         Execution Error
                       </span>
-                      <p className="text-white/60 text-sm leading-relaxed">
-                        {error}
-                      </p>
+                      <p className="text-white/60 text-sm leading-relaxed">{error}</p>
                     </div>
                   </div>
                 )}
@@ -771,7 +818,7 @@ export default function WorkflowStudio({
                         Workflow Results
                       </h3>
                       <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-[10px] font-bold border border-green-500/20">
-                        <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />{" "}
+                        <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />{' '}
                         COMPLETED
                       </div>
                     </div>
@@ -782,13 +829,13 @@ export default function WorkflowStudio({
                           key={idx}
                           className="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-primary/30 transition-all shadow-2xl"
                         >
-                          {out.type === "image_url" ? (
+                          {out.type === 'image_url' ? (
                             <img
                               src={out.value}
                               className="w-full aspect-square object-cover"
                               alt="Output"
                             />
-                          ) : out.type === "video_url" ? (
+                          ) : out.type === 'video_url' ? (
                             <video
                               src={out.value}
                               controls
@@ -841,7 +888,7 @@ export default function WorkflowStudio({
                   initialWorkflowData={{
                     ...workflowDef,
                     // Inject ID to prevent builder from assuming this is a new unsaved flow
-                    workflow_id: selectedWorkflow?.id
+                    workflow_id: selectedWorkflow?.id,
                   }}
                   onGenerationStart={onGenerationStart}
                   onGenerationEnd={onGenerationEnd}
@@ -872,9 +919,7 @@ export default function WorkflowStudio({
         <div className="flex flex-col gap-6 mb-12">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
-                Workflows
-              </h1>
+              <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Workflows</h1>
               <p className="text-white/60 text-sm font-medium">
                 Create and manage your asynchronous AI processing pipelines
               </p>
@@ -902,31 +947,31 @@ export default function WorkflowStudio({
 
           <div className="flex items-center gap-2 border-b border-white/5">
             <button
-              onClick={() => setActiveMainTab("templates")}
+              onClick={() => setActiveMainTab('templates')}
               className={`px-6 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
-                activeMainTab === "templates"
-                  ? "text-primary border-primary"
-                  : "text-white/60 border-transparent hover:text-white"
+                activeMainTab === 'templates'
+                  ? 'text-primary border-primary'
+                  : 'text-white/60 border-transparent hover:text-white'
               }`}
             >
               Templates
             </button>
             <button
-              onClick={() => setActiveMainTab("my-workflows")}
+              onClick={() => setActiveMainTab('my-workflows')}
               className={`px-6 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
-                activeMainTab === "my-workflows"
-                  ? "text-primary border-primary"
-                  : "text-white/60 border-transparent hover:text-white"
+                activeMainTab === 'my-workflows'
+                  ? 'text-primary border-primary'
+                  : 'text-white/60 border-transparent hover:text-white'
               }`}
             >
               My Workflows
             </button>
             <button
-              onClick={() => setActiveMainTab("published")}
+              onClick={() => setActiveMainTab('published')}
               className={`px-6 py-4 text-xs font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
-                activeMainTab === "published"
-                  ? "text-primary border-primary"
-                  : "text-white/60 border-transparent hover:text-white"
+                activeMainTab === 'published'
+                  ? 'text-primary border-primary'
+                  : 'text-white/60 border-transparent hover:text-white'
               }`}
             >
               Community
@@ -947,8 +992,8 @@ export default function WorkflowStudio({
                 onClick={handleSelectWorkflow}
                 activeTab={activeMainTab}
                 onRename={(wf) => {
-                   setRenamingWorkflow(wf);
-                   setNewWorkflowName(wf.name);
+                  setRenamingWorkflow(wf);
+                  setNewWorkflowName(wf.name);
                 }}
                 onDelete={handleDeleteWorkflow}
               />
@@ -967,17 +1012,24 @@ export default function WorkflowStudio({
       {/* Rename Modal */}
       {renamingWorkflow && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setRenamingWorkflow(null)} />
-          <form 
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            onClick={() => setRenamingWorkflow(null)}
+          />
+          <form
             onSubmit={handleRenameWorkflow}
             className="relative w-full max-w-sm bg-panel-bg border border-white/10 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in duration-300"
           >
             <h3 className="text-xl font-bold text-white mb-2">Rename Workflow</h3>
-            <p className="text-white/60 text-sm mb-6">Enter a new descriptive name for your pipeline.</p>
-            
+            <p className="text-white/60 text-sm mb-6">
+              Enter a new descriptive name for your pipeline.
+            </p>
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-primary uppercase tracking-widest">Workflow Name</label>
+                <label className="text-[10px] font-black text-primary uppercase tracking-widest">
+                  Workflow Name
+                </label>
                 <input
                   autoFocus
                   type="text"
@@ -987,7 +1039,7 @@ export default function WorkflowStudio({
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
                 />
               </div>
-              
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"

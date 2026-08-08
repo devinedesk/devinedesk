@@ -1,8 +1,8 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../api/auth/[...nextauth]/route";
-import AgentChatClient from "../AgentChatClient";
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../../api/auth/[...nextauth]/route';
+import AgentChatClient from '../AgentChatClient';
 import prisma from '@/src/lib/prisma';
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   return {
@@ -15,13 +15,15 @@ export default async function AgentConversationPage({ params }) {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
-    redirect("/auth/login");
+    redirect('/auth/login');
   }
 
-  console.log(`[ConvPage] Loading for agent: ${agent_id}, conv: ${conversation_id}, user: ${session.user.id}`);
+  console.log(
+    `[ConvPage] Loading for agent: ${agent_id}, conv: ${conversation_id}, user: ${session.user.id}`
+  );
 
   const agent = await prisma.agent.findUnique({
-    where: { slug: agent_id }
+    where: { slug: agent_id },
   });
 
   if (!agent) {
@@ -30,35 +32,35 @@ export default async function AgentConversationPage({ params }) {
 
   const conversation = await prisma.conversation.findUnique({
     where: { id: conversation_id },
-    include: { messages: { orderBy: { createdAt: 'asc' } } }
+    include: { messages: { orderBy: { createdAt: 'asc' } } },
   });
 
   let initialHistory = null;
   if (conversation && conversation.userId === session.user.id) {
-    initialHistory = conversation.messages.map(m => ({
+    initialHistory = conversation.messages.map((m) => ({
       id: m.id,
       role: m.role,
       content: m.content,
-      created_at: m.createdAt.toISOString()
+      created_at: m.createdAt.toISOString(),
     }));
   }
 
   const agentDetails = {
     ...agent,
     system_prompt: agent.systemPrompt,
-    agent_id: agent.id
+    agent_id: agent.id,
   };
 
   const userData = {
     balance: session.user.credits || 0,
     email: session.user.email,
-    name: session.user.name
+    name: session.user.name,
   };
 
   return (
-    <AgentChatClient 
-      agentDetails={agentDetails} 
-      initialHistory={initialHistory} 
+    <AgentChatClient
+      agentDetails={agentDetails}
+      initialHistory={initialHistory}
       userData={userData}
     />
   );
