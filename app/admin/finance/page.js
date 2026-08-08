@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { AdminService } from '@/src/lib/services/adminService';
 import { Card } from '@/components/ui/Card';
 import { CreditCard } from 'lucide-react';

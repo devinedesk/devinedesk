@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Card } from '@/components/ui/Card';
 import { Activity, Clock, Server, Zap, Cpu, MemoryStick, Database, Globe } from 'lucide-react';
 import {

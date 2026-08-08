@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getServerSession } from 'next-auth/next';
 import UpgradeButton from './UpgradeButton';
 import prisma from '@/src/lib/prisma';

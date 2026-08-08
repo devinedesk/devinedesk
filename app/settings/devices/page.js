@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getServerSession } from 'next-auth/next';
 import prisma from '@/src/lib/prisma';
 import { Card } from '@/components/ui/Card';
