@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { DataGrid } from '@/components/ui/DataGrid';
+import { Tabs } from '@/components/ui/Tabs';
 import { apiClient } from '@/src/lib/apiClient';
 
 const PACKAGES = [
@@ -24,8 +26,22 @@ const PACKAGES = [
 export default function BillingPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [loading, setLoading] = useState(null);
+  const [loadingId, setLoadingId] = useState(null);
   const [error, setError] = useState('');
+  
+  const [invoices, setInvoices] = useState([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(true);
+
+  useEffect(() => {
+    if (session) {
+      apiClient.get('/billing/invoices')
+        .then((data) => setInvoices(data.invoices || []))
+        .catch((err) => console.error(err))
+        .finally(() => setLoadingInvoices(false));
+    } else {
+      setLoadingInvoices(false);
+    }
+  }, [session]);
 
   const handleCheckout = async (packageId) => {
     if (!session) {
@@ -33,7 +49,7 @@ export default function BillingPage() {
       return;
     }
 
-    setLoading(packageId);
+    setLoadingId(packageId);
     setError('');
 
     try {
@@ -46,30 +62,28 @@ export default function BillingPage() {
       }
     } catch (err) {
       setError(err.message || 'Failed to initialize checkout');
-      setLoading(null);
+      setLoadingId(null);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-app-bg text-white p-8 font-sans pt-24">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 mb-4">
-            Credits & Billing
-          </h1>
-          <p className="text-secondary text-lg max-w-2xl mx-auto">
-            Top up your account to generate more AI images, videos, and workflows. Credits never
-            expire.
-          </p>
-        </div>
+  const invoiceColumns = [
+    { key: 'date', label: 'Date', render: (val) => new Date(val).toLocaleDateString() },
+    { key: 'description', label: 'Description' },
+    { key: 'amount', label: 'Amount', render: (val) => `$${val.toFixed(2)}` },
+    { key: 'status', label: 'Status', render: (val) => (
+      <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">{val}</span>
+    )},
+    { key: 'url', label: 'Receipt', render: (val) => (
+      <a href={val} className="text-cyan-400 hover:underline">Download</a>
+    )}
+  ];
 
-        {error && (
-          <div className="mb-8 p-4 bg-red-900/30 border border-red-500/50 rounded-xl text-red-200 text-center font-medium">
-            {error}
-          </div>
-        )}
-
-        <div className="grid md:grid-cols-3 gap-6">
+  const tabs = [
+    {
+      id: 'packages',
+      label: 'Credit Packages',
+      content: (
+        <div className="grid md:grid-cols-3 gap-6 pt-6">
           {PACKAGES.map((pkg) => (
             <Card
               key={pkg.id}
@@ -100,7 +114,7 @@ export default function BillingPage() {
               <Button
                 variant={pkg.popular ? 'primary' : 'secondary'}
                 onClick={() => handleCheckout(pkg.id)}
-                isLoading={loading === pkg.id}
+                isLoading={loadingId === pkg.id}
                 className="w-full"
                 size="lg"
               >
@@ -109,6 +123,52 @@ export default function BillingPage() {
             </Card>
           ))}
         </div>
+      )
+    },
+    {
+      id: 'invoices',
+      label: 'Invoice History',
+      content: (
+        <div className="pt-6">
+          {session ? (
+            <Card className="overflow-hidden">
+              <DataGrid
+                columns={invoiceColumns}
+                data={invoices}
+                loading={loadingInvoices}
+                emptyMessage="No invoices found."
+              />
+            </Card>
+          ) : (
+            <div className="text-center py-12 bg-white/5 rounded-xl border border-neutral-border-glass">
+              <h3 className="text-lg text-white mb-4">Please log in to view invoices</h3>
+              <Button onClick={() => router.push('/auth/login?callbackUrl=/billing')}>Log In</Button>
+            </div>
+          )}
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-app-bg text-white p-8 font-sans pt-24">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600 mb-4">
+            Credits & Billing
+          </h1>
+          <p className="text-secondary text-lg max-w-2xl mx-auto">
+            Manage your subscription, top up credits, and download past invoices.
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-8 p-4 bg-red-900/30 border border-red-500/50 rounded-xl text-red-200 text-center font-medium">
+            {error}
+          </div>
+        )}
+
+        <Tabs tabs={tabs} defaultTab="packages" />
       </div>
     </div>
   );

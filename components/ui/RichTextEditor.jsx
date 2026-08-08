@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
-import { Bold, Italic, List, Link as LinkIcon, Image as ImageIcon, Code, Type } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { Bold, Italic, List, ListOrdered, Type, Code, Strikethrough, Heading1, Heading2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,46 +11,131 @@ function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
-export function RichTextEditor({ value, onChange, placeholder = 'Type here...' }) {
-  // A simplified placeholder RichTextEditor component to avoid massive dependencies like TipTap or Slate.
-  // In a real scenario, this would wrap a robust WYSIWYG editor.
+const MenuBar = ({ editor }) => {
+  if (!editor) {
+    return null;
+  }
 
-  const handleCommand = (command) => {
-    document.execCommand(command, false, null);
-  };
-
-  const ToolbarButton = ({ icon: Icon, command, title }) => (
+  const ToolbarButton = ({ icon: Icon, onClick, isActive, title }) => (
     <button
       type="button"
-      onClick={() => handleCommand(command)}
+      onClick={onClick}
       title={title}
-      className="p-2 text-neutral-secondary hover:text-white hover:bg-white/10 rounded transition-colors"
+      className={cn(
+        "p-2 rounded transition-colors",
+        isActive ? "text-white bg-primary/20" : "text-neutral-secondary hover:text-white hover:bg-white/10"
+      )}
     >
       <Icon size={16} />
     </button>
   );
 
   return (
-    <div className="w-full border border-neutral-border-glass rounded-xl overflow-hidden bg-neutral-card-bg focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500 transition-all">
-      <div className="flex items-center gap-1 p-2 border-b border-neutral-border-glass bg-white/5 flex-wrap">
-        <ToolbarButton icon={Bold} command="bold" title="Bold" />
-        <ToolbarButton icon={Italic} command="italic" title="Italic" />
-        <div className="w-px h-5 bg-neutral-border-glass mx-1" />
-        <ToolbarButton icon={List} command="insertUnorderedList" title="Bullet List" />
-        <ToolbarButton icon={Type} command="formatBlock" title="Heading" />
-        <div className="w-px h-5 bg-neutral-border-glass mx-1" />
-        <ToolbarButton icon={Code} command="formatBlock" title="Code Block" />
-        <ToolbarButton icon={LinkIcon} command="createLink" title="Insert Link" />
-        <ToolbarButton icon={ImageIcon} command="insertImage" title="Insert Image" />
-      </div>
-
-      <div
-        contentEditable
-        className="w-full min-h-[200px] p-4 text-white text-sm outline-none overflow-y-auto prose prose-invert max-w-none"
-        onInput={(e) => onChange?.(e.currentTarget.innerHTML)}
-        dangerouslySetInnerHTML={{ __html: value || '' }}
-        placeholder={placeholder}
+    <div className="flex items-center gap-1 p-2 border-b border-neutral-border-glass bg-white/5 flex-wrap">
+      <ToolbarButton
+        icon={Bold}
+        title="Bold"
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        isActive={editor.isActive('bold')}
       />
+      <ToolbarButton
+        icon={Italic}
+        title="Italic"
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        isActive={editor.isActive('italic')}
+      />
+      <ToolbarButton
+        icon={Strikethrough}
+        title="Strikethrough"
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        isActive={editor.isActive('strike')}
+      />
+      
+      <div className="w-px h-5 bg-neutral-border-glass mx-1" />
+      
+      <ToolbarButton
+        icon={Heading1}
+        title="Heading 1"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        isActive={editor.isActive('heading', { level: 1 })}
+      />
+      <ToolbarButton
+        icon={Heading2}
+        title="Heading 2"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        isActive={editor.isActive('heading', { level: 2 })}
+      />
+      <ToolbarButton
+        icon={Type}
+        title="Paragraph"
+        onClick={() => editor.chain().focus().setParagraph().run()}
+        isActive={editor.isActive('paragraph')}
+      />
+      
+      <div className="w-px h-5 bg-neutral-border-glass mx-1" />
+      
+      <ToolbarButton
+        icon={List}
+        title="Bullet List"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        isActive={editor.isActive('bulletList')}
+      />
+      <ToolbarButton
+        icon={ListOrdered}
+        title="Ordered List"
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        isActive={editor.isActive('orderedList')}
+      />
+      
+      <div className="w-px h-5 bg-neutral-border-glass mx-1" />
+      
+      <ToolbarButton
+        icon={Code}
+        title="Code Block"
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        isActive={editor.isActive('codeBlock')}
+      />
+    </div>
+  );
+};
+
+export function RichTextEditor({ value, onChange, placeholder = 'Type here...' }) {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
+      }),
+    ],
+    content: value || '',
+    editorProps: {
+      attributes: {
+        class: 'w-full min-h-[200px] p-4 text-white text-sm outline-none overflow-y-auto prose prose-invert max-w-none focus:outline-none',
+        placeholder: placeholder,
+      },
+    },
+    onUpdate: ({ editor }) => {
+      onChange?.(editor.getHTML());
+    },
+  });
+
+  // Sync value from props if it changes externally (e.g. form reset)
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value || '');
+    }
+  }, [value, editor]);
+
+  return (
+    <div className="w-full border border-neutral-border-glass rounded-xl overflow-hidden bg-neutral-card-bg focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500 transition-all">
+      <MenuBar editor={editor} />
+      <EditorContent editor={editor} />
     </div>
   );
 }
