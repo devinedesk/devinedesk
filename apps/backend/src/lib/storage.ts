@@ -40,7 +40,10 @@ const IS_DEFAULT_PORT =
 const HOST = IS_DEFAULT_PORT
   ? env.MINIO_FRONTEND_ENDPOINT
   : `${env.MINIO_FRONTEND_ENDPOINT}:${env.MINIO_PORT}`;
-const PUBLIC_BASE = `${PROTOCOL}://${HOST}/${BUCKET}`;
+const COMPUTED_PUBLIC_BASE = `${PROTOCOL}://${HOST}/${BUCKET}`;
+const PUBLIC_BASE = env.MINIO_PUBLIC_BASE_URL
+  ? `${env.MINIO_PUBLIC_BASE_URL.replace(/\/+$/, "")}/${BUCKET}`
+  : COMPUTED_PUBLIC_BASE;
 
 /** Ensure the bucket exists and allows anonymous reads. Safe to call repeatedly. */
 export async function ensureBucket(): Promise<void> {

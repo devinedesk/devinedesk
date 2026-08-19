@@ -156,6 +156,15 @@ const envSchema = z.object({
   MINIO_ACCESS_KEY: z.string().default("minioadmin"),
   MINIO_SECRET_KEY: z.string().default("minioadmin"),
   MINIO_BUCKET: z.string().default("devinedesk"),
+  // When set, completely overrides the computed public URL base for object URLs.
+  // Use this when the internal MinIO connection (MINIO_ENDPOINT/PORT/USE_SSL)
+  // differs from how objects are publicly accessed (e.g. behind an nginx proxy).
+  // Example: "https://devinedesk.com/minio" → URLs become
+  //   https://devinedesk.com/minio/<bucket>/<key>
+  MINIO_PUBLIC_BASE_URL: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().url().optional(),
+  ),
 });
 
 const parsed = envSchema.safeParse(process.env);
