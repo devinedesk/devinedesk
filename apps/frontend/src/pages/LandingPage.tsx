@@ -255,16 +255,16 @@ interface Banner {
 /** Big featured template banners (hero style). */
 const TEMPLATE_BANNERS: Banner[] = [
   {
-    title: "DIDI",
-    kicker: "DHURANDHAR · TEMPLATE",
-    subtitle: "Put yourself in the scene",
-    src: "/showcase/templates/dhurandhar.mp4",
+    title: "GO VIRAL",
+    kicker: "CREATORS · TEMPLATE",
+    subtitle: "Break the algorithm",
+    src: "/showcase/templates/creators-viral.mp4",
   },
   {
-    title: "BOYFRIEND",
-    kicker: "KARAN AUJLA · TEMPLATE",
-    subtitle: "Star in the music video",
-    src: "/showcase/templates/boyfriend.mp4",
+    title: "HERO ENTRY",
+    kicker: "BLOCKBUSTER · TEMPLATE",
+    subtitle: "Be the hero of the scene",
+    src: "/showcase/templates/fans-blockbuster.mp4",
   },
 ];
 
@@ -358,7 +358,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Dhurandhar template banner */}
+      {/* Creators template banner */}
       <section className="mx-auto max-w-[1600px] px-4 pb-12 lg:px-6">
         <h2 className="mb-4 text-lg font-semibold">Featured template</h2>
         <TemplateBanner banner={TEMPLATE_BANNERS[0]!} cta={tryTemplate} />
@@ -387,7 +387,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Karan Aujla template banner */}
+      {/* Fans blockbuster template banner */}
       <section className="mx-auto max-w-[1600px] px-4 pb-12 lg:px-6">
         <TemplateBanner banner={TEMPLATE_BANNERS[1]!} cta={tryTemplate} />
       </section>
