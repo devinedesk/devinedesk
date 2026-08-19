@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Logo } from "./Logo";
 
 const CONTACT_EMAIL = "support@devinedesk.com";
 
@@ -21,10 +22,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-[1600px] gap-10 px-4 py-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-6">
         {/* Brand */}
         <div>
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="DevineDesk" className="h-8 w-8 rounded-lg" />
-            <span className="text-[15px] font-semibold tracking-tight">DevineDesk</span>
-          </Link>
+          <Logo size={32} withText linked />
           <p className="mt-3 max-w-xs text-sm text-muted-foreground">
             Generate cinematic AI videos, images, and personalized template renders in minutes.
           </p>

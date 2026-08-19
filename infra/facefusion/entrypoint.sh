@@ -23,15 +23,13 @@ MARKER="${ASSETS_DIR}/.models-downloaded"
 if [ -f "${MARKER}" ]; then
   echo "[facefusion] Pre-download already attempted; skipping."
 else
-  # Best-effort, single attempt. `force-download` is all-or-nothing and can abort
-  # on an upstream-corrupt model we don't even use (e.g. corridor_key_1024), so we
-  # don't gate on its exit code — the models our swap config actually needs are
-  # fetched lazily (and validated) on the first swap regardless. Mark it done
-  # either way so restarts don't re-attempt the (possibly broken) bulk download.
-  echo "[facefusion] Pre-downloading models (lite scope, best-effort) — runs once, persisted in the .assets volume…"
-  python facefusion.py force-download --download-scope lite \
-    && echo "[facefusion] Model pre-download complete." \
-    || echo "[facefusion] WARNING: pre-download incomplete; needed models will download lazily on first swap." >&2
+  # Skip the bulk `force-download --download-scope lite` — it pulls many
+  # unrelated heavy models (deoldify colorizer, etc.) that we don't use and
+  # can exhaust disk space. Instead, just start the server; the models our
+  # swap config actually needs (hyperswap swapper, GFPGAN enhancer, occluder,
+  # face analyser) are auto-downloaded lazily on the FIRST swap, validated,
+  # and cached in the volume — so only that first swap is slow.
+  echo "[facefusion] Skipping bulk pre-download; models will download lazily on first swap."
   touch "${MARKER}"
 fi
 

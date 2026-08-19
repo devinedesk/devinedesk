@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useMe } from "@/lib/useMe";
 import { AuthModal } from "./AuthModal";
+import { Logo } from "./Logo";
 
 interface NavLink {
   to: string;
@@ -34,12 +35,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-black">
       <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-6 px-4 lg:px-6">
         {/* Logo */}
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <img src="/logo.png" alt="DevineDesk" className="h-8 w-8 rounded-lg" />
-          <span className="hidden text-[15px] font-semibold tracking-tight sm:inline">
-            DevineDesk
-          </span>
-        </Link>
+        <Logo size={32} withText linked />
 
         {/* Primary nav */}
         <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">

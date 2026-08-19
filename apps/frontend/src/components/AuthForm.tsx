@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ArrowLeft, Gift, Mail, Sparkles } from "lucide-react";
+import { ArrowLeft, Gift, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/Logo";
 import { signIn, signUp, requestPasswordReset, sendVerificationEmail } from "@/lib/auth-client";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -120,9 +121,7 @@ export function AuthForm({ onSuccess, callbackURL }: AuthFormProps) {
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex flex-col items-center gap-3 text-center">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Sparkles className="h-5 w-5" />
-        </span>
+        <Logo size={48} />
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Welcome to DevineDesk</h2>
           <p className="mt-1 text-sm text-muted-foreground">Sign up and generate for free</p>

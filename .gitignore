@@ -39,3 +39,4 @@ yarn-error.log*
 
 # Local DB backups (contain real data — never commit)
 backups/
+.env.production

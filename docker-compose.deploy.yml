@@ -1,0 +1,124 @@
+# Single-VM deployment compose with SSL (Let's Encrypt via certbot on the host).
+#
+# Prerequisites:
+#   - DNS A records for devinedesk.com, app.devinedesk.com, api.devinedesk.com
+#     pointing to this VM.
+#   - SSL certs obtained on the host via:
+#       sudo certbot certonly --standalone -d devinedesk.com -d app.devinedesk.com -d api.devinedesk.com -d www.devinedesk.com
+#     (stop the frontend container first to free port 80)
+#
+# Usage:
+#   docker compose -f docker-compose.deploy.yml --env-file .env.production up -d
+#   # with face swap:
+#   docker compose -f docker-compose.deploy.yml --env-file .env.production --profile facefusion up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-devinedesk}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-devinedesk}?schema=public
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+    ports:
+      - "4000:4000"
+    command: sh -c "cd /app/packages/db && bunx prisma migrate deploy && cd /app/apps/backend && bun src/index.ts"
+    healthcheck:
+      test: ["CMD-SHELL", "bun -e 'fetch(\"http://localhost:4000/health\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        VITE_API_URL: ${FRONTEND_URL:-https://devinedesk.com}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  facefusion:
+    build:
+      context: .
+      dockerfile: infra/facefusion/Dockerfile
+    restart: unless-stopped
+    profiles: ["facefusion"]
+    environment:
+      FACE_SWAPPER_MODEL: ${FACE_SWAPPER_MODEL:-hyperswap_1a_256}
+      FACE_SWAPPER_PIXEL_BOOST: ${FACE_SWAPPER_PIXEL_BOOST:-1024x1024}
+      FACE_ENHANCER_ENABLED: ${FACE_ENHANCER_ENABLED:-true}
+      FACE_ENHANCER_MODEL: ${FACE_ENHANCER_MODEL:-gfpgan_1.4}
+      FACE_ENHANCER_BLEND: ${FACE_ENHANCER_BLEND:-30}
+      FACE_MASK_BLUR: ${FACE_MASK_BLUR:-0.2}
+    ports:
+      - "7865:7865"
+    volumes:
+      - facefusion_data:/facefusion/.assets
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:7865/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 600s
+
+volumes:
+  postgres_data:
+  minio_data:
+  facefusion_data:

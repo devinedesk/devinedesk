@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/Logo";
 import { resetPassword } from "@/lib/auth-client";
 
 /**
@@ -39,9 +39,7 @@ export function ResetPasswordPage() {
     <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col justify-center px-4">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col items-center gap-3 text-center">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Sparkles className="h-5 w-5" />
-          </span>
+          <Logo size={48} />
           <h2 className="text-2xl font-bold tracking-tight">Reset your password</h2>
         </div>
         {notice ? (
