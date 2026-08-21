@@ -369,10 +369,9 @@ docker compose -f docker-compose.deploy.yml --env-file .env.production --profile
 - [x] `BACKEND_URL=https://devinedesk.com`
 - [x] `FRONTEND_URL=https://devinedesk.com`
 - [x] `MINIO_PUBLIC_BASE_URL=https://devinedesk.com/minio`
-- [ ] `DODO_PAYMENTS_API_KEY` / `DODO_PAYMENTS_WEBHOOK_KEY` — test keys set;
-      need live keys after business verification
-- [ ] `DODO_PAYMENTS_ENVIRONMENT=live_mode` — switch after business verification
-- [ ] `DODO_PRODUCT_IDS` — live product IDs (separate from test IDs)
+- [x] `DODO_PAYMENTS_API_KEY` / `DODO_PAYMENTS_WEBHOOK_KEY` — live keys set
+- [x] `DODO_PAYMENTS_ENVIRONMENT=live_mode` — activated 2026-08-21
+- [x] `DODO_PRODUCT_IDS` — live product IDs set
 
 ### Object storage (production)
 
@@ -395,13 +394,17 @@ docker compose -f docker-compose.deploy.yml --env-file .env.production --profile
       (may already be set — CI/CD is passing)
 - [ ] On the server: `docker compose pull && docker compose up -d` for updates
 
-### Dodo Payments (live mode) — NEEDS ATTENTION
+### Dodo Payments (live mode) — DONE ✅
 
-- [ ] Re-check test API key (may have expired — returns "Unauthorized")
-- [ ] Complete Dodo business verification
-- [ ] Create live products (₹499, ₹1999, ₹4999)
-- [ ] Set webhook endpoint to `https://devinedesk.com/api/credits/webhook`
-- [ ] Switch `DODO_PAYMENTS_ENVIRONMENT=live_mode`
+- [x] Business verification complete — "Live payments are active"
+- [x] Live products imported from test (₹499, ₹1999, ₹4999)
+- [x] Live API key created: "DevineDesk Production Live"
+- [x] Webhook endpoint created: `https://devinedesk.com/api/credits/webhook`
+- [x] Webhook subscribed to `payment.succeeded` event
+- [x] Webhook signing secret configured on VM
+- [x] `DODO_PAYMENTS_ENVIRONMENT=live_mode` set on VM
+- [x] Backend restarted with live Dodo credentials
+- [x] Webhook endpoint verified: returns `{"error":"Invalid webhook signature"}` for invalid sigs
 
 ### Post-deploy verification — PARTIAL ✅
 
