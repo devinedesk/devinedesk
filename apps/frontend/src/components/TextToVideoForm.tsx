@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/select";
 import { refreshCredits } from "@/lib/useMe";
 import { useActionCosts } from "@/lib/useActionCosts";
+import { useVideoPolling } from "@/lib/useVideoPolling";
 import {
   ALLOWED_DURATIONS,
   createVideo,
   fetchModels,
-  fetchVideo,
   modelsForDuration,
   type Video,
   type VideoModel,
@@ -47,9 +47,18 @@ export function TextToVideoForm({ onCreated }: Props) {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pollingId, setPollingId] = useState<string | null>(null);
 
   const costs = useActionCosts();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Poll the video with exponential backoff (3s→5s→10s cap), 10-min timeout,
+  // and automatic cancellation on unmount.
+  useVideoPolling(pollingId, (updated) => {
+    onCreated(updated);
+    refreshCredits();
+    setPollingId(null);
+  });
 
   useEffect(() => {
     fetchModels()
@@ -107,20 +116,10 @@ export function TextToVideoForm({ onCreated }: Props) {
       onCreated(video);
       setPrompt("");
 
-      // If the backend returned IN_PROGRESS (async generation), poll until done.
+      // If the backend returned IN_PROGRESS (async generation), start polling.
+      // The useVideoPolling hook handles backoff, timeout, and cleanup.
       if (video.status === "IN_PROGRESS") {
-        const pollId = setInterval(async () => {
-          try {
-            const updated = await fetchVideo(video.id);
-            if (updated.status === "COMPLETED" || updated.status === "FAILED") {
-              clearInterval(pollId);
-              onCreated(updated);
-              refreshCredits();
-            }
-          } catch {
-            clearInterval(pollId);
-          }
-        }, 5000);
+        setPollingId(video.id);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate video");

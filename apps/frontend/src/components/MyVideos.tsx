@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { friendlyError } from "@/lib/utils";
-import { fetchVideo, type Video } from "@/lib/api";
+import { useVideoBatchPolling } from "@/lib/useVideoPolling";
+import { type Video } from "@/lib/api";
 
 interface Props {
   videos: Video[];
@@ -169,27 +170,11 @@ export function MyVideos({ videos, loading, error }: Props) {
     setLocalVideos(videos);
   }, [videos]);
 
-  // Poll any IN_PROGRESS videos until they complete or fail.
-  useEffect(() => {
-    const pending = localVideos.filter((v) => v.status === "IN_PROGRESS");
-    if (pending.length === 0) return;
-
-    const interval = setInterval(async () => {
-      const updates = await Promise.all(
-        pending.map((v) =>
-          fetchVideo(v.id).catch(() => null),
-        ),
-      );
-      setLocalVideos((prev) =>
-        prev.map((v) => {
-          const updated = updates.find((u) => u && u.id === v.id);
-          return updated ?? v;
-        }),
-      );
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [localVideos]);
+  // Poll any IN_PROGRESS videos with exponential backoff (3s→5s→10s cap),
+  // 10-minute timeout, and automatic cancellation on unmount.
+  useVideoBatchPolling(localVideos, (updated) => {
+    setLocalVideos((prev) => prev.map((v) => (v.id === updated.id ? updated : v)));
+  });
 
   if (loading) {
     return (
