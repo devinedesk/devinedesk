@@ -26,6 +26,7 @@ export function useVideoPolling(
 
   useEffect(() => {
     if (!videoId) return;
+    const id = videoId; // narrow to string for the closure
 
     const controller = new AbortController();
     cancelRef.current = controller;
@@ -39,12 +40,12 @@ export function useVideoPolling(
 
       // Check timeout
       if (Date.now() - startTime > timeoutMs) {
-        console.warn(`Video ${videoId} polling timed out after ${timeoutMs}ms`);
+        console.warn(`Video ${id} polling timed out after ${timeoutMs}ms`);
         return;
       }
 
       try {
-        const video = await fetchVideo(videoId);
+        const video = await fetchVideo(id);
         if (controller.signal.aborted) return;
 
         if (video.status === "COMPLETED" || video.status === "FAILED") {
@@ -71,7 +72,7 @@ export function useVideoPolling(
       cancelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, timeoutMs]);
+  }, [videoId]);
 
   return cancel;
 }
