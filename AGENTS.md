@@ -158,11 +158,18 @@ It is a **bun**-managed **Turborepo** monorepo.
   provider, store the result and mark `COMPLETED`/`FAILED`. Image and face-swap
   routes block on the provider call (fast enough for proxy timeouts). Video
   generation (`POST /api/videos`) returns `202 Accepted` with the `IN_PROGRESS`
-  row immediately and runs `generateVideo` in a background promise — the
-  frontend polls `GET /api/videos/:id` every 5s until `COMPLETED`/`FAILED` (this
-  avoids Cloudflare's 100s proxy timeout). Template renders already ran in the
-  background (`void runAndStoreRender`). Mirror the appropriate pattern and
-  reuse `src/lib/uploads.ts` when adding new media types.
+  row immediately and runs `generateVideo` via a **BullMQ durable job queue**
+  (`src/lib/queue.ts`) when `REDIS_URL` is configured — jobs survive container
+  restarts. When Redis is not available, it falls back to fire-and-forget
+  (in-process promise). The frontend polls `GET /api/videos/:id` every 5s until
+  `COMPLETED`/`FAILED` (this avoids Cloudflare's 100s proxy timeout). Template
+  renders already ran in the background (`void runAndStoreRender`). Mirror the
+  appropriate pattern and reuse `src/lib/uploads.ts` when adding new media types.
+- **Media access**: the MinIO bucket is anonymous-read by default, so the API
+  returns permanent public URLs (`getPublicUrl`) built from
+  `MINIO_FRONTEND_ENDPOINT`. For private media, use `getPresignedUrl` (time-limited
+  signed URLs) or the authenticated media proxy at `GET /api/media/:key` (requires
+  a valid session). The proxy streams objects from MinIO through the backend.
 - **Template avatars**: the admin assigns 1-2 of their own avatars to a template at
   creation (`Template.avatarIds`, which sets `avatarSlots`). Blocks pick one of
   those slots (`TemplateBlock.avatarSlot`) for both the reference image and the
@@ -429,3 +436,37 @@ docker compose -f docker-compose.deploy.yml --env-file .env.production --profile
 - [ ] Test video/image generation
 - [ ] Test face swap (FaceFusion is deployed and healthy)
 - [ ] Test template creation + render (admin + user)
+
+### Monitoring & alerting
+
+- [x] `GET /health` — simple health check (returns `{"status":"ok","queue":"redis","timestamp":"..."}`)
+- [x] `GET /health/detailed` — checks database, MinIO, and Redis connectivity (returns 503 if any service is degraded)
+- [ ] Set up UptimeRobot (free tier):
+      1. Create an account at https://uptimerobot.com
+      2. Add a monitor for `https://devinedesk.com/health` (HTTP keyword, check every 5 min)
+      3. Add a monitor for `https://devinedesk.com/health/detailed` (HTTP status, check every 5 min)
+      4. Enable email alerts for downtime
+- [ ] Consider Sentry for error tracking (frontend + backend)
+
+### Durable job queue (BullMQ + Redis) — DONE ✅
+
+- [x] Redis added to `docker-compose.deploy.yml` (redis:7-alpine with AOF persistence)
+- [x] `src/lib/queue.ts` — BullMQ queue + worker for video generation
+- [x] `REDIS_URL` env var (set automatically by docker-compose as `redis://redis:6379`)
+- [x] Video generation enqueues durable jobs when Redis is available
+- [x] Fire-and-forget fallback when Redis is not configured (dev mode)
+- [x] Orphaned video reconciliation on startup (marks interrupted videos as FAILED + refunds credits)
+
+### Media access policy — DONE ✅
+
+- [x] `getPresignedUrl()` in `src/lib/storage.ts` — time-limited signed URLs for private media
+- [x] `GET /api/media/:key` — authenticated media proxy route (requires valid session)
+- [x] Default remains public-read for backward compatibility; switch to presigned for private media
+
+### SEO — DONE ✅
+
+- [x] `index.html` — Open Graph tags, Twitter cards, JSON-LD structured data
+- [x] `noscript` fallback with descriptive content for crawlers that don't execute JS
+- [x] `sitemap.xml` updated with `lastmod` dates
+- [x] `robots.txt` allows indexing of all pages, disallows `/api/`
+- [x] Canonical URL set to `https://devinedesk.com/`

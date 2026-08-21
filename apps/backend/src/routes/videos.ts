@@ -3,9 +3,10 @@ import { z } from "zod";
 import { prisma, type Video } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
 import { generateVideo } from "../lib/openrouter.js";
-import { getPublicUrl, uploadBuffer } from "../lib/storage.js";
+import { getPublicUrl, uploadBuffer, downloadObject } from "../lib/storage.js";
 import { extFromMime, toDataUrl, upload } from "../lib/uploads.js";
 import { actionCost, getBalance, refundCredits, spendCredits } from "../lib/credits.js";
+import { enqueueVideoJob, startVideoWorker, queueAvailable, type VideoJobData } from "../lib/queue.js";
 
 export const videosRouter: Router = Router();
 
@@ -34,6 +35,67 @@ function serializeVideo(video: Video) {
   };
 }
 
+/**
+ * Process a video generation job. This is the single source of truth for
+ * background video generation — called by both the BullMQ worker (when Redis
+ * is available) and the fire-and-forget fallback.
+ */
+export async function processVideoJob(data: VideoJobData): Promise<void> {
+  // Download input frames from MinIO (they were uploaded before enqueuing).
+  const startFrameBuffer = data.startFrameKey ? await downloadObject(data.startFrameKey) : undefined;
+  const endFrameBuffer = data.endFrameKey ? await downloadObject(data.endFrameKey) : undefined;
+  const referenceFrameBuffers = await Promise.all(
+    data.referenceFrameKeys.map((k) => downloadObject(k)),
+  );
+
+  const generated = await generateVideo({
+    model: data.model,
+    prompt: data.prompt,
+    duration: data.duration,
+    resolution: data.resolution,
+    aspectRatio: data.aspectRatio,
+    generateAudio: data.generateAudio,
+    firstFrame: startFrameBuffer
+      ? { url: `data:image/jpeg;base64,${startFrameBuffer.toString("base64")}` }
+      : undefined,
+    lastFrame: endFrameBuffer
+      ? { url: `data:image/jpeg;base64,${endFrameBuffer.toString("base64")}` }
+      : undefined,
+    references: referenceFrameBuffers.map((buf) => ({
+      url: `data:image/jpeg;base64,${buf.toString("base64")}`,
+    })),
+  });
+
+  const videoKey = await uploadBuffer(generated.buffer, generated.contentType, "videos", "mp4");
+  await prisma.video.update({
+    where: { id: data.videoId },
+    data: {
+      status: "COMPLETED",
+      videoKey,
+      providerJobId: generated.providerJobId,
+      cost: generated.cost,
+    },
+  });
+}
+
+/**
+ * Handle a video generation failure — refund credits and mark the row failed.
+ * Called by both the queue worker's failed handler and the fire-and-forget catch.
+ */
+export async function failVideoJob(data: VideoJobData, error: unknown): Promise<void> {
+  const message = error instanceof Error ? error.message : "Video generation failed";
+  console.error(`Video generation failed for ${data.videoId}:`, message);
+  await refundCredits(data.userId, data.cost, {
+    referenceType: "video",
+    referenceId: data.videoId,
+    description: "Refund: video generation failed",
+  });
+  await prisma.video.update({
+    where: { id: data.videoId },
+    data: { status: "FAILED", error: message },
+  });
+}
+
 // List the current user's videos.
 videosRouter.get("/", requireAuth, async (req: AuthedRequest, res) => {
   const videos = await prisma.video.findMany({
@@ -55,7 +117,7 @@ videosRouter.get("/:id", requireAuth, async (req: AuthedRequest, res) => {
   res.json(serializeVideo(video));
 });
 
-// Create a video: upload inputs, call OpenRouter synchronously, store output.
+// Create a video: upload inputs, enqueue generation, return IN_PROGRESS immediately.
 videosRouter.post(
   "/",
   requireAuth,
@@ -137,42 +199,40 @@ videosRouter.post(
     //    Cloudflare's 100s limit). The frontend polls GET /api/videos/:id.
     res.status(202).json(serializeVideo(video));
 
-    // 4. Generate in the background, then update the DB row.
-    generateVideo({
-      model,
+    // 4. Enqueue the generation job. When Redis is available, the job is durable
+    //    (survives container restarts). Otherwise, fall back to fire-and-forget.
+    const jobData: VideoJobData = {
+      videoId: video.id,
+      userId: req.userId!,
       prompt,
+      model,
       duration,
       resolution,
       aspectRatio,
       generateAudio,
-      firstFrame: startFrame ? { url: toDataUrl(startFrame) } : undefined,
-      lastFrame: endFrame ? { url: toDataUrl(endFrame) } : undefined,
-      references: referenceFrames.map((f) => ({ url: toDataUrl(f) })),
-    })
-      .then(async (generated) => {
-        const videoKey = await uploadBuffer(generated.buffer, generated.contentType, "videos", "mp4");
-        await prisma.video.update({
-          where: { id: video.id },
-          data: {
-            status: "COMPLETED",
-            videoKey,
-            providerJobId: generated.providerJobId,
-            cost: generated.cost,
-          },
-        });
-      })
-      .catch(async (err) => {
-        const message = err instanceof Error ? err.message : "Video generation failed";
-        console.error("Video generation failed:", message);
-        await refundCredits(req.userId!, cost, {
-          referenceType: "video",
-          referenceId: video.id,
-          description: "Refund: video generation failed",
-        });
-        await prisma.video.update({
-          where: { id: video.id },
-          data: { status: "FAILED", error: message },
-        });
-      });
+      startFrameKey,
+      endFrameKey,
+      referenceFrameKeys,
+      cost,
+    };
+
+    if (queueAvailable) {
+      const jobId = await enqueueVideoJob(jobData);
+      if (jobId) {
+        console.log(`[queue] Enqueued video job ${jobId} for video ${video.id}`);
+        return;
+      }
+    }
+
+    // Fire-and-forget fallback (no Redis).
+    processVideoJob(jobData).catch((err) => failVideoJob(jobData, err));
   },
 );
+
+// Start the video worker at module load (only when Redis is configured).
+// The worker runs in the same process and processes jobs concurrently.
+startVideoWorker(async (data) => {
+  await processVideoJob(data);
+}).catch((err) => {
+  console.error("[queue] Failed to start video worker:", err instanceof Error ? err.message : err);
+});

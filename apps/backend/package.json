@@ -14,9 +14,11 @@
   "dependencies": {
     "@repo/db": "*",
     "better-auth": "^1.2.7",
+    "bullmq": "^6.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "ioredis": "^6.0.0",
     "minio": "^8.0.4",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",

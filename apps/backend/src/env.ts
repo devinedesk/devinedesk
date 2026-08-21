@@ -145,6 +145,14 @@ const envSchema = z.object({
   // USD→INR rate used only for documentation/estimates in the pricing helper.
   USD_INR_RATE: z.coerce.number().positive().default(86),
 
+  // Redis (for BullMQ job queue). Optional — if not set, video generation
+  // falls back to fire-and-forget (in-process promise). When set, jobs are
+  // durable and survive container restarts.
+  REDIS_URL: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().url().optional(),
+  ),
+
   // MinIO / S3-compatible object store
   MINIO_ENDPOINT: z.string().default("localhost"),
   MINIO_FRONTEND_ENDPOINT: z.string().default("localhost"),

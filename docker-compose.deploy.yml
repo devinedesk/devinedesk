@@ -43,6 +43,18 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   backend:
     build:
       context: .
@@ -53,6 +65,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+      redis:
+        condition: service_healthy
     env_file:
       - .env.production
     environment:
@@ -62,6 +76,7 @@ services:
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_USE_SSL: "false"
+      REDIS_URL: redis://redis:6379
     ports:
       - "4000:4000"
     command: sh -c "cd /app/packages/db && bunx prisma migrate deploy && cd /app/apps/backend && bun src/index.ts"
@@ -121,4 +136,5 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  redis_data:
   facefusion_data:

@@ -81,6 +81,25 @@ export function getPublicUrl(key: string): string {
   return `${PUBLIC_BASE}/${encoded}`;
 }
 
+/**
+ * Generate a presigned URL for temporary access to a private object.
+ * The URL expires after `expiry` seconds (default: 1 hour).
+ * Use this instead of getPublicUrl when media should not be publicly readable.
+ */
+export async function getPresignedUrl(key: string, expiry = 3600): Promise<string> {
+  return minio.presignedGetObject(BUCKET, key, expiry);
+}
+
+/**
+ * Serialize an object key into a URL. When media access is set to "presigned",
+ * this returns a time-limited presigned URL (async). Otherwise it returns the
+ * permanent public URL (sync). The caller decides which mode to use.
+ *
+ * For now, generated media (videos, images, face swaps) uses public URLs for
+ * backward compatibility. To switch to presigned, call getPresignedUrl instead.
+ */
+export { getPublicUrl as getMediaUrl };
+
 /** Download an object into a Buffer. */
 export async function downloadObject(key: string): Promise<Buffer> {
   const stream = await minio.getObject(BUCKET, key);
