@@ -15,7 +15,7 @@ export default defineConfig({
     // Sentry Vite plugin must be after all other plugins.
     sentryVitePlugin({
       org: "devinedesk",
-      project: "frontend",
+      project: "javascript-react",
       authToken: process.env.SENTRY_AUTH_TOKEN,
       // Only upload source maps when an auth token is present (CI/CD).
       // Local builds without a token skip the upload gracefully.
