@@ -318,40 +318,59 @@ config change.
 - [x] A records for `devinedesk.com`, `api.devinedesk.com`, `app.devinedesk.com`
       (all pointing through Cloudflare proxy — orange cloud)
 - [x] MX, DKIM, SPF, DMARC records for Resend email — all verified propagated
-- [ ] Resend verifies `devinedesk.com` — all DNS records are in place;
-      log into Resend dashboard and click "Verify" (may already be verified)
-- [ ] Switch `SMTP_FROM` to `DevineDesk <noreply@devinedesk.com>` — do this
-      after Resend confirms domain verification
+- [x] Resend verifies `devinedesk.com` — verified 2026-08-21 7:39 PM UTC
+- [x] Switch `SMTP_FROM` to `DevineDesk <noreply@devinedesk.com>` — done on VM
 
-### Server provisioning — ALREADY DEPLOYED ✅
+### Server provisioning — DEPLOYED ON GCP ✅
 
-The app is already live at `https://devinedesk.com`! The frontend, backend,
-Postgres, and MinIO are all running behind Cloudflare proxy. The CI/CD
-pipeline builds and pushes images to ghcr.io on every push to `main`.
+The app is live at `https://devinedesk.com` running on a GCP VM in the
+DevineDesk project (`fifth-howl-505921-k0`). Cloudflare proxies to the VM.
+
+**GCP VM details:**
+- Project: `fifth-howl-505921-k0` (DevineDesk — NOT lazynext-ai)
+- VM name: `devinedesk`
+- Zone: `us-central1-a`
+- Machine type: `e2-medium`
+- External IP: `34.72.99.248`
+- Firewall: HTTP (80), HTTPS (443), SSH (22) open
+
+**Running containers (all healthy):**
+- `devinedesk-frontend-1` — nginx serving SPA + proxying /api/* (ports 80, 443)
+- `devinedesk-backend-1` — Express API (port 4000)
+- `devinedesk-postgres-1` — PostgreSQL 16 (port 5432)
+- `devinedesk-minio-1` — MinIO object storage (port 9000)
+- `devinedesk-facefusion-1` — FaceFusion face swap (port 7865)
+
+**Deploy command (on VM):**
+```sh
+cd /home/avaspatel/devinedesk
+git pull
+docker compose -f docker-compose.deploy.yml --env-file .env.production --profile facefusion up -d --build
+```
 
 - [x] Site is live and serving the frontend SPA
 - [x] Backend API is responding at `https://devinedesk.com/api/*`
 - [x] Sign-up flow works (sends verification email via Resend SMTP)
-- [ ] Optionally provision a GCP VM for scaling (user has GCP account
-      `support@devinedesk.com`, project `lazynext-ai` — needs `gcloud auth login`)
-- [ ] Optionally: `docker compose --profile facefusion up -d --build facefusion`
+- [x] FaceFusion is deployed and healthy
+- [x] Templates published (Go Viral, Hero Entry)
 
-### Production secrets (root `.env.production`) — DONE ✅
+### Production secrets (`.env.production` on VM) — DONE ✅
 
-- [x] `POSTGRES_PASSWORD` — strong random password generated
-- [x] `BETTER_AUTH_SECRET` — rotated with `openssl rand -base64 32`
+- [x] `POSTGRES_PASSWORD` — strong random password
+- [x] `BETTER_AUTH_SECRET` — generated with `openssl rand -base64 32`
 - [x] `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — set
 - [x] `SMTP_HOST=smtp.resend.com`, `SMTP_PORT=465`, `SMTP_USER=resend`,
-      `SMTP_PASS=<resend-api-key>` — set (using `onboarding@resend.dev` sender
-      until domain is verified)
-- [x] `ADMIN_EMAILS=support@devinedesk.com,test@devinedesk.com`
+      `SMTP_PASS=<resend-api-key>` — set
+- [x] `SMTP_FROM=DevineDesk <noreply@devinedesk.com>` — branded sender (domain verified)
+- [x] `ADMIN_EMAILS=support@devinedesk.com`
+- [x] `SUPERADMIN_EMAILS=support@devinedesk.com`
 - [x] `OPENROUTER_API_KEY` — funded key set
-- [x] `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` — strong credentials generated
-- [x] `BACKEND_URL=https://api.devinedesk.com`
-- [x] `FRONTEND_URL=https://devinedesk.com,https://www.devinedesk.com`
+- [x] `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` — strong credentials
+- [x] `BACKEND_URL=https://devinedesk.com`
+- [x] `FRONTEND_URL=https://devinedesk.com`
 - [x] `MINIO_PUBLIC_BASE_URL=https://devinedesk.com/minio`
-- [ ] `DODO_PAYMENTS_API_KEY` / `DODO_PAYMENTS_WEBHOOK_KEY` — test keys may
-      have expired; need to re-check in Dodo dashboard
+- [ ] `DODO_PAYMENTS_API_KEY` / `DODO_PAYMENTS_WEBHOOK_KEY` — test keys set;
+      need live keys after business verification
 - [ ] `DODO_PAYMENTS_ENVIRONMENT=live_mode` — switch after business verification
 - [ ] `DODO_PRODUCT_IDS` — live product IDs (separate from test IDs)
 
@@ -387,13 +406,18 @@ pipeline builds and pushes images to ghcr.io on every push to `main`.
 ### Post-deploy verification — PARTIAL ✅
 
 - [x] Site is live at `https://devinedesk.com` (HTTP 200)
-- [x] Backend API responds at `https://devinedesk.com/api/*`
-- [x] Sign-up flow works (verification email sent)
-- [ ] Verify email → sign in (need to check inbox for verification link)
+- [x] Backend API responds at `https://devinedesk.com/api/*` (returns JSON)
+- [x] Backend health: `curl http://localhost:4000/health` → `{"status":"ok"}`
+- [x] FaceFusion health: `{"status":"ok"}`
+- [x] Sign-up flow works (verification email sent via Resend)
+- [x] Resend domain verified (2026-08-21)
+- [x] SMTP_FROM updated to branded sender `noreply@devinedesk.com`
+- [x] Templates published (Go Viral + Hero Entry)
+- [x] All 5 containers healthy on GCP VM
+- [ ] Verify email → sign in (check inbox for verification link)
 - [ ] Test Google OAuth sign-in
 - [ ] Test password reset
-- [ ] Test credit purchase (Dodo checkout — needs valid API key)
+- [ ] Test credit purchase (Dodo checkout — needs live keys)
 - [ ] Test video/image generation
-- [ ] Test face swap (if FaceFusion is deployed)
+- [ ] Test face swap (FaceFusion is deployed and healthy)
 - [ ] Test template creation + render (admin + user)
-- [ ] Run `publish-templates.ts` on production to seed templates
