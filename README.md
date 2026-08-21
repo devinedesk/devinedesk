@@ -171,8 +171,10 @@ verification is skipped (dev mode).
 ## Production deployment
 
 The GitHub Actions workflow (`.github/workflows/deploy.yml`) builds and pushes
-Docker images to Docker Hub on every push to `main`. Required repository
-secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
+Docker images to GitHub Container Registry (ghcr.io) on every push to `main`.
+No external secrets required — it uses the automatically-provided `GITHUB_TOKEN`.
+Ensure the repository has "Packages: write" permission for the workflow token
+(Settings → Actions → General → Workflow permissions).
 
 For production:
 

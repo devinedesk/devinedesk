@@ -362,10 +362,11 @@ config change.
 - [ ] Backend cookies use `SameSite=None; Secure` automatically when
       `BACKEND_URL` starts with `https://` (see `auth.ts`)
 
-### CI/CD (GitHub Actions)
+### CI/CD (GitHub Actions → ghcr.io)
 
-- [ ] Set repo secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
-- [ ] Push to `main` triggers build + push to Docker Hub
+- [x] Workflow uses GitHub Container Registry (ghcr.io) — no external secrets needed
+- [ ] Ensure repo Settings → Actions → General → Workflow permissions = "Read and write"
+- [ ] Push to `main` triggers build + push to ghcr.io
 - [ ] On the server: `docker compose pull && docker compose up -d`
 
 ### Dodo Payments (live mode)
