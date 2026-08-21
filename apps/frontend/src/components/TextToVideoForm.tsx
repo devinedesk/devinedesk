@@ -18,6 +18,7 @@ import {
   ALLOWED_DURATIONS,
   createVideo,
   fetchModels,
+  fetchVideo,
   modelsForDuration,
   type Video,
   type VideoModel,
@@ -105,6 +106,22 @@ export function TextToVideoForm({ onCreated }: Props) {
       refreshCredits();
       onCreated(video);
       setPrompt("");
+
+      // If the backend returned IN_PROGRESS (async generation), poll until done.
+      if (video.status === "IN_PROGRESS") {
+        const pollId = setInterval(async () => {
+          try {
+            const updated = await fetchVideo(video.id);
+            if (updated.status === "COMPLETED" || updated.status === "FAILED") {
+              clearInterval(pollId);
+              onCreated(updated);
+              refreshCredits();
+            }
+          } catch {
+            clearInterval(pollId);
+          }
+        }, 5000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate video");
     } finally {

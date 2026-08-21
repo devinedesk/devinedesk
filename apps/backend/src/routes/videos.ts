@@ -132,46 +132,47 @@ videosRouter.post(
       return;
     }
 
-    // 3. Generate synchronously via OpenRouter, then store the output.
-    try {
-      const generated = await generateVideo({
-        model,
-        prompt,
-        duration,
-        resolution,
-        aspectRatio,
-        generateAudio,
-        firstFrame: startFrame ? { url: toDataUrl(startFrame) } : undefined,
-        lastFrame: endFrame ? { url: toDataUrl(endFrame) } : undefined,
-        references: referenceFrames.map((f) => ({ url: toDataUrl(f) })),
-      });
+    // 3. Return the IN_PROGRESS row immediately — generation runs in the
+    //    background so the HTTP response doesn't hit proxy timeouts (e.g.
+    //    Cloudflare's 100s limit). The frontend polls GET /api/videos/:id.
+    res.status(202).json(serializeVideo(video));
 
-      const videoKey = await uploadBuffer(generated.buffer, generated.contentType, "videos", "mp4");
-
-      const updated = await prisma.video.update({
-        where: { id: video.id },
-        data: {
-          status: "COMPLETED",
-          videoKey,
-          providerJobId: generated.providerJobId,
-          cost: generated.cost,
-        },
+    // 4. Generate in the background, then update the DB row.
+    generateVideo({
+      model,
+      prompt,
+      duration,
+      resolution,
+      aspectRatio,
+      generateAudio,
+      firstFrame: startFrame ? { url: toDataUrl(startFrame) } : undefined,
+      lastFrame: endFrame ? { url: toDataUrl(endFrame) } : undefined,
+      references: referenceFrames.map((f) => ({ url: toDataUrl(f) })),
+    })
+      .then(async (generated) => {
+        const videoKey = await uploadBuffer(generated.buffer, generated.contentType, "videos", "mp4");
+        await prisma.video.update({
+          where: { id: video.id },
+          data: {
+            status: "COMPLETED",
+            videoKey,
+            providerJobId: generated.providerJobId,
+            cost: generated.cost,
+          },
+        });
+      })
+      .catch(async (err) => {
+        const message = err instanceof Error ? err.message : "Video generation failed";
+        console.error("Video generation failed:", message);
+        await refundCredits(req.userId!, cost, {
+          referenceType: "video",
+          referenceId: video.id,
+          description: "Refund: video generation failed",
+        });
+        await prisma.video.update({
+          where: { id: video.id },
+          data: { status: "FAILED", error: message },
+        });
       });
-      res.status(201).json(serializeVideo(updated));
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Video generation failed";
-      console.error("Video generation failed:", message);
-      // Refund the credits we charged — the user got nothing.
-      await refundCredits(req.userId!, cost, {
-        referenceType: "video",
-        referenceId: video.id,
-        description: "Refund: video generation failed",
-      });
-      const failed = await prisma.video.update({
-        where: { id: video.id },
-        data: { status: "FAILED", error: message },
-      });
-      res.status(502).json({ error: message, video: serializeVideo(failed) });
-    }
   },
 );

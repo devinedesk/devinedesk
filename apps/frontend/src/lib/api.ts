@@ -291,6 +291,7 @@ export const fetchSwapModels = () => get<SwapModelOption[]>("/api/models/swap");
 
 // ---- Videos ----
 export const fetchVideos = () => get<Video[]>("/api/videos");
+export const fetchVideo = (id: string) => get<Video>(`/api/videos/${id}`);
 export const createVideo = (form: FormData) => post<Video>("/api/videos", form);
 
 // ---- Images ----

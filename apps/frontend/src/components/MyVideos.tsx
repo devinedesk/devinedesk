@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, Download, Loader2, Play } from "lucide-react";
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { friendlyError } from "@/lib/utils";
-import type { Video } from "@/lib/api";
+import { fetchVideo, type Video } from "@/lib/api";
 
 interface Props {
   videos: Video[];
@@ -162,6 +162,34 @@ function VideoModal({ video, onClose }: { video: Video | null; onClose: () => vo
 
 export function MyVideos({ videos, loading, error }: Props) {
   const [active, setActive] = useState<Video | null>(null);
+  const [localVideos, setLocalVideos] = useState<Video[]>(videos);
+
+  // Sync when parent passes new videos.
+  useEffect(() => {
+    setLocalVideos(videos);
+  }, [videos]);
+
+  // Poll any IN_PROGRESS videos until they complete or fail.
+  useEffect(() => {
+    const pending = localVideos.filter((v) => v.status === "IN_PROGRESS");
+    if (pending.length === 0) return;
+
+    const interval = setInterval(async () => {
+      const updates = await Promise.all(
+        pending.map((v) =>
+          fetchVideo(v.id).catch(() => null),
+        ),
+      );
+      setLocalVideos((prev) =>
+        prev.map((v) => {
+          const updated = updates.find((u) => u && u.id === v.id);
+          return updated ?? v;
+        }),
+      );
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [localVideos]);
 
   if (loading) {
     return (
@@ -175,7 +203,7 @@ export function MyVideos({ videos, loading, error }: Props) {
     return <p className="py-16 text-center text-destructive">{error}</p>;
   }
 
-  if (videos.length === 0) {
+  if (localVideos.length === 0) {
     return (
       <p className="py-16 text-center text-muted-foreground">
         You haven&apos;t generated any videos yet. Use the panel on the left to create one.
@@ -186,7 +214,7 @@ export function MyVideos({ videos, loading, error }: Props) {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {videos.map((video) => (
+        {localVideos.map((video) => (
           <VideoCard key={video.id} video={video} onOpen={() => setActive(video)} />
         ))}
       </div>
