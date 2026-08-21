@@ -6,7 +6,7 @@ import { prisma } from "@repo/db";
 import { env } from "./env.js";
 import { auth } from "./auth.js";
 import { ensureBucket } from "./lib/storage.js";
-import { videosRouter } from "./routes/videos.js";
+import { videosRouter, failVideoById } from "./routes/videos.js";
 import { imagesRouter } from "./routes/images.js";
 import { faceSwapsRouter } from "./routes/faceswaps.js";
 import { modelsRouter } from "./routes/models.js";
@@ -17,6 +17,7 @@ import { adminTemplatesRouter } from "./routes/adminTemplates.js";
 import { creditsRouter, creditsWebhookHandler } from "./routes/credits.js";
 import { mediaRouter } from "./routes/media.js";
 import { uploadErrorHandler } from "./lib/uploads.js";
+import { queueAvailable, getVideoJobState } from "./lib/queue.js";
 import { rateLimit } from "./middleware/rateLimit.js";
 
 // Initialize Sentry as early as possible so it captures startup errors.
@@ -162,24 +163,40 @@ async function failOrphanedRenders() {
   }
 }
 
+/** BullMQ states where the queue will still drive the job to completion. */
+const LIVE_JOB_STATES = new Set(["waiting", "active", "delayed", "prioritized", "waiting-children", "paused"]);
+
 /**
- * When Redis is NOT available (fire-and-forget mode), any in-progress videos
- * at startup were orphaned by the restart. Mark them failed + refund credits.
- * When Redis IS available, BullMQ resumes pending jobs automatically.
+ * A video still IN_PROGRESS at boot was interrupted by a restart/crash/redeploy.
+ * Without Redis, in-flight generation died with the process, so EVERY such row
+ * is orphaned. With Redis, BullMQ resumes jobs still present in the queue, so
+ * only rows whose job is GONE (never enqueued, attempts exhausted, or pruned)
+ * are orphaned. Orphans are marked FAILED + refunded so they surface a clear
+ * error instead of showing "Processing…" forever.
  */
 async function failOrphanedVideos() {
-  if (process.env.REDIS_URL) return; // BullMQ will resume — don't interfere
   try {
-    const orphaned = await prisma.video.findMany({
+    const inProgress = await prisma.video.findMany({
       where: { status: "IN_PROGRESS" },
       select: { id: true, userId: true },
     });
-    if (orphaned.length === 0) return;
-    await prisma.video.updateMany({
-      where: { id: { in: orphaned.map((v) => v.id) } },
-      data: { status: "FAILED", error: "Generation was interrupted by a server restart. Please try again." },
-    });
-    console.log(`↺ Marked ${orphaned.length} interrupted video(s) as failed on startup.`);
+    if (inProgress.length === 0) return;
+    let failedCount = 0;
+    for (const video of inProgress) {
+      if (queueAvailable) {
+        const state = await getVideoJobState(video.id);
+        if (state && LIVE_JOB_STATES.has(state)) continue; // BullMQ will resume it
+      }
+      await failVideoById(
+        video.id,
+        video.userId,
+        "Generation was interrupted by a server restart. Please try again.",
+      );
+      failedCount++;
+    }
+    if (failedCount > 0) {
+      console.log(`↺ Marked ${failedCount} interrupted video(s) as failed on startup.`);
+    }
   } catch (err) {
     console.error("⚠️  Could not reconcile interrupted videos:", err instanceof Error ? err.message : err);
   }

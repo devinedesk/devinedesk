@@ -160,7 +160,11 @@ It is a **bun**-managed **Turborepo** monorepo.
   generation (`POST /api/videos`) returns `202 Accepted` with the `IN_PROGRESS`
   row immediately and runs `generateVideo` via a **BullMQ durable job queue**
   (`src/lib/queue.ts`) when `REDIS_URL` is configured — jobs survive container
-  restarts. When Redis is not available, it falls back to fire-and-forget
+  restarts. Terminal job failures mark the row `FAILED` and refund credits via
+  `failVideoJob` (wired to the worker's `failed` event once attempts are
+  exhausted; jobs are keyed `jobId = videoId`), and on boot `failOrphanedVideos`
+  in `index.ts` fails + refunds any `IN_PROGRESS` video whose BullMQ job is
+  gone. When Redis is not available, it falls back to fire-and-forget
   (in-process promise). The frontend polls `GET /api/videos/:id` every 5s until
   `COMPLETED`/`FAILED` (this avoids Cloudflare's 100s proxy timeout). Template
   renders already ran in the background (`void runAndStoreRender`). Mirror the

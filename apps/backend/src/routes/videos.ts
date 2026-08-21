@@ -79,21 +79,35 @@ export async function processVideoJob(data: VideoJobData): Promise<void> {
 }
 
 /**
+ * Mark a video FAILED and refund whatever was actually charged for it. The
+ * refund amount comes from the ledger SPEND row (the source of truth) and
+ * refundCredits is net-aware, so repeat calls never double-refund. Used for
+ * orphaned rows where the original job payload is no longer available.
+ */
+export async function failVideoById(videoId: string, userId: string, message: string): Promise<void> {
+  const spend = await prisma.creditTransaction.findFirst({
+    where: { userId, referenceType: "video", referenceId: videoId, type: "SPEND" },
+    select: { amount: true },
+  });
+  await refundCredits(userId, Math.abs(spend?.amount ?? 0), {
+    referenceType: "video",
+    referenceId: videoId,
+    description: "Refund: video generation failed",
+  });
+  await prisma.video.update({
+    where: { id: videoId },
+    data: { status: "FAILED", error: message },
+  });
+}
+
+/**
  * Handle a video generation failure — refund credits and mark the row failed.
  * Called by both the queue worker's failed handler and the fire-and-forget catch.
  */
 export async function failVideoJob(data: VideoJobData, error: unknown): Promise<void> {
   const message = error instanceof Error ? error.message : "Video generation failed";
   console.error(`Video generation failed for ${data.videoId}:`, message);
-  await refundCredits(data.userId, data.cost, {
-    referenceType: "video",
-    referenceId: data.videoId,
-    description: "Refund: video generation failed",
-  });
-  await prisma.video.update({
-    where: { id: data.videoId },
-    data: { status: "FAILED", error: message },
-  });
+  await failVideoById(data.videoId, data.userId, message);
 }
 
 // List the current user's videos.
@@ -217,10 +231,16 @@ videosRouter.post(
     };
 
     if (queueAvailable) {
-      const jobId = await enqueueVideoJob(jobData);
-      if (jobId) {
-        console.log(`[queue] Enqueued video job ${jobId} for video ${video.id}`);
-        return;
+      try {
+        const jobId = await enqueueVideoJob(jobData);
+        if (jobId) {
+          console.log(`[queue] Enqueued video job ${jobId} for video ${video.id}`);
+          return;
+        }
+      } catch (err) {
+        // The 202 is already sent; fall back to in-process generation so the
+        // row isn't stranded at IN_PROGRESS when Redis hiccups.
+        console.error("[queue] Failed to enqueue video job, falling back to in-process:", err);
       }
     }
 
@@ -231,8 +251,9 @@ videosRouter.post(
 
 // Start the video worker at module load (only when Redis is configured).
 // The worker runs in the same process and processes jobs concurrently.
+// failVideoJob finalizes dead jobs: marks the row FAILED + refunds credits.
 startVideoWorker(async (data) => {
   await processVideoJob(data);
-}).catch((err) => {
+}, failVideoJob).catch((err) => {
   console.error("[queue] Failed to start video worker:", err instanceof Error ? err.message : err);
 });
