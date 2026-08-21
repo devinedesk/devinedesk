@@ -20,6 +20,10 @@ ENV VITE_API_URL=${VITE_API_URL}
 # Sentry DSN for frontend error tracking (baked in at build time).
 ARG VITE_SENTRY_DSN=
 ENV VITE_SENTRY_DSN=${VITE_SENTRY_DSN}
+# Sentry auth token for source map upload (only needed at build time).
+# When set, the Vite plugin uploads source maps to Sentry.
+ARG SENTRY_AUTH_TOKEN=
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 RUN cd apps/frontend && bun run build
 
 # --- Serve with nginx ---

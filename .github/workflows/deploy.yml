@@ -66,8 +66,11 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           # Only the frontend consumes VITE_API_URL; the backend ignores it.
+          # SENTRY_AUTH_TOKEN is used by the frontend build to upload source maps.
           build-args: |
             VITE_API_URL=${{ env.FRONTEND_API_URL }}
+            VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN_FRONTEND }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             ${{ env.REGISTRY }}/${{ steps.image.outputs.path }}:latest
             ${{ env.REGISTRY }}/${{ steps.image.outputs.path }}:${{ github.sha }}

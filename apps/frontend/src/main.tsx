@@ -10,7 +10,17 @@ if (SENTRY_DSN) {
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: import.meta.env.MODE,
+    // Performance monitoring — 10% of transactions are sampled.
     tracesSampleRate: 0.1,
+    // Session Replay — record 10% of healthy sessions, 100% of error sessions.
+    integrations: [
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
   });
 }
 
