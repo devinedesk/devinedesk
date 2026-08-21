@@ -153,11 +153,16 @@ It is a **bun**-managed **Turborepo** monorepo.
   persisted on the `Video`/`Image`/`FaceSwap` models; the bucket is anonymous-read,
   so the API returns permanent public URLs (`getPublicUrl`) built from
   `MINIO_FRONTEND_ENDPOINT`.
-- Generation is **synchronous**: routes create a DB row (`IN_PROGRESS`), call the
-  provider, store the result and mark `COMPLETED`/`FAILED`. Mirror this pattern and
-  reuse `src/lib/uploads.ts` when adding new media types. Template renders follow
-  the same pattern (`TemplateRender` row → render → store), but a render generates
-  *every* block sequentially, so it can take many minutes.
+- Generation is **asynchronous for video and template renders, synchronous for
+  images and face swaps**: routes create a DB row (`IN_PROGRESS`), call the
+  provider, store the result and mark `COMPLETED`/`FAILED`. Image and face-swap
+  routes block on the provider call (fast enough for proxy timeouts). Video
+  generation (`POST /api/videos`) returns `202 Accepted` with the `IN_PROGRESS`
+  row immediately and runs `generateVideo` in a background promise — the
+  frontend polls `GET /api/videos/:id` every 5s until `COMPLETED`/`FAILED` (this
+  avoids Cloudflare's 100s proxy timeout). Template renders already ran in the
+  background (`void runAndStoreRender`). Mirror the appropriate pattern and
+  reuse `src/lib/uploads.ts` when adding new media types.
 - **Template avatars**: the admin assigns 1-2 of their own avatars to a template at
   creation (`Template.avatarIds`, which sets `avatarSlots`). Blocks pick one of
   those slots (`TemplateBlock.avatarSlot`) for both the reference image and the
@@ -215,7 +220,7 @@ It is a **bun**-managed **Turborepo** monorepo.
   route (`videos`, `images`, template `render`/`retry`) follows the same pattern:
   reject up front with **402** if the balance is too low, `spendCredits()` once the
   DB row exists, and `refundCredits()` on failure (synchronous routes in their
-  catch; template renders in the background `.catch`). Admin `/export` and per-block
+  catch; video and template renders in the background `.catch`). Admin `/export` and per-block
   `/bake` are NOT charged (they're authoring tools). The frontend shows the balance
   in the navbar (`useMe().credits`); call `refreshCredits()` after any spend/top-up
   so it updates immediately. Pricing defaults assume ~30% margin over typical
