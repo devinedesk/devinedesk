@@ -4,7 +4,7 @@ import { prisma, type Video } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
 import { generateVideo } from "../lib/openrouter.js";
 import { getPublicUrl, uploadBuffer, downloadObject } from "../lib/storage.js";
-import { extFromMime, toDataUrl, upload } from "../lib/uploads.js";
+import { extFromMime, mimeFromBuffer, toDataUrl, upload } from "../lib/uploads.js";
 import { actionCost, getBalance, refundCredits, spendCredits } from "../lib/credits.js";
 import { enqueueVideoJob, startVideoWorker, queueAvailable, type VideoJobData } from "../lib/queue.js";
 
@@ -40,6 +40,10 @@ function serializeVideo(video: Video) {
  * background video generation — called by both the BullMQ worker (when Redis
  * is available) and the fire-and-forget fallback.
  */
+/** Data URL for a stored image buffer, declaring its REAL mime type. */
+const frameDataUrl = (buf: Buffer): string =>
+  `data:${mimeFromBuffer(buf)};base64,${buf.toString("base64")}`;
+
 export async function processVideoJob(data: VideoJobData): Promise<void> {
   // Download input frames from MinIO (they were uploaded before enqueuing).
   const startFrameBuffer = data.startFrameKey ? await downloadObject(data.startFrameKey) : undefined;
@@ -55,15 +59,9 @@ export async function processVideoJob(data: VideoJobData): Promise<void> {
     resolution: data.resolution,
     aspectRatio: data.aspectRatio,
     generateAudio: data.generateAudio,
-    firstFrame: startFrameBuffer
-      ? { url: `data:image/jpeg;base64,${startFrameBuffer.toString("base64")}` }
-      : undefined,
-    lastFrame: endFrameBuffer
-      ? { url: `data:image/jpeg;base64,${endFrameBuffer.toString("base64")}` }
-      : undefined,
-    references: referenceFrameBuffers.map((buf) => ({
-      url: `data:image/jpeg;base64,${buf.toString("base64")}`,
-    })),
+    firstFrame: startFrameBuffer ? { url: frameDataUrl(startFrameBuffer) } : undefined,
+    lastFrame: endFrameBuffer ? { url: frameDataUrl(endFrameBuffer) } : undefined,
+    references: referenceFrameBuffers.map((buf) => ({ url: frameDataUrl(buf) })),
   });
 
   const videoKey = await uploadBuffer(generated.buffer, generated.contentType, "videos", "mp4");

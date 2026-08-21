@@ -61,6 +61,23 @@ export const extFromMime = (mime: string): string => {
   return map[mime] ?? "png";
 };
 
+/**
+ * Sniff an image's real mime type from its magic bytes (defaults to png).
+ * Needed when building data URLs from stored buffers — declaring the wrong
+ * type (e.g. jpeg for PNG bytes) makes providers reject the image.
+ */
+export function mimeFromBuffer(buffer: Buffer): string {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (buffer.length >= 12 && buffer.toString("ascii", 8, 12) === "WEBP") return "image/webp";
+  if (buffer.length >= 6) {
+    const sig = buffer.toString("ascii", 0, 6);
+    if (sig === "GIF87a" || sig === "GIF89a") return "image/gif";
+  }
+  return "image/png";
+}
+
 /** Encode an uploaded file as a base64 data URL (sent to providers that can't reach MinIO). */
 export const toDataUrl = (file: Express.Multer.File): string =>
   `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
