@@ -309,80 +309,91 @@ config change.
 
 ## Production deployment checklist
 
-### DNS (in progress)
+### DNS — DONE ✅
 
-- [ ] Wix Domains Advanced Team updates nameservers to Cloudflare
-      (escalation ticket **3000090102**, confirmed by Wix agent Isabela on 2026-08-19;
-      she added a priority note to the case)
-- [ ] Cloudflare zone status → Active
-- [ ] Resend verifies `devinedesk.com`
-- [ ] Switch `SMTP_FROM` to `DevineDesk <noreply@devinedesk.com>`
-- [ ] Add A records for `app.devinedesk.com` and `api.devinedesk.com`
-      pointing to the production server IP
+- [x] Wix Domains Advanced Team updates nameservers to Cloudflare
+      (escalation ticket **3000090102** — confirmed complete 2026-08-21;
+      nameservers are now `jasper.ns.cloudflare.com` + `oaklyn.ns.cloudflare.com`)
+- [x] Cloudflare zone status → Active (DNS propagated, site is live)
+- [x] A records for `devinedesk.com`, `api.devinedesk.com`, `app.devinedesk.com`
+      (all pointing through Cloudflare proxy — orange cloud)
+- [x] MX, DKIM, SPF, DMARC records for Resend email — all verified propagated
+- [ ] Resend verifies `devinedesk.com` — all DNS records are in place;
+      log into Resend dashboard and click "Verify" (may already be verified)
+- [ ] Switch `SMTP_FROM` to `DevineDesk <noreply@devinedesk.com>` — do this
+      after Resend confirms domain verification
 
-### Server provisioning
+### Server provisioning — ALREADY DEPLOYED ✅
 
-- [ ] Provision a VPS (e.g. DigitalOcean droplet, Hetzner, AWS EC2)
-- [ ] Install Docker + Docker Compose
-- [ ] Clone the repo and copy `.env.example` → `.env`
-- [ ] Fill in all production secrets (see below)
-- [ ] `docker compose up -d --build` (postgres + minio + backend + frontend)
+The app is already live at `https://devinedesk.com`! The frontend, backend,
+Postgres, and MinIO are all running behind Cloudflare proxy. The CI/CD
+pipeline builds and pushes images to ghcr.io on every push to `main`.
+
+- [x] Site is live and serving the frontend SPA
+- [x] Backend API is responding at `https://devinedesk.com/api/*`
+- [x] Sign-up flow works (sends verification email via Resend SMTP)
+- [ ] Optionally provision a GCP VM for scaling (user has GCP account
+      `support@devinedesk.com`, project `lazynext-ai` — needs `gcloud auth login`)
 - [ ] Optionally: `docker compose --profile facefusion up -d --build facefusion`
 
-### Production secrets (root `.env`)
+### Production secrets (root `.env.production`) — DONE ✅
 
-- [ ] `POSTGRES_PASSWORD` — strong random password (not "postgres")
-- [ ] `BETTER_AUTH_SECRET` — `openssl rand -base64 32`
-- [ ] `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — from Google Cloud Console
-      (add `https://api.devinedesk.com/api/auth/callback/google` as redirect URI)
-- [ ] `SMTP_HOST=smtp.resend.com`, `SMTP_PORT=465`, `SMTP_USER=resend`,
-      `SMTP_PASS=<resend-api-key>`, `SMTP_FROM=DevineDesk <noreply@devinedesk.com>`
-- [ ] `ADMIN_EMAILS=support@devinedesk.com`
-- [ ] `OPENROUTER_API_KEY` — funded OpenRouter key
-- [ ] `DODO_PAYMENTS_API_KEY` / `DODO_PAYMENTS_WEBHOOK_KEY` — live mode keys
-- [ ] `DODO_PAYMENTS_ENVIRONMENT=live_mode`
+- [x] `POSTGRES_PASSWORD` — strong random password generated
+- [x] `BETTER_AUTH_SECRET` — rotated with `openssl rand -base64 32`
+- [x] `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — set
+- [x] `SMTP_HOST=smtp.resend.com`, `SMTP_PORT=465`, `SMTP_USER=resend`,
+      `SMTP_PASS=<resend-api-key>` — set (using `onboarding@resend.dev` sender
+      until domain is verified)
+- [x] `ADMIN_EMAILS=support@devinedesk.com,test@devinedesk.com`
+- [x] `OPENROUTER_API_KEY` — funded key set
+- [x] `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` — strong credentials generated
+- [x] `BACKEND_URL=https://api.devinedesk.com`
+- [x] `FRONTEND_URL=https://devinedesk.com,https://www.devinedesk.com`
+- [x] `MINIO_PUBLIC_BASE_URL=https://devinedesk.com/minio`
+- [ ] `DODO_PAYMENTS_API_KEY` / `DODO_PAYMENTS_WEBHOOK_KEY` — test keys may
+      have expired; need to re-check in Dodo dashboard
+- [ ] `DODO_PAYMENTS_ENVIRONMENT=live_mode` — switch after business verification
 - [ ] `DODO_PRODUCT_IDS` — live product IDs (separate from test IDs)
-- [ ] `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` — strong credentials
-- [ ] `BACKEND_URL=https://api.devinedesk.com`
-- [ ] `FRONTEND_URL=https://app.devinedesk.com,https://devinedesk.com`
-- [ ] `MINIO_FRONTEND_ENDPOINT=<public-endpoint>` (for object URLs)
 
 ### Object storage (production)
 
-- [ ] Use a managed S3-compatible store (DigitalOcean Spaces, AWS S3, or
-      self-hosted MinIO with a public endpoint)
-- [ ] Set `MINIO_ENDPOINT`, `MINIO_FRONTEND_ENDPOINT`, `MINIO_PORT`,
-      `MINIO_USE_SSL=true`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`
-- [ ] Ensure the bucket is publicly readable for object URLs to work
+- [x] Self-hosted MinIO running in Docker with public-read bucket
+- [x] `MINIO_PUBLIC_BASE_URL` set for nginx proxy URL rewriting
+- [ ] Consider migrating to managed S3 (DigitalOcean Spaces) for reliability
 
-### HTTPS / TLS
+### HTTPS / TLS — DONE ✅
 
-- [ ] Put Cloudflare proxy in front (orange-cloud) for free TLS
-- [ ] Or use Caddy/nginx + Let's Encrypt on the server
-- [ ] Backend cookies use `SameSite=None; Secure` automatically when
-      `BACKEND_URL` starts with `https://` (see `auth.ts`)
+- [x] Cloudflare proxy in front (orange-cloud) for free TLS
+- [x] Backend cookies use `SameSite=None; Secure` (BACKEND_URL is HTTPS)
+- [x] Security headers configured in nginx
 
-### CI/CD (GitHub Actions → ghcr.io)
+### CI/CD (GitHub Actions → ghcr.io) — DONE ✅
 
 - [x] Workflow uses GitHub Container Registry (ghcr.io) — no external secrets needed
+- [x] CI/CD passing — images built and pushed successfully
+- [x] Push to `main` triggers build + push to ghcr.io
 - [ ] Ensure repo Settings → Actions → General → Workflow permissions = "Read and write"
-- [ ] Push to `main` triggers build + push to ghcr.io
-- [ ] On the server: `docker compose pull && docker compose up -d`
+      (may already be set — CI/CD is passing)
+- [ ] On the server: `docker compose pull && docker compose up -d` for updates
 
-### Dodo Payments (live mode)
+### Dodo Payments (live mode) — NEEDS ATTENTION
 
+- [ ] Re-check test API key (may have expired — returns "Unauthorized")
 - [ ] Complete Dodo business verification
 - [ ] Create live products (₹499, ₹1999, ₹4999)
-- [ ] Set webhook endpoint to `https://api.devinedesk.com/api/credits/webhook`
+- [ ] Set webhook endpoint to `https://devinedesk.com/api/credits/webhook`
 - [ ] Switch `DODO_PAYMENTS_ENVIRONMENT=live_mode`
 
-### Post-deploy verification
+### Post-deploy verification — PARTIAL ✅
 
-- [ ] `curl https://api.devinedesk.com/health` → `{"status":"ok"}`
-- [ ] Sign up with a real email → verify → sign in
+- [x] Site is live at `https://devinedesk.com` (HTTP 200)
+- [x] Backend API responds at `https://devinedesk.com/api/*`
+- [x] Sign-up flow works (verification email sent)
+- [ ] Verify email → sign in (need to check inbox for verification link)
 - [ ] Test Google OAuth sign-in
 - [ ] Test password reset
-- [ ] Test credit purchase (live Dodo checkout)
+- [ ] Test credit purchase (Dodo checkout — needs valid API key)
 - [ ] Test video/image generation
 - [ ] Test face swap (if FaceFusion is deployed)
 - [ ] Test template creation + render (admin + user)
+- [ ] Run `publish-templates.ts` on production to seed templates
