@@ -25,6 +25,45 @@ function runFfmpeg(args: string[]): Promise<void> {
   });
 }
 
+/**
+ * Transcode any image buffer (AVIF, HEIC, GIF, TIFF, …) to PNG bytes.
+ * User uploads arrive in whatever format the browser had (an AVIF saved as
+ * ".png" is common), which providers reject with opaque errors — so uploaded
+ * frames are normalised to PNG before being stored or sent out.
+ */
+export function imageToPng(input: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("ffmpeg", [
+      "-hide_banner",
+      "-loglevel", "error",
+      "-i", "pipe:0",
+      "-frames:v", "1",
+      "-f", "image2pipe",
+      "-vcodec", "png",
+      "pipe:1",
+    ]);
+    const chunks: Buffer[] = [];
+    let stderr = "";
+    proc.stdout.on("data", (d) => chunks.push(d as Buffer));
+    proc.stderr.on("data", (d) => {
+      stderr += d.toString();
+    });
+    proc.on("error", (err) => {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        reject(new Error("ffmpeg is not installed or not on PATH (required to normalize uploaded images)."));
+      } else {
+        reject(err);
+      }
+    });
+    proc.on("close", (code) => {
+      if (code === 0) resolve(Buffer.concat(chunks));
+      else reject(new Error(`ffmpeg image transcode exited with code ${code}: ${stderr.slice(-500)}`));
+    });
+    proc.stdin.on("error", () => {}); // swallow EPIPE if ffmpeg exits before reading all input
+    proc.stdin.end(input);
+  });
+}
+
 export interface StitchOptions {
   /** Output width in pixels (clips are scaled + padded to fit). Defaults to 1280. */
   width?: number;

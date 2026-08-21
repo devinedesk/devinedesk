@@ -4,7 +4,7 @@ import { prisma, type Image } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
 import { generateImage } from "../lib/openrouter.js";
 import { getPublicUrl, uploadBuffer } from "../lib/storage.js";
-import { extFromMime, toDataUrl, upload } from "../lib/uploads.js";
+import { extFromMime, imageDataUrl, storeNormalizedImage, upload, UnsupportedImageError } from "../lib/uploads.js";
 import { actionCost, getBalance, refundCredits, spendCredits } from "../lib/credits.js";
 
 export const imagesRouter: Router = Router();
@@ -69,10 +69,19 @@ imagesRouter.post(
     const files = (req.files ?? {}) as Record<string, Express.Multer.File[] | undefined>;
     const referenceImages = files.referenceImages ?? [];
 
-    // 1. Persist uploaded reference inputs to the object store.
-    const referenceImageKeys = await Promise.all(
-      referenceImages.map((f) => uploadBuffer(f.buffer, f.mimetype, "inputs", extFromMime(f.mimetype))),
-    );
+    // 1. Normalize uploads to provider-safe formats (AVIF/HEIC/GIF → PNG) and
+    //    persist them to the object store.
+    let refs: { key: string; buffer: Buffer; mime: string }[];
+    try {
+      refs = await Promise.all(referenceImages.map((f) => storeNormalizedImage(f, "inputs")));
+    } catch (err) {
+      if (err instanceof UnsupportedImageError) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      throw err;
+    }
+    const referenceImageKeys = refs.map((r) => r.key);
 
     // 2. Create the DB record up front.
     const image = await prisma.image.create({
@@ -110,7 +119,7 @@ imagesRouter.post(
         prompt,
         resolution,
         aspectRatio,
-        references: referenceImages.map((f) => ({ url: toDataUrl(f) })),
+        references: refs.map((r) => ({ url: imageDataUrl(r.buffer, r.mime) })),
       });
 
       const ext = extFromMime(generated.contentType);

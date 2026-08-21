@@ -2,8 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma, type Avatar } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
-import { deleteObjects, getPublicUrl, uploadBuffer } from "../lib/storage.js";
-import { extFromMime, upload } from "../lib/uploads.js";
+import { deleteObjects, getPublicUrl } from "../lib/storage.js";
+import { storeNormalizedImage, upload, UnsupportedImageError } from "../lib/uploads.js";
 
 export const avatarsRouter: Router = Router();
 
@@ -61,9 +61,20 @@ avatarsRouter.post(
       return;
     }
 
-    const sourceImageKeys = await Promise.all(
-      images.map((f) => uploadBuffer(f.buffer, f.mimetype, "avatars", extFromMime(f.mimetype))),
-    );
+    // Normalize to provider-safe formats (AVIF/HEIC/GIF → PNG) — avatar photos
+    // are used as face-swap sources and provider reference images.
+    let sourceImageKeys: string[];
+    try {
+      sourceImageKeys = await Promise.all(
+        images.map(async (f) => (await storeNormalizedImage(f, "avatars")).key),
+      );
+    } catch (err) {
+      if (err instanceof UnsupportedImageError) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      throw err;
+    }
 
     const avatar = await prisma.avatar.create({
       data: {

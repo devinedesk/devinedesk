@@ -4,7 +4,7 @@ import { prisma, type Video } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
 import { generateVideo } from "../lib/openrouter.js";
 import { getPublicUrl, uploadBuffer, downloadObject } from "../lib/storage.js";
-import { extFromMime, mimeFromBuffer, toDataUrl, upload } from "../lib/uploads.js";
+import { mimeFromBuffer, storeNormalizedImage, upload, UnsupportedImageError } from "../lib/uploads.js";
 import { actionCost, getBalance, refundCredits, spendCredits } from "../lib/credits.js";
 import { enqueueVideoJob, startVideoWorker, queueAvailable, type VideoJobData } from "../lib/queue.js";
 
@@ -159,18 +159,27 @@ videosRouter.post(
     const endFrame = files.endFrame?.[0];
     const referenceFrames = files.referenceFrames ?? [];
 
-    // 1. Persist uploaded input images to the object store.
-    const [startFrameKey, endFrameKey, referenceFrameKeys] = await Promise.all([
-      startFrame
-        ? uploadBuffer(startFrame.buffer, startFrame.mimetype, "inputs", extFromMime(startFrame.mimetype))
-        : Promise.resolve<string | undefined>(undefined),
-      endFrame
-        ? uploadBuffer(endFrame.buffer, endFrame.mimetype, "inputs", extFromMime(endFrame.mimetype))
-        : Promise.resolve<string | undefined>(undefined),
-      Promise.all(
-        referenceFrames.map((f) => uploadBuffer(f.buffer, f.mimetype, "inputs", extFromMime(f.mimetype))),
-      ),
-    ]);
+    // 1. Normalize uploads to provider-safe formats (AVIF/HEIC/GIF → PNG) and
+    //    persist them to the object store.
+    let startFrameKey: string | undefined;
+    let endFrameKey: string | undefined;
+    let referenceFrameKeys: string[];
+    try {
+      const [start, end, refs] = await Promise.all([
+        startFrame ? storeNormalizedImage(startFrame, "inputs") : undefined,
+        endFrame ? storeNormalizedImage(endFrame, "inputs") : undefined,
+        Promise.all(referenceFrames.map((f) => storeNormalizedImage(f, "inputs"))),
+      ]);
+      startFrameKey = start?.key;
+      endFrameKey = end?.key;
+      referenceFrameKeys = refs.map((r) => r.key);
+    } catch (err) {
+      if (err instanceof UnsupportedImageError) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      throw err;
+    }
 
     // 2. Create the DB record up front.
     const video = await prisma.video.create({

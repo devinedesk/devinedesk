@@ -3,7 +3,7 @@ import { prisma, type FaceSwap } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
 import { faceSwap } from "../lib/facefusion.js";
 import { getPublicUrl, uploadBuffer } from "../lib/storage.js";
-import { extFromMime, upload } from "../lib/uploads.js";
+import { extFromMime, normalizeImage, upload, UnsupportedImageError } from "../lib/uploads.js";
 
 export const faceSwapsRouter: Router = Router();
 
@@ -56,10 +56,25 @@ faceSwapsRouter.post(
       return;
     }
 
-    // 1. Persist both uploaded inputs to the object store.
+    // 1. Normalize to provider-safe formats (AVIF/HEIC/GIF → PNG) and persist
+    //    both uploaded inputs to the object store.
+    let sourceNorm: { buffer: Buffer; mime: string };
+    let targetNorm: { buffer: Buffer; mime: string };
+    try {
+      [sourceNorm, targetNorm] = await Promise.all([
+        normalizeImage(source.buffer),
+        normalizeImage(target.buffer),
+      ]);
+    } catch (err) {
+      if (err instanceof UnsupportedImageError) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      throw err;
+    }
     const [sourceKey, targetKey] = await Promise.all([
-      uploadBuffer(source.buffer, source.mimetype, "inputs", extFromMime(source.mimetype)),
-      uploadBuffer(target.buffer, target.mimetype, "inputs", extFromMime(target.mimetype)),
+      uploadBuffer(sourceNorm.buffer, sourceNorm.mime, "inputs", extFromMime(sourceNorm.mime)),
+      uploadBuffer(targetNorm.buffer, targetNorm.mime, "inputs", extFromMime(targetNorm.mime)),
     ]);
 
     // 2. Create the DB record up front.
@@ -70,8 +85,8 @@ faceSwapsRouter.post(
     // 3. Run the swap synchronously via FaceFusion, then store the output.
     try {
       const result = await faceSwap(
-        { buffer: source.buffer, mimetype: source.mimetype, filename: `source.${extFromMime(source.mimetype)}` },
-        { buffer: target.buffer, mimetype: target.mimetype, filename: `target.${extFromMime(target.mimetype)}` },
+        { buffer: sourceNorm.buffer, mimetype: sourceNorm.mime, filename: `source.${extFromMime(sourceNorm.mime)}` },
+        { buffer: targetNorm.buffer, mimetype: targetNorm.mime, filename: `target.${extFromMime(targetNorm.mime)}` },
       );
 
       const ext = extFromMime(result.contentType);

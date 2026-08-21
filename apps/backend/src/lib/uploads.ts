@@ -1,5 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import multer from "multer";
+import { imageToPng } from "./ffmpeg.js";
+import { uploadBuffer } from "./storage.js";
 
 /** Shared multer instance for in-memory image uploads (reused by every route). */
 export const upload = multer({
@@ -75,7 +77,56 @@ export function mimeFromBuffer(buffer: Buffer): string {
     const sig = buffer.toString("ascii", 0, 6);
     if (sig === "GIF87a" || sig === "GIF89a") return "image/gif";
   }
+  // ISO-BMFF family (AVIF / HEIC): "ftyp" box at offset 4, brand at offset 8.
+  if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
+    const brand = buffer.toString("ascii", 8, 12);
+    if (brand === "avif" || brand === "avis") return "image/avif";
+    if (["heic", "heix", "hevc", "mif1", "msf1"].includes(brand)) return "image/heic";
+  }
   return "image/png";
+}
+
+/** Thrown when an uploaded image can't be read or transcoded (corrupt/unsupported). */
+export class UnsupportedImageError extends Error {
+  constructor() {
+    super("An uploaded image is corrupt or in an unsupported format.");
+    this.name = "UnsupportedImageError";
+  }
+}
+
+/** Formats providers can reliably parse; anything else is transcoded to PNG. */
+const PROVIDER_SAFE_IMAGE_MIMES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+/**
+ * Normalize an uploaded image to a provider-safe format: sniff the real type
+ * from magic bytes (browser mimetypes and file extensions lie — an AVIF saved
+ * as ".png" is common) and transcode anything else to PNG via ffmpeg.
+ */
+export async function normalizeImage(buffer: Buffer): Promise<{ buffer: Buffer; mime: string }> {
+  const mime = mimeFromBuffer(buffer);
+  if (PROVIDER_SAFE_IMAGE_MIMES.has(mime)) return { buffer, mime };
+  try {
+    return { buffer: await imageToPng(buffer), mime: "image/png" };
+  } catch {
+    throw new UnsupportedImageError();
+  }
+}
+
+/** Data URL for an image buffer, declaring its real mime type. */
+export const imageDataUrl = (buffer: Buffer, mime: string): string =>
+  `data:${mime};base64,${buffer.toString("base64")}`;
+
+/**
+ * Normalize an uploaded image file and persist it to the object store.
+ * Throws UnsupportedImageError for corrupt/unsupported files.
+ */
+export async function storeNormalizedImage(
+  file: Express.Multer.File,
+  prefix: string,
+): Promise<{ key: string; buffer: Buffer; mime: string }> {
+  const { buffer, mime } = await normalizeImage(file.buffer);
+  const key = await uploadBuffer(buffer, mime, prefix, extFromMime(mime));
+  return { key, buffer, mime };
 }
 
 /** Encode an uploaded file as a base64 data URL (sent to providers that can't reach MinIO). */

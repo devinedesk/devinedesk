@@ -172,7 +172,14 @@ export function VideoPage() {
           <div className="lg:sticky lg:top-20">
             <TextToVideoForm
               onCreated={(video) => {
-                setVideos((prev) => [video, ...prev]);
+                // Upsert by id — the form calls this once at creation and again
+                // when its polling sees the terminal status, and a blind prepend
+                // would render the same video twice.
+                setVideos((prev) =>
+                  prev.some((v) => v.id === video.id)
+                    ? prev.map((v) => (v.id === video.id ? video : v))
+                    : [video, ...prev],
+                );
                 setView("library");
               }}
             />
