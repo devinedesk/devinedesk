@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
@@ -17,6 +18,15 @@ import { creditsRouter, creditsWebhookHandler } from "./routes/credits.js";
 import { mediaRouter } from "./routes/media.js";
 import { uploadErrorHandler } from "./lib/uploads.js";
 import { rateLimit } from "./middleware/rateLimit.js";
+
+// Initialize Sentry as early as possible so it captures startup errors.
+if (env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: env.SENTRY_DSN,
+    environment: env.NODE_ENV,
+    tracesSampleRate: 0.1,
+  });
+}
 
 const app = express();
 
@@ -115,6 +125,11 @@ app.use("/api/media", mediaRouter);
 
 // Turn multer upload failures into clean 400s (mounted after all routers).
 app.use(uploadErrorHandler);
+
+// Sentry error handler must be after all controllers (last middleware).
+if (env.SENTRY_DSN) {
+  Sentry.setupExpressErrorHandler(app);
+}
 
 /**
  * Template renders run in this process (a detached background task), so any

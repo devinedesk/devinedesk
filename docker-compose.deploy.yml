@@ -93,6 +93,7 @@ services:
       dockerfile: apps/frontend/Dockerfile
       args:
         VITE_API_URL: ${FRONTEND_URL:-https://devinedesk.com}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
     restart: unless-stopped
     depends_on:
       backend:

@@ -173,6 +173,13 @@ const envSchema = z.object({
     (v) => (v === "" ? undefined : v),
     z.string().url().optional(),
   ),
+
+  // Sentry error tracking (optional). When set, backend errors are reported
+  // to Sentry with stack traces.
+  SENTRY_DSN: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().optional(),
+  ),
 });
 
 const parsed = envSchema.safeParse(process.env);

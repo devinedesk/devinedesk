@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@repo/db": "*",
+    "@sentry/node": "^10.70.0",
     "better-auth": "^1.2.7",
     "bullmq": "^6.2.0",
     "cors": "^2.8.5",

@@ -17,6 +17,9 @@ COPY apps/frontend apps/frontend
 # VITE_API_URL is baked in at build time.
 ARG VITE_API_URL=http://localhost:4000
 ENV VITE_API_URL=${VITE_API_URL}
+# Sentry DSN for frontend error tracking (baked in at build time).
+ARG VITE_SENTRY_DSN=
+ENV VITE_SENTRY_DSN=${VITE_SENTRY_DSN}
 RUN cd apps/frontend && bun run build
 
 # --- Serve with nginx ---
