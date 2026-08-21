@@ -2,6 +2,10 @@
 FROM oven/bun:1.3.11 AS build
 WORKDIR /app
 
+# Install CA certificates so sentry-cli can verify Sentry's SSL cert during
+# source map upload.
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+
 COPY package.json bun.lock ./
 COPY apps/frontend/package.json apps/frontend/package.json
 COPY packages/typescript-config/package.json packages/typescript-config/package.json
