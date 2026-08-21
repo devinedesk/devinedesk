@@ -94,6 +94,9 @@ services:
       args:
         VITE_API_URL: ${FRONTEND_URL:-https://devinedesk.com}
         VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        # Sentry auth token for source map upload (CI/CD only).
+        # When set, the Vite plugin uploads source maps to Sentry.
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN:-}
     restart: unless-stopped
     depends_on:
       backend:
