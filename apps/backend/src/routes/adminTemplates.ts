@@ -9,7 +9,7 @@ import { audioUpload, extFromMime, videoUpload } from "../lib/uploads.js";
 import { generateThumbnail, probeMediaDuration } from "../lib/ffmpeg.js";
 import { runAndStoreRender } from "../lib/runRender.js";
 import { applyFaceSwap, buildBlockLipsyncAudio, renderBlockClip } from "../lib/templateRender.js";
-import { supportsAudioLipsync } from "../lib/openrouter.js";
+import { supportsAudioLipsync } from "../lib/aiProvider.js";
 import {
   serializeAudioClip,
   serializeBlock,

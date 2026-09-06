@@ -8,7 +8,7 @@ import {
   type AudioWindowPart,
   type TimelineSegment,
 } from "./ffmpeg.js";
-import { generateImage, generateVideo, supportsAudioLipsync, swapFaceWithImageModel } from "./openrouter.js";
+import { generateImage, generateVideo, supportsAudioLipsync, swapFaceWithImageModel } from "./aiProvider.js";
 import { downloadObject, getPublicUrl, uploadBuffer } from "./storage.js";
 
 /** Per-block phase emitted via the progress callback (mirrors the DB enum). */

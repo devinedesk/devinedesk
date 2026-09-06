@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
-import { listImageModels, listSwapModels, listVideoModels } from "../lib/openrouter.js";
+import { listImageModels, listSwapModels, listVideoModels } from "../lib/aiProvider.js";
 
 export const modelsRouter: Router = Router();
 

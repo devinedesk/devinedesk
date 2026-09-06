@@ -1,5 +1,8 @@
 # DevineDesk
 
+[![Powered by Atlas Cloud](https://www.atlascloud.ai/oss-program/powered-by-atlas-cloud.svg)](https://www.atlascloud.ai/?ref=YOUR_INVITE_CODE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A generative-media SaaS. Users sign in and can:
 
 - **Generate videos** from a prompt with a choice of model, duration, resolution,
@@ -8,11 +11,13 @@ A generative-media SaaS. Users sign in and can:
   ratio and optional reference images.
 - **Face swap** — upload a base image and a face, and get the face swapped in.
 
-Video and image generation are routed through
-[OpenRouter](https://openrouter.ai/docs/guides/overview/multimodal/video-generation);
-face swaps run on a self-hosted [FaceFusion](https://docs.facefusion.io) service.
-All generated media and uploaded inputs are stored in an S3-compatible object
-store (MinIO).
+Video and image generation are routed through a configurable AI provider:
+[OpenRouter](https://openrouter.ai/docs/guides/overview/multimodal/video-generation),
+[Atlas Cloud](https://www.atlascloud.ai), or
+[Vertex AI / Gemini Enterprise Agent Platform](https://cloud.google.com/vertex-ai)
+— selected via the `AI_PROVIDER` env var. Face swaps run on a self-hosted
+[FaceFusion](https://docs.facefusion.io) service. All generated media and
+uploaded inputs are stored in an S3-compatible object store (MinIO).
 
 ## Architecture
 

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma, type Video } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
-import { generateVideo } from "../lib/openrouter.js";
+import { generateVideo } from "../lib/aiProvider.js";
 import { getPublicUrl, uploadBuffer, downloadObject } from "../lib/storage.js";
 import { mimeFromBuffer, storeNormalizedImage, upload, UnsupportedImageError } from "../lib/uploads.js";
 import { actionCost, getBalance, refundCredits, spendCredits } from "../lib/credits.js";

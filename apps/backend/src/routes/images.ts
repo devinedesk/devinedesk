@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma, type Image } from "@repo/db";
 import { requireAuth, type AuthedRequest } from "../middleware/requireAuth.js";
-import { generateImage } from "../lib/openrouter.js";
+import { generateImage } from "../lib/aiProvider.js";
 import { getPublicUrl, uploadBuffer } from "../lib/storage.js";
 import { extFromMime, imageDataUrl, storeNormalizedImage, upload, UnsupportedImageError } from "../lib/uploads.js";
 import { actionCost, getBalance, refundCredits, spendCredits } from "../lib/credits.js";

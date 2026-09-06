@@ -47,6 +47,27 @@ It is a **bun**-managed **Turborepo** monorepo.
     `src/lib/auth-client.ts`.
   - `src/lib/openrouter.ts` — OpenRouter client: video (submit + poll) **and**
     image (`generateImage`, `listImageModels`) generation, plus video model list.
+    This is the **default** AI provider (`AI_PROVIDER=openrouter`).
+  - `src/lib/aiProvider.ts` — **AI provider router**. Dispatches generation +
+    model-listing calls to the provider selected by the `AI_PROVIDER` env var:
+    `openrouter` (default), `atlascloud`, or `vertex`. All routes and
+    `templateRender.ts` import from `aiProvider.ts` (not `openrouter.ts`
+    directly) so the provider can be switched via env without code changes.
+    Each provider module exports the same interface: `listVideoModels`,
+    `listImageModels`, `listSwapModels`, `generateVideo`, `generateImage`,
+    `swapFaceWithImageModel`.
+  - `src/lib/atlascloud.ts` — **Atlas Cloud** provider (400+ models, OpenAI-
+    compatible API). Used when `AI_PROVIDER=atlascloud`. Async flow:
+    `POST /api/v1/model/generateVideo` → poll `GET /api/v1/model/prediction/{id}`.
+    Eligible for the Atlas Cloud Open Source Sponsorship Program (free monthly
+    credits for active OSS projects — see https://www.atlascloud.ai/oss-program).
+  - `src/lib/vertexai.ts` — **Vertex AI / Gemini Enterprise Agent Platform**
+    provider (Google native: Veo video + Imagen image). Used when
+    `AI_PROVIDER=vertex`. Video uses `predictLongRunning` (async LRO → GCS
+    output → download). Image uses `predict` (synchronous, base64 response).
+    Auth: GCP metadata server (on VM), `VERTEX_ACCESS_TOKEN` (local dev), or
+    `GCP_SERVICE_ACCOUNT_KEY`. Covered by GCP $300 free trial credits and
+    Google for Startups Cloud Program credits.
   - `src/lib/facefusion.ts` — calls the self-hosted FaceFusion swap service over HTTP.
     The frame face-swap step in `renderBlockClip` is provider-pluggable via
     `SWAP_PROVIDER`: `facefusion` (classic pixel swap) or `flux` (diffusion identity

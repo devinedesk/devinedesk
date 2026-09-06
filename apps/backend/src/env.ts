@@ -70,6 +70,14 @@ const envSchema = z.object({
         .filter(Boolean),
     ),
 
+  // ---- AI provider selection ----
+  // Which AI provider to use for video/image generation:
+  //  - "openrouter": OpenRouter (default, 400+ models, 5.5% platform fee)
+  //  - "atlascloud": Atlas Cloud (400+ models, OSS sponsorship credits available)
+  //  - "vertex":     Vertex AI / Gemini Enterprise Agent Platform (Google native,
+  //                  covered by GCP $300 free credits + Google for Startups)
+  AI_PROVIDER: z.enum(["openrouter", "atlascloud", "vertex"]).default("openrouter"),
+
   // OpenRouter
   OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_BASE_URL: z.string().url().default("https://openrouter.ai/api/v1"),
@@ -87,6 +95,22 @@ const envSchema = z.object({
         .map((s) => s.trim())
         .filter(Boolean),
     ),
+
+  // Atlas Cloud (alternative AI provider — OSS sponsorship credits available)
+  ATLASCLOUD_API_KEY: z.string().optional(),
+
+  // Vertex AI / Gemini Enterprise Agent Platform (Google native AI)
+  // Required when AI_PROVIDER=vertex. When running on a GCP VM, the metadata
+  // server provides auth automatically. For local dev, set VERTEX_ACCESS_TOKEN
+  // from `gcloud auth print-access-token`.
+  GCP_PROJECT_ID: z.string().optional(),
+  // GCS bucket URI where Veo video outputs are stored (e.g. "gs://my-bucket/output/").
+  VERTEX_GCS_OUTPUT_URI: z.string().optional(),
+  // Static access token for local dev (from `gcloud auth print-access-token`).
+  VERTEX_ACCESS_TOKEN: z.string().optional(),
+  // Service account JSON key (for non-GCP environments). When set, JWT signing
+  // is used — but for simplicity, prefer the metadata server or VERTEX_ACCESS_TOKEN.
+  GCP_SERVICE_ACCOUNT_KEY: z.string().optional(),
 
   // Face-swap provider for template frames:
   //  - "facefusion": classic pixel-level swap via the self-hosted service (precise,
