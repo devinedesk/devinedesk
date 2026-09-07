@@ -34,4 +34,4 @@ EXPOSE 4000
 # DATABASE_URL is provided as a mounted `.env` file (k8s secret at
 # /app/apps/backend/.env), so source it first; under docker-compose that file is
 # absent (the `|| true` no-ops) and the real env vars are used instead.
-CMD ["sh", "-c", "set -a; . /app/apps/backend/.env 2>/dev/null || true; set +a; (cd packages/db && bunx prisma migrate deploy) ; cd apps/backend && bun start"]
+CMD ["sh", "-c", "set -a; . /app/apps/backend/.env 2>/dev/null || true; set +a; (cd /app/packages/db && bunx prisma migrate deploy) ; cd /app/apps/backend && bun start"]
