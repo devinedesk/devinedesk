@@ -82,7 +82,7 @@ services:
       - "4000:4000"
     command: sh -c "cd /app/packages/db && bunx prisma migrate deploy && cd /app/apps/backend && bun src/index.ts"
     healthcheck:
-      test: ["CMD-SHELL", "bun -e 'fetch(\"http://localhost:4000/health\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'"]
+      test: ["CMD-SHELL", "bun -e 'fetch(\"http://127.0.0.1:4000/health\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -108,7 +108,7 @@ services:
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost/ || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -132,7 +132,7 @@ services:
     volumes:
       - facefusion_data:/facefusion/.assets
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:7865/health"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:7865/health"]
       interval: 15s
       timeout: 5s
       retries: 5
