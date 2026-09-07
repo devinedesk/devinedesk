@@ -1,0 +1,64 @@
+To: umut@fal.ai
+Subject: Builder Grant Application — DevineDesk ($250 Launch Pack) — Live Gen-Media SaaS, Already Integrated with fal
+
+Hi Umut,
+
+I just submitted the Builder Grant application through the Tally form for DevineDesk. I wanted to reach out directly because I don't have a partner referral code (I'm not part of an accelerator or university program that's partnered with fal), but I believe our application stands strongly on its own merits.
+
+## What we're building
+
+DevineDesk is a live, production-grade generative-media SaaS platform — essentially Higgsfield for the Indian market. It's already deployed at https://devinedesk.com with real users.
+
+Our platform offers:
+- AI video generation (text-to-video and image-to-video)
+- AI image generation
+- Face swap (self-hosted FaceFusion + diffusion-based editing)
+- A Premiere-style multi-track timeline editor for creating reusable video templates with face-swap avatar slots
+
+Every single user action on our platform involves calling generative AI models — this is a direct generative media app, not a product with AI as a side feature.
+
+## Why we chose fal (and already integrated it)
+
+We've already written and tested a complete fal.ai provider integration in our backend codebase. It's production-ready — we just need an API key to flip the switch. Our integration covers:
+
+- Video generation via fal's queue API: Seedance 2.0, Kling 3.0 Pro, Veo 3.1, Sora 2, Wan 2.5
+- Image generation: FLUX.1 dev, Nano Banana 2, Seedream V4
+- Face swap via diffusion: FLUX Kontext Pro
+
+We chose fal over our current provider (OpenRouter) because:
+1. One API for 1,000+ models — we can offer users multiple video models without separate integrations
+2. Pay-per-second video pricing is 20-50% cheaper
+3. Queue-based async API fits our BullMQ job architecture perfectly
+4. fal is first to host new SOTA models (Sora 2, Seedance 2.0, Veo 3.1)
+
+## Why the $250 Launch Pack
+
+We're preparing for our public launch in the coming weeks. At launch, we expect:
+- ~50-100 video generations/month (5-10s clips at 720p)
+- ~300-500 image generations/month
+- ~20-50 template renders/month
+
+At fal's pricing, this translates to approximately $150-250/month — which is exactly why the $250 Launch pack is the right fit. It covers our public launch day and the first wave of real users.
+
+## What we're asking
+
+I'm hoping you can review our application on its merits even without a partner referral code. We're a genuine gen-media app, already live, already integrated with fal, and preparing for a public launch where fal would be our primary inference provider.
+
+If the $250 Launch pack is approved, we'd be happy to:
+- Showcase our fal integration publicly
+- Serve as a case study for the Builder Grant program
+- Transition to paid fal usage immediately after the credits are consumed
+
+You can see the live platform at https://devinedesk.com. I'm creating my fal.ai account now (username: avaspatel) so credits can be loaded directly.
+
+Thank you for your time, and I'm happy to jump on a quick call if that helps.
+
+Best,
+Avas Patel
+Founder, DevineDesk
+support@devinedesk.com
+https://devinedesk.com
+
+---
+
+P.S. If the Builder Grant isn't the right fit, I'd also be interested in the fal Research Grants program (grants@fal.ai) — our platform includes open-source components and we're happy to share our fal provider integration code with the community.
