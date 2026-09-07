@@ -74,13 +74,16 @@ const envSchema = z.object({
   // Which AI provider to use for video/image generation:
   //  - "openrouter": OpenRouter (default, 400+ models, 5.5% platform fee)
   //  - "atlascloud": Atlas Cloud (400+ models, OSS sponsorship credits available)
+  //  - "fal":        fal.ai (1,000+ models, Builder Grant $25–$250 / Startup
+  //                  Program $1,000–$5,000 in free credits — see
+  //                  https://fal.ai/startups)
   //  - "vertex":     Vertex AI (Google native: Veo video + Imagen image).
   //                  Covered by GCP $300 free trial credits + Google for
   //                  Startups Cloud Program. All costs bill through the GCP
   //                  billing account. (The Gemini API / Google AI Studio path
   //                  was removed — its costs are NOT covered by the $300
   //                  credits; it uses a separate prepayment billing system.)
-  AI_PROVIDER: z.enum(["openrouter", "atlascloud", "vertex"]).default("openrouter"),
+  AI_PROVIDER: z.enum(["openrouter", "atlascloud", "fal", "vertex"]).default("openrouter"),
 
   // OpenRouter
   OPENROUTER_API_KEY: z.string().optional(),
@@ -102,6 +105,10 @@ const envSchema = z.object({
 
   // Atlas Cloud (alternative AI provider — OSS sponsorship credits available)
   ATLASCLOUD_API_KEY: z.string().optional(),
+
+  // fal.ai (alternative AI provider — Builder Grant & Startup Program credits
+  // available, see https://fal.ai/startups). 1,000+ image/video/audio models.
+  FAL_API_KEY: z.string().optional(),
 
   // Vertex AI / Gemini Enterprise Agent Platform (Google native AI)
   // Required when AI_PROVIDER=vertex. When running on a GCP VM, the metadata

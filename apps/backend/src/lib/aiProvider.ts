@@ -10,6 +10,7 @@ import type {
 } from "./openrouter.js";
 import * as openrouter from "./openrouter.js";
 import * as atlascloud from "./atlascloud.js";
+import * as falai from "./falai.js";
 import * as vertexai from "./vertexai.js";
 
 /**
@@ -19,6 +20,7 @@ import * as vertexai from "./vertexai.js";
  * Providers:
  *   - "openrouter" (default): OpenRouter — 400+ models, 5.5% platform fee
  *   - "atlascloud":           Atlas Cloud — 400+ models, OSS sponsorship credits
+ *   - "fal":                  fal.ai — 1,000+ models, Builder Grant / Startup credits
  *   - "vertex":               Vertex AI — Google native (Veo, Imagen), GCP credits
  *
  * Each provider module exports the same interface:
@@ -45,6 +47,8 @@ function getProvider(): ProviderModule {
   switch (env.AI_PROVIDER) {
     case "atlascloud":
       return atlascloud;
+    case "fal":
+      return falai;
     case "vertex":
       return vertexai;
     case "openrouter":
