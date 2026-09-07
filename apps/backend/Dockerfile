@@ -31,7 +31,6 @@ EXPOSE 4000
 # `prisma migrate deploy` applies committed migrations in order (production-safe).
 # Run from packages/db so `bunx prisma` resolves the project's pinned Prisma (it's a
 # dependency there) rather than fetching a newer, incompatible Prisma from npm.
-# DATABASE_URL is provided as a mounted `.env` file (k8s secret at
-# /app/apps/backend/.env), so source it first; under docker-compose that file is
-# absent (the `|| true` no-ops) and the real env vars are used instead.
-CMD ["sh", "-c", "set -a; . /app/apps/backend/.env 2>/dev/null || true; set +a; (cd /app/packages/db && bunx prisma migrate deploy) ; cd /app/apps/backend && bun start"]
+# Under docker-compose, env vars are injected directly (no .env file needed).
+# For k8s, mount a secret at /app/apps/backend/.env and it will be sourced first.
+CMD ["sh", "-c", "if [ -f /app/apps/backend/.env ]; then set -a; . /app/apps/backend/.env; set +a; fi; cd /app/packages/db && bunx prisma migrate deploy && cd /app/apps/backend && bun src/index.ts"]
