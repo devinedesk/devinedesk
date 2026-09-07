@@ -74,8 +74,12 @@ const envSchema = z.object({
   // Which AI provider to use for video/image generation:
   //  - "openrouter": OpenRouter (default, 400+ models, 5.5% platform fee)
   //  - "atlascloud": Atlas Cloud (400+ models, OSS sponsorship credits available)
-  //  - "vertex":     Vertex AI / Gemini Enterprise Agent Platform (Google native,
-  //                  covered by GCP $300 free credits + Google for Startups)
+  //  - "vertex":     Vertex AI (Google native: Veo video + Imagen image).
+  //                  Covered by GCP $300 free trial credits + Google for
+  //                  Startups Cloud Program. All costs bill through the GCP
+  //                  billing account. (The Gemini API / Google AI Studio path
+  //                  was removed — its costs are NOT covered by the $300
+  //                  credits; it uses a separate prepayment billing system.)
   AI_PROVIDER: z.enum(["openrouter", "atlascloud", "vertex"]).default("openrouter"),
 
   // OpenRouter
@@ -112,11 +116,12 @@ const envSchema = z.object({
   // is used — but for simplicity, prefer the metadata server or VERTEX_ACCESS_TOKEN.
   GCP_SERVICE_ACCOUNT_KEY: z.string().optional(),
 
-  // Gemini API (Google AI Studio — generativelanguage.googleapis.com)
-  // Separate from Vertex AI. Has its own prepayment credits (not GCP $300 credits).
-  // Create at: https://aistudio.google.com/apikey
-  // Available models: gemini-2.5-flash-image (image), veo-3.1-generate-preview (video)
-  GEMINI_API_KEY: z.string().optional(),
+  // NOTE: The Gemini API (Google AI Studio / generativelanguage.googleapis.com)
+  // was removed because its costs are NOT covered by the GCP $300 free trial
+  // credits — it uses a separate prepayment billing system. Vertex AI
+  // (aiplatform.googleapis.com) provides equivalent Veo and Imagen models and
+  // IS covered by the $300 free credits. Use AI_PROVIDER=vertex for Google
+  // native AI generation.
 
   // Face-swap provider for template frames:
   //  - "facefusion": classic pixel-level swap via the self-hosted service (precise,

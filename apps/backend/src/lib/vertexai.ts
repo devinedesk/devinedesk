@@ -9,19 +9,19 @@ import type {
 } from "./openrouter.js";
 
 /**
- * Vertex AI / Gemini API provider — Google's native generative AI service.
+ * Vertex AI provider — Google's native generative AI service.
  *
- * Uses two Google APIs:
- *  1. Gemini API (generativelanguage.googleapis.com) — when GEMINI_API_KEY is set.
- *     Has Veo 3.1 video generation and Gemini image models (gemini-2.5-flash-image,
- *     gemini-3.1-flash-image, nano-banana-pro-preview). Uses separate prepayment
- *     credits (NOT GCP $300 free trial credits). Create a key at:
- *     https://aistudio.google.com/apikey
- *  2. Vertex AI API (aiplatform.googleapis.com) — fallback when GEMINI_API_KEY is
- *     not set. Uses GCP access token (from `gcloud auth print-access-token` or the
- *     GCE metadata server). Has Imagen and Veo models, but these may not be
- *     available on the GCP free trial. Covered by GCP $300 credits + Google for
- *     Startups Cloud Program.
+ * Uses the Vertex AI API (aiplatform.googleapis.com) exclusively. This is a
+ * GCP service that bills through the GCP billing account and is covered by the
+ * GCP $300 free trial credits and the Google for Startups Cloud Program.
+ *
+ * The Gemini API (Google AI Studio / generativelanguage.googleapis.com) path
+ * was REMOVED because its costs are NOT covered by the GCP $300 free trial
+ * credits — it has a separate prepayment billing system. Vertex AI provides
+ * equivalent Veo and Imagen models that ARE covered by the $300 credits.
+ *
+ * Auth: GCP metadata server (on VM), VERTEX_ACCESS_TOKEN (local dev), or
+ * GCP_SERVICE_ACCOUNT_KEY.
  *
  * Selected via `AI_PROVIDER=vertex`.
  *
@@ -33,10 +33,6 @@ import type {
  */
 
 const VERTEX_BASE = "https://us-central1-aiplatform.googleapis.com/v1";
-const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
-
-/** Whether to use the Gemini API (Google AI Studio) vs Vertex AI. */
-const useGeminiApi = (): boolean => !!env.GEMINI_API_KEY;
 
 // ---------------------------------------------------------------------------
 // Authentication — get an OAuth2 access token
@@ -108,40 +104,15 @@ function projectId(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Model listing — static lists for known Google models
+// Model listing — static lists for known Vertex AI models
 // ---------------------------------------------------------------------------
 
 const VERTEX_VIDEO_MODELS: VideoModel[] = [
-  // Gemini API models (generativelanguage.googleapis.com)
-  {
-    id: "veo-3.1-generate-preview",
-    name: "Veo 3.1",
-    description: "Google Veo 3.1 — latest high-quality video generation (Gemini API)",
-    supported_resolutions: ["720p", "1080p"],
-    supported_aspect_ratios: ["16:9", "9:16", "1:1"],
-    supported_durations: [4, 6, 8],
-  },
-  {
-    id: "veo-3.1-fast-generate-preview",
-    name: "Veo 3.1 Fast",
-    description: "Google Veo 3.1 Fast — fast, affordable video generation (Gemini API)",
-    supported_resolutions: ["720p", "1080p"],
-    supported_aspect_ratios: ["16:9", "9:16", "1:1"],
-    supported_durations: [4, 6, 8],
-  },
-  {
-    id: "veo-3.1-lite-generate-preview",
-    name: "Veo 3.1 Lite",
-    description: "Google Veo 3.1 Lite — most affordable video generation (Gemini API)",
-    supported_resolutions: ["720p", "1080p"],
-    supported_aspect_ratios: ["16:9", "9:16", "1:1"],
-    supported_durations: [4, 6, 8],
-  },
-  // Vertex AI models (aiplatform.googleapis.com)
+  // Vertex AI models (aiplatform.googleapis.com) — covered by GCP $300 free credits
   {
     id: "veo-3.0-fast-generate-001",
     name: "Veo 3 Fast (Vertex AI)",
-    description: "Google Veo 3 Fast — fast video generation via Vertex AI",
+    description: "Google Veo 3 Fast — fast video generation via Vertex AI (covered by GCP free credits)",
     supported_resolutions: ["720p", "1080p"],
     supported_aspect_ratios: ["16:9", "9:16", "1:1"],
     supported_durations: [4, 6, 8],
@@ -149,7 +120,7 @@ const VERTEX_VIDEO_MODELS: VideoModel[] = [
   {
     id: "veo-3.0-generate-001",
     name: "Veo 3 (Vertex AI)",
-    description: "Google Veo 3 — high-quality video generation via Vertex AI",
+    description: "Google Veo 3 — high-quality video generation via Vertex AI (covered by GCP free credits)",
     supported_resolutions: ["720p", "1080p"],
     supported_aspect_ratios: ["16:9", "9:16", "1:1"],
     supported_durations: [4, 6, 8],
@@ -157,47 +128,18 @@ const VERTEX_VIDEO_MODELS: VideoModel[] = [
 ];
 
 const VERTEX_IMAGE_MODELS: VideoModel[] = [
-  // Gemini API image models (generativelanguage.googleapis.com)
-  {
-    id: "gemini-2.5-flash-image",
-    name: "Gemini 2.5 Flash Image",
-    description: "Google Gemini 2.5 Flash — fast image generation (Gemini API)",
-    supported_resolutions: ["1024x1024"],
-    supported_aspect_ratios: ["1:1", "3:4", "4:3", "9:16", "16:9"],
-  },
-  {
-    id: "gemini-3.1-flash-image",
-    name: "Gemini 3.1 Flash Image",
-    description: "Google Gemini 3.1 Flash — latest image generation (Gemini API)",
-    supported_resolutions: ["1024x1024"],
-    supported_aspect_ratios: ["1:1", "3:4", "4:3", "9:16", "16:9"],
-  },
-  {
-    id: "gemini-3-pro-image",
-    name: "Gemini 3 Pro Image",
-    description: "Google Gemini 3 Pro — highest quality image generation (Gemini API)",
-    supported_resolutions: ["1024x1024"],
-    supported_aspect_ratios: ["1:1", "3:4", "4:3", "9:16", "16:9"],
-  },
-  {
-    id: "nano-banana-pro-preview",
-    name: "Nano Banana Pro",
-    description: "Google Nano Banana Pro — high-quality image generation (Gemini API)",
-    supported_resolutions: ["1024x1024"],
-    supported_aspect_ratios: ["1:1", "3:4", "4:3", "9:16", "16:9"],
-  },
-  // Vertex AI Imagen models (aiplatform.googleapis.com)
+  // Vertex AI Imagen models (aiplatform.googleapis.com) — covered by GCP $300 free credits
   {
     id: "imagen-4.0-fast-generate-001",
     name: "Imagen 4 Fast (Vertex AI)",
-    description: "Google Imagen 4 Fast — fast image generation via Vertex AI",
+    description: "Google Imagen 4 Fast — fast image generation via Vertex AI (covered by GCP free credits)",
     supported_resolutions: ["1024x1024", "1280x1280", "1792x1792", "768x1408", "1408x768"],
     supported_aspect_ratios: ["1:1", "3:4", "4:3", "9:16", "16:9"],
   },
   {
     id: "imagen-4.0-generate-001",
     name: "Imagen 4 (Vertex AI)",
-    description: "Google Imagen 4 — balanced quality image generation via Vertex AI",
+    description: "Google Imagen 4 — balanced quality image generation via Vertex AI (covered by GCP free credits)",
     supported_resolutions: ["1024x1024", "1280x1280", "1792x1792", "768x1408", "1408x768"],
     supported_aspect_ratios: ["1:1", "3:4", "4:3", "9:16", "16:9"],
   },
@@ -231,71 +173,8 @@ interface LroResponse {
   };
 }
 
-/** Generate a video via Gemini API (Veo 3.1) or Vertex AI (Veo 3.0). */
+/** Generate a video via Vertex AI (Veo 3.0). Covered by GCP $300 free credits. */
 export async function generateVideo(params: GenerateVideoParams): Promise<GeneratedVideo> {
-  // --- Gemini API path (generativelanguage.googleapis.com) ---
-  if (useGeminiApi()) {
-    const url = `${GEMINI_BASE}/models/${params.model}:predictLongRunning?key=${env.GEMINI_API_KEY}`;
-    const instance: Record<string, unknown> = { prompt: params.prompt };
-    const parameters: Record<string, unknown> = { sampleCount: 1 };
-    if (params.aspectRatio) parameters.aspectRatio = params.aspectRatio;
-    if (params.resolution) parameters.resolution = params.resolution;
-    if (params.duration) parameters.durationSeconds = params.duration;
-    if (params.generateAudio !== undefined) parameters.generateAudio = params.generateAudio;
-    const body = { instances: [instance], parameters };
-
-    const submitRes = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!submitRes.ok) {
-      throw new Error(`Gemini API video submit failed: ${submitRes.status} ${await submitRes.text()}`);
-    }
-    const lro = (await submitRes.json()) as LroResponse;
-    const operationName = lro.name;
-
-    // Poll the long-running operation.
-    const deadline = Date.now() + MAX_POLL_MS;
-    const pollUrl = `${GEMINI_BASE}/${operationName}?key=${env.GEMINI_API_KEY}`;
-    let operation: LroResponse = lro;
-    while (!operation.done) {
-      if (Date.now() > deadline) {
-        throw new Error(`Gemini API video generation timed out after ${MAX_POLL_MS / 1000}s`);
-      }
-      await sleep(POLL_INTERVAL_MS);
-      const pollRes = await fetch(pollUrl);
-      if (!pollRes.ok) {
-        throw new Error(`Gemini API poll failed: ${pollRes.status} ${await pollRes.text()}`);
-      }
-      operation = (await pollRes.json()) as LroResponse;
-    }
-
-    if (operation.error) {
-      throw new Error(operation.error.message ?? "Gemini API video generation failed");
-    }
-
-    const videoUri = operation.response?.videos?.[0]?.gcsUri ?? operation.response?.videos?.[0]?.uri;
-    if (!videoUri) {
-      throw new Error("Gemini API video generation completed with no output URI");
-    }
-
-    // Download the video.
-    const gcsHttpUrl = videoUri.replace("gs://", "https://storage.googleapis.com/");
-    const videoRes = await fetch(gcsHttpUrl);
-    if (!videoRes.ok) {
-      throw new Error(`Failed to download video from GCS: ${videoRes.status}`);
-    }
-    const arrayBuffer = await videoRes.arrayBuffer();
-
-    return {
-      buffer: Buffer.from(arrayBuffer),
-      contentType: videoRes.headers.get("content-type") ?? "video/mp4",
-      providerJobId: operationName,
-    };
-  }
-
-  // --- Vertex AI path (aiplatform.googleapis.com) ---
   const token = await getAccessToken();
   const pid = projectId();
   const modelId = params.model;
@@ -391,50 +270,8 @@ function detectImageContentType(buffer: Buffer): string {
   return "image/png";
 }
 
-/** Generate an image via Gemini API (gemini-2.5-flash-image) or Vertex AI (Imagen). */
+/** Generate an image via Vertex AI (Imagen). Covered by GCP $300 free credits. */
 export async function generateImage(params: GenerateImageParams): Promise<GeneratedImage> {
-  // --- Gemini API path (generativelanguage.googleapis.com) ---
-  if (useGeminiApi()) {
-    const url = `${GEMINI_BASE}/models/${params.model}:generateContent?key=${env.GEMINI_API_KEY}`;
-    const parts: Record<string, unknown>[] = [{ text: params.prompt }];
-    // Include reference images if provided (for face swap / image-to-image).
-    if (params.references) {
-      for (const ref of params.references) {
-        // ref.url is a data URL: data:image/png;base64,....
-        const match = ref.url.match(/^data:(.+?);base64,(.+)$/);
-        if (match) {
-          parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
-        }
-      }
-    }
-    const body = {
-      contents: [{ role: "user", parts }],
-      generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-    };
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      throw new Error(`Gemini API image generation failed: ${res.status} ${await res.text()}`);
-    }
-    const json = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string; inlineData?: { mimeType?: string; data?: string } }[] } }[];
-    };
-    const responseParts = json.candidates?.[0]?.content?.parts ?? [];
-    const imagePart = responseParts.find((p) => p.inlineData?.data);
-    if (!imagePart?.inlineData?.data) {
-      throw new Error("Gemini API image generation returned no image data");
-    }
-    const buffer = Buffer.from(imagePart.inlineData.data, "base64");
-    return {
-      buffer,
-      contentType: imagePart.inlineData.mimeType ?? detectImageContentType(buffer),
-    };
-  }
-
-  // --- Vertex AI path (aiplatform.googleapis.com) ---
   const token = await getAccessToken();
   const pid = projectId();
   const modelId = params.model;

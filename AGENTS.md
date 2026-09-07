@@ -61,13 +61,16 @@ It is a **bun**-managed **Turborepo** monorepo.
     `POST /api/v1/model/generateVideo` → poll `GET /api/v1/model/prediction/{id}`.
     Eligible for the Atlas Cloud Open Source Sponsorship Program (free monthly
     credits for active OSS projects — see https://www.atlascloud.ai/oss-program).
-  - `src/lib/vertexai.ts` — **Vertex AI / Gemini Enterprise Agent Platform**
-    provider (Google native: Veo video + Imagen image). Used when
-    `AI_PROVIDER=vertex`. Video uses `predictLongRunning` (async LRO → GCS
-    output → download). Image uses `predict` (synchronous, base64 response).
-    Auth: GCP metadata server (on VM), `VERTEX_ACCESS_TOKEN` (local dev), or
-    `GCP_SERVICE_ACCOUNT_KEY`. Covered by GCP $300 free trial credits and
-    Google for Startups Cloud Program credits.
+  - `src/lib/vertexai.ts` — **Vertex AI** provider (Google native: Veo video +
+    Imagen image). Used when `AI_PROVIDER=vertex`. Video uses `predictLongRunning`
+    (async LRO → GCS output → download). Image uses `predict` (synchronous, base64
+    response). Auth: GCP metadata server (on VM), `VERTEX_ACCESS_TOKEN` (local dev),
+    or `GCP_SERVICE_ACCOUNT_KEY`. **All costs are covered by the GCP $300 free trial
+    credits** and Google for Startups Cloud Program credits. The Gemini API (Google
+    AI Studio / `generativelanguage.googleapis.com`) path was **removed** because its
+    costs are NOT covered by the GCP $300 free trial credits — it uses a separate
+    prepayment billing system. Vertex AI provides equivalent Veo and Imagen models
+    that ARE covered by the $300 credits.
   - `src/lib/facefusion.ts` — calls the self-hosted FaceFusion swap service over HTTP.
     The frame face-swap step in `renderBlockClip` is provider-pluggable via
     `SWAP_PROVIDER`: `facefusion` (classic pixel swap) or `flux` (diffusion identity
