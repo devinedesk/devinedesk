@@ -112,6 +112,12 @@ const envSchema = z.object({
   // is used — but for simplicity, prefer the metadata server or VERTEX_ACCESS_TOKEN.
   GCP_SERVICE_ACCOUNT_KEY: z.string().optional(),
 
+  // Gemini API (Google AI Studio — generativelanguage.googleapis.com)
+  // Separate from Vertex AI. Has its own prepayment credits (not GCP $300 credits).
+  // Create at: https://aistudio.google.com/apikey
+  // Available models: gemini-2.5-flash-image (image), veo-3.1-generate-preview (video)
+  GEMINI_API_KEY: z.string().optional(),
+
   // Face-swap provider for template frames:
   //  - "facefusion": classic pixel-level swap via the self-hosted service (precise,
   //    supports per-person targeting, no prompt/context).
