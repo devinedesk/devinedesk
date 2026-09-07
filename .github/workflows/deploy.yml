@@ -128,9 +128,9 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             echo "2/4: Rebuilding Docker images..."
-            docker compose -f docker-compose.prod.yml build
+            sudo docker compose -f docker-compose.prod.yml build
             echo "3/4: Restarting services..."
-            docker compose -f docker-compose.prod.yml up -d postgres minio backend frontend proxy certbot
+            sudo docker compose -f docker-compose.prod.yml up -d postgres minio backend frontend proxy certbot
             echo "4/4: Waiting for backend health..."
             for i in $(seq 1 30); do
               if curl -fsS http://127.0.0.1:4000/health > /dev/null 2>&1; then
@@ -142,7 +142,7 @@ jobs:
               sleep 5
             done
             echo "=== Deploy complete! ==="
-            docker compose -f docker-compose.prod.yml ps
+            sudo docker compose -f docker-compose.prod.yml ps
 
       - name: Deploy skipped (no secrets)
         if: steps.check.outputs.skip == 'true'
