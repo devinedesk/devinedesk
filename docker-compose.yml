@@ -92,6 +92,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-devinedesk}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
     ports:
       - "4000:4000"
     command: sh -c "cd /app/packages/db && bunx prisma migrate deploy && cd /app/apps/backend && bun src/index.ts"

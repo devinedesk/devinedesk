@@ -216,6 +216,15 @@ const envSchema = z.object({
     z.string().url().optional(),
   ),
 
+  // ElevenLabs (text-to-speech / voice generation). Optional — key created at
+  // https://elevenlabs.io/app/api/api-keys. Free tier with rate limits.
+  // Not yet wired into a provider module; stored here so it's validated and
+  // available for future voice-generation features.
+  ELEVENLABS_API_KEY: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().optional(),
+  ),
+
   // Sentry error tracking (optional). When set, backend errors are reported
   // to Sentry with stack traces.
   SENTRY_DSN: z.preprocess(

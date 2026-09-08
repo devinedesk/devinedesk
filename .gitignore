@@ -40,3 +40,8 @@ yarn-error.log*
 # Local DB backups (contain real data — never commit)
 backups/
 .env.production
+
+# MFA/TOTP secrets (do not commit)
+runpod-mfa-secret.txt
+*-mfa-secret.txt
+*-credentials.txt
