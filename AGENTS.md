@@ -403,6 +403,16 @@ git pull
 docker compose -f docker-compose.deploy.yml --env-file .env.production --profile facefusion up -d --build
 ```
 
+- `docker-compose.deploy.yml` is the single authoritative file: it includes the
+  edge `proxy` + `certbot` (TLS via the `certbot_certs` volume) and an internal
+  HTTP-only `frontend` behind it (`nginx.dev.conf` — the frontend must NOT bind
+  host 80/443; the proxy owns them). `docker-compose.prod.yml` is legacy — do not
+  mix the two files, or containers get recreated under conflicting definitions.
+- The frontend build arg is `VITE_API_URL: ${BACKEND_URL}` (=
+  `https://api.devinedesk.com`). Never pass `FRONTEND_URL` — it is a
+  comma-separated CORS origin list, and baking it into the bundle breaks every
+  API call.
+
 - [x] Site is live and serving the frontend SPA
 - [x] Backend API is responding at `https://devinedesk.com/api/*`
 - [x] Sign-up flow works (sends verification email via Resend SMTP)
