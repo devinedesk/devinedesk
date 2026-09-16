@@ -1,0 +1,77 @@
+To: effy.zhou@atlascloud.ai
+Subject: Re: DevineDesk's project on Atlas Cloud
+
+Hi Effy,
+
+Thanks for the follow-up. Happy to share the details you need. I've answered each of your questions below, and I also have a specific proposal I'd like to put forward.
+
+---
+
+CURRENT MONTHLY USAGE
+
+DevineDesk is live with paying customers, but we're early-stage and bootstrapped, so current usage is modest:
+
+- Current monthly spend across all AI providers (OpenRouter, fal.ai, Vertex AI): approximately $50-100/month
+- Breakdown: roughly 60% video generation, 30% image generation, 10% face swap / identity-preserving generation
+- We're running real production workloads — video generation, image generation, and face-swap pipelines — but the customer base is still small
+
+EXPECTED MONTHLY BUDGET (NEXT 1-3 MONTHS)
+
+- Month 1: $200-300/month as we onboard new customers and increase marketing
+- Month 2: $300-500/month as credit-pack purchases grow and usage scales
+- Month 3: $500-800/month as we expand our model offerings and customer base
+
+We expect steady growth as our Dodo Payments integration goes live (verification in progress) and we begin paid customer acquisition.
+
+---
+
+PROPOSAL: $400/MONTH CREDIT SUPPORT FOR 3 MONTHS
+
+Before we commit meaningful traffic to Atlas Cloud, I'd like to propose a structured trial arrangement that benefits both sides:
+
+**What I'm requesting:** $400/month in credits for 3 months ($1,200 total), applied to our Atlas Cloud account registered with support@lazynext.com.
+
+**Why this makes sense for Atlas Cloud:**
+
+1. **Integration is already complete.** DevineDesk's backend has a fully implemented Atlas Cloud provider module (video generation, image generation, face-swap via diffusion models, model listing, async polling). There is zero engineering investment needed from your side — we can shift traffic to Atlas Cloud today.
+
+2. **$400/month lets us run real production traffic, not just tests.** At $400/month, we can route a meaningful portion of our video and image generation through Atlas Cloud alongside our existing providers. This gives you real-world usage data, latency metrics, and reliability validation — and gives us confidence in your platform at scale.
+
+3. **3 months is enough to validate and commit.** If Atlas Cloud performs well over 3 months on quality, latency, and reliability, our plan is to consolidate traffic toward Atlas Cloud as the primary provider. That means Atlas Cloud becomes our default for 400+ models — a long-term, growing revenue account.
+
+4. **We're actively comparing providers.** Right now we're splitting traffic across OpenRouter, fal.ai, and Vertex AI. The provider that supports our growth early — before we're a large account — is the one we'll default to long-term. $1,200 in credits over 3 months is a modest customer acquisition cost for what could become a high-volume, recurring account.
+
+5. **We qualify for the OSS Sponsorship Program.** DevineDesk's backend and infrastructure configuration is open source. Our Atlas Cloud provider integration, FaceFusion wrapper, template rendering pipeline, and multi-provider architecture are all publicly visible. The OSS program exists to support exactly this kind of project — active, integrated, and building in public.
+
+6. **We're a multi-model platform, not a single-use case.** DevineDesk uses 200+ AI models across video, image, and face-swap generation. A customer like us generates diverse, consistent API traffic across many of your models — not just one or two. That's the kind of usage that grows your platform's breadth, not just one model's volume.
+
+**What Atlas Cloud gets in return:**
+- A live, integrated customer running real production traffic
+- Usage data and feedback across video, image, and identity-preserving models
+- A case study candidate once we scale
+- A long-term customer relationship if the trial performs well
+- Public visibility — our Atlas Cloud integration is in our open codebase
+
+**Account for credits:** Please apply any credits to our Atlas Cloud account registered with **support@lazynext.com** (this is our holding/operations account). Our DevineDesk platform uses this account's API key for Atlas Cloud calls.
+
+---
+
+ANSWERS TO YOUR OTHER QUESTIONS
+
+**Concurrency:** We need at least 5-10 concurrent generation requests per account. Our users generate media in parallel (multiple video/image generations at once), and our template rendering pipeline can trigger several block generations simultaneously. What concurrency does Atlas Cloud support per account, and is there a path to higher limits as we scale?
+
+**Model recommendations:** We're particularly interested in:
+- High-quality text-to-video and image-to-video models (comparable to Veo, Kling, Runway)
+- Identity-preserving image generation / face-swap-capable models (FLUX, Nano Banana, or similar diffusion models that accept reference images)
+- Any new or upcoming models we should know about
+
+**Startup/volume-based commercial options:** Beyond the credit support above, what does volume pricing look like once we're spending $500+/month? We'd like to understand the long-term cost structure so we can plan our provider strategy.
+
+---
+
+I believe this arrangement — $400/month for 3 months, applied to our support@lazynext.com account — gives both sides a clear, low-risk way to validate the partnership and build toward a long-term commercial relationship. I'm happy to jump on a call once we have the credit arrangement in place and the tailored proposal from your account manager.
+
+Best regards,
+Avas Patel
+DevineDesk Team
+support@devinedesk.com
