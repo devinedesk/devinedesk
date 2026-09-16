@@ -25,6 +25,13 @@ import type {
  *
  * Image and video generation are asynchronous: submit → get prediction_id →
  * poll until status is "completed"/"succeeded" → download from outputs URL.
+ *
+ * Every model exposes its input contract as a JSON schema (the `schema` URL in
+ * the catalog). Param names are NOT uniform across models — e.g. first frame is
+ * `image` on MiniMax but `start_image_url` on FLUX, references are `refers`
+ * (array of {url,type}) on MiniMax but `reference_images` on Seedance — so both
+ * model listing and generation map our generic params onto whatever each
+ * model's schema actually declares.
  */
 
 const MEDIA_BASE = "https://api.atlascloud.ai/api/v1";
@@ -42,61 +49,200 @@ function authHeaders(): Record<string, string> {
 }
 
 // ---------------------------------------------------------------------------
-// Model listing
+// Model catalog + per-model input schemas
 // ---------------------------------------------------------------------------
 
 interface AtlasModel {
-  id: string;
-  name?: string;
-  description?: string;
+  uuid?: string;
+  /** The model id, e.g. "minimax/h3-max/text-to-video". */
+  model: string;
+  /** "Video" | "Image" | "Text" | "Audio" — capitalized. */
   type?: string;
-  supported_resolutions?: string[];
-  supported_aspect_ratios?: string[];
-  supported_durations?: number[];
-  supportsReferences?: boolean;
+  displayName?: string;
+  /** Long-form description. */
+  profile?: string;
+  /** URL of the model's JSON schema (components.schemas.Input.properties). */
+  schema?: string;
+  categories?: string[];
+  tags?: string[];
 }
 
-interface AtlasModelsResponse {
-  data?: AtlasModel[];
+interface SchemaProp {
+  type?: string;
+  enum?: unknown[];
+  description?: string;
+  items?: { properties?: Record<string, SchemaProp> };
+  required?: string[];
 }
 
-/** List video-generation models available on Atlas Cloud. */
-export async function listVideoModels(): Promise<VideoModel[]> {
-  const res = await fetch(`${MEDIA_BASE}/models?type=video`, {
+interface ModelSchema {
+  /** Input property map for the model (empty if unavailable). */
+  props: Record<string, SchemaProp>;
+  /** Required input fields, e.g. ["model","prompt","image"]. */
+  required: string[];
+}
+
+const CATALOG_TTL_MS = 10 * 60 * 1000;
+const SCHEMA_TTL_MS = 60 * 60 * 1000;
+
+let catalogCache: { at: number; models: AtlasModel[] } | null = null;
+const schemaCache = new Map<string, { at: number; schema: ModelSchema }>();
+
+/** Fetch the full model catalog (cached — it's ~750KB and rarely changes). */
+async function getCatalog(): Promise<AtlasModel[]> {
+  if (catalogCache && Date.now() - catalogCache.at < CATALOG_TTL_MS) {
+    return catalogCache.models;
+  }
+  const res = await fetch(`${MEDIA_BASE}/models`, {
     headers: env.ATLASCLOUD_API_KEY ? authHeaders() : { "Content-Type": "application/json" },
   });
   if (!res.ok) {
-    throw new Error(`Failed to list Atlas Cloud video models: ${res.status} ${await res.text()}`);
+    throw new Error(`Failed to list Atlas Cloud models: ${res.status} ${await res.text()}`);
   }
-  const json = (await res.json()) as AtlasModelsResponse;
-  return (json.data ?? []).map((m) => ({
-    id: m.id,
-    name: m.name ?? m.id,
-    description: m.description,
-    supported_resolutions: m.supported_resolutions,
-    supported_aspect_ratios: m.supported_aspect_ratios,
-    supported_durations: m.supported_durations,
-    supportsReferences: m.supportsReferences,
-  }));
+  const json = (await res.json()) as { data?: AtlasModel[] };
+  const models = json.data ?? [];
+  catalogCache = { at: Date.now(), models };
+  return models;
+}
+
+/** Fetch + cache a model's input schema (small static JSON on Atlas's CDN). */
+async function getModelSchema(modelId: string): Promise<ModelSchema> {
+  const cached = schemaCache.get(modelId);
+  if (cached && Date.now() - cached.at < SCHEMA_TTL_MS) return cached.schema;
+
+  let schema: ModelSchema = { props: {}, required: [] };
+  const entry = (await getCatalog()).find((m) => m.model === modelId);
+  if (entry?.schema) {
+    try {
+      const res = await fetch(entry.schema);
+      if (res.ok) {
+        const json = (await res.json()) as {
+          components?: { schemas?: { Input?: { properties?: Record<string, SchemaProp>; required?: string[] } } };
+        };
+        const input = json.components?.schemas?.Input;
+        schema = { props: input?.properties ?? {}, required: input?.required ?? [] };
+      }
+    } catch {
+      // Schema fetch failed — fall through with empty props; generation will
+      // send only the generic params and let the API validate.
+    }
+  }
+  schemaCache.set(modelId, { at: Date.now(), schema });
+  return schema;
+}
+
+/** Run an async mapping with bounded concurrency (schema fan-out). */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let i = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (i < items.length) {
+      const idx = i++;
+      out[idx] = await fn(items[idx]!);
+    }
+  });
+  await Promise.all(workers);
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Capability extraction (schema → the VideoModel fields the frontend uses)
+// ---------------------------------------------------------------------------
+
+const strEnum = (p?: SchemaProp): string[] | undefined => {
+  const vals = p?.enum?.filter((v): v is string => typeof v === "string");
+  return vals?.length ? vals : undefined;
+};
+
+const numEnum = (p?: SchemaProp): number[] | undefined => {
+  const vals = p?.enum?.filter((v): v is number => typeof v === "number" && v > 0);
+  return vals?.length ? vals : undefined;
+};
+
+/** True when a `refers`-style array accepts audio entries (lip-sync input). */
+function refersAcceptsAudio(p?: SchemaProp): boolean {
+  const t = p?.items?.properties?.["type"];
+  return Array.isArray(t?.enum) && t.enum.includes("audio");
+}
+
+/** Params the app can never supply — models requiring these are filtered out. */
+const UNSUPPLIABLE_INPUT = /^(video|video_url|source_video|input_video|motion_video)$/i;
+
+function videoCaps(schema: ModelSchema): Pick<
+  VideoModel,
+  | "supported_resolutions"
+  | "supported_durations"
+  | "supported_aspect_ratios"
+  | "supportsReferences"
+  | "supportsAudioInput"
+> {
+  const p = schema.props;
+  return {
+    supported_resolutions: strEnum(p["resolution"]) ?? strEnum(p["size"]),
+    supported_durations: numEnum(p["duration"]),
+    supported_aspect_ratios: strEnum(p["ratio"]) ?? strEnum(p["aspect_ratio"]),
+    supportsReferences: !!(
+      p["refers"] ||
+      p["references"] ||
+      p["reference_images"] ||
+      p["input_references"]
+    ),
+    supportsAudioInput: !!(
+      p["reference_audios"] ||
+      p["audio_url"] ||
+      p["audio_reference"] ||
+      (p["audio"] && p["audio"].type === "string") ||
+      refersAcceptsAudio(p["refers"])
+    ),
+  };
+}
+
+function imageCaps(schema: ModelSchema): Pick<
+  VideoModel,
+  "supported_resolutions" | "supported_aspect_ratios" | "supportsReferences"
+> {
+  const p = schema.props;
+  return {
+    supported_resolutions: strEnum(p["resolution"]) ?? strEnum(p["size"]),
+    supported_aspect_ratios: strEnum(p["aspect_ratio"]) ?? strEnum(p["ratio"]),
+    supportsReferences: !!(p["images"] || p["image"] || p["input_references"]),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Model listing
+// ---------------------------------------------------------------------------
+
+/** List video-generation models available on Atlas Cloud. */
+export async function listVideoModels(): Promise<VideoModel[]> {
+  const entries = (await getCatalog()).filter((m) => m.type === "Video");
+  const enriched = await mapLimit<AtlasModel, VideoModel | undefined>(entries, 12, async (m) => {
+    const schema = await getModelSchema(m.model);
+    // Drop models that require an input the app can't supply (source video for
+    // video-extend/video-edit/video-to-video/motion-transfer variants).
+    if (schema.required.some((r) => UNSUPPLIABLE_INPUT.test(r))) return undefined;
+    return {
+      id: m.model,
+      name: m.displayName ?? m.model,
+      description: m.profile,
+      ...videoCaps(schema),
+    };
+  });
+  return enriched.filter((m): m is VideoModel => !!m);
 }
 
 /** List image-generation models available on Atlas Cloud. */
 export async function listImageModels(): Promise<VideoModel[]> {
-  const res = await fetch(`${MEDIA_BASE}/models?type=image`, {
-    headers: env.ATLASCLOUD_API_KEY ? authHeaders() : { "Content-Type": "application/json" },
+  const entries = (await getCatalog()).filter((m) => m.type === "Image");
+  return mapLimit<AtlasModel, VideoModel>(entries, 12, async (m) => {
+    const schema = await getModelSchema(m.model);
+    return {
+      id: m.model,
+      name: m.displayName ?? m.model,
+      description: m.profile,
+      ...imageCaps(schema),
+    };
   });
-  if (!res.ok) {
-    throw new Error(`Failed to list Atlas Cloud image models: ${res.status} ${await res.text()}`);
-  }
-  const json = (await res.json()) as AtlasModelsResponse;
-  return (json.data ?? []).map((m) => ({
-    id: m.id,
-    name: m.name ?? m.id,
-    description: m.description,
-    supported_resolutions: m.supported_resolutions,
-    supported_aspect_ratios: m.supported_aspect_ratios,
-    supportsReferences: m.supportsReferences,
-  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -169,6 +315,56 @@ async function downloadContent(url: string): Promise<{ buffer: Buffer; contentTy
 }
 
 // ---------------------------------------------------------------------------
+// Schema-driven param mapping
+// ---------------------------------------------------------------------------
+
+/** First declared property name from `names`, or undefined. */
+const declared = (props: Record<string, SchemaProp>, names: string[]): string | undefined =>
+  names.find((n) => props[n] !== undefined);
+
+/**
+ * Set body[key] = value when the model's schema declares one of `names` and —
+ * when the property has an enum — the value is an allowed choice. Returns the
+ * key that was set (or undefined if the param was skipped).
+ */
+function setParam(
+  body: Record<string, unknown>,
+  props: Record<string, SchemaProp>,
+  names: string[],
+  value: unknown,
+): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  const key = declared(props, names);
+  if (!key) return undefined;
+  const allowed = props[key]?.enum;
+  if (Array.isArray(allowed) && allowed.length > 0 && !allowed.includes(value)) {
+    return undefined; // unsupported value → let the model's default apply
+  }
+  body[key] = value;
+  return key;
+}
+
+/** Pick the "WxH" enum entry whose aspect ratio is closest to `ratio` ("16:9"). */
+function sizeForAspectRatio(sizes: unknown[] | undefined, ratio: string): string | undefined {
+  const m = /^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(ratio);
+  if (!m || !sizes) return undefined;
+  const target = Number(m[1]) / Number(m[2]);
+  let best: string | undefined;
+  let bestDiff = Infinity;
+  for (const s of sizes) {
+    if (typeof s !== "string") continue;
+    const mm = /^(\d+)x(\d+)$/.exec(s);
+    if (!mm) continue;
+    const diff = Math.abs(Number(mm[1]) / Number(mm[2]) - target);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = s;
+    }
+  }
+  return best;
+}
+
+// ---------------------------------------------------------------------------
 // Video generation
 // ---------------------------------------------------------------------------
 
@@ -179,24 +375,56 @@ interface AtlasVideoSubmitResponse {
 
 /** Generate a video via Atlas Cloud (async: submit → poll → download). */
 export async function generateVideo(params: GenerateVideoParams): Promise<GeneratedVideo> {
+  const schema = await getModelSchema(params.model);
+  const props = schema.props;
+
   const body: Record<string, unknown> = {
     model: params.model,
     prompt: params.prompt,
   };
-  if (params.duration) body.duration = params.duration;
-  if (params.resolution) body.resolution = params.resolution;
-  if (params.aspectRatio) body.aspect_ratio = params.aspectRatio;
-  if (params.generateAudio !== undefined) body.generate_audio = params.generateAudio;
+  setParam(body, props, ["duration"], params.duration);
+  setParam(body, props, ["resolution"], params.resolution);
+  setParam(body, props, ["ratio", "aspect_ratio", "aspectRatio"], params.aspectRatio);
+  setParam(body, props, ["audio", "generate_audio", "generateAudio"], params.generateAudio);
 
-  // Atlas Cloud uses "images" for frame images (image-to-video models).
-  const images: string[] = [];
-  if (params.firstFrame) images.push(params.firstFrame.url);
-  if (params.lastFrame) images.push(params.lastFrame.url);
-  if (images.length > 0) body.images = images;
+  // First/last frame inputs — the field name varies per model.
+  const firstKey = declared(props, ["image", "start_image", "start_image_url", "first_frame", "firstFrame"]);
+  const lastKey = declared(props, ["end_image", "end_image_url", "last_frame", "lastFrame"]);
+  if (params.firstFrame && firstKey) body[firstKey] = params.firstFrame.url;
+  if (params.lastFrame && lastKey) body[lastKey] = params.lastFrame.url;
+  // Models that take both frames as an images[] array instead.
+  if (props["images"] && !firstKey && (params.firstFrame || params.lastFrame)) {
+    body["images"] = [params.firstFrame?.url, params.lastFrame?.url].filter(Boolean);
+  }
 
-  // Reference images for reference-to-video models.
-  if (params.references && params.references.length > 0) {
-    body.references = params.references.map((r) => r.url);
+  // Reference images — field name and item shape vary per model.
+  const refs = params.references?.map((r) => r.url) ?? [];
+  if (refs.length > 0) {
+    if (props["refers"]) {
+      body["refers"] = refs.map((url) => ({ url, type: "image" }));
+    } else if (props["reference_images"]) {
+      body["reference_images"] = refs;
+    } else if (props["references"]) {
+      body["references"] = refs;
+    } else if (props["input_references"]) {
+      body["input_references"] = refs;
+    } else if (props["images"] && !body["images"]) {
+      body["images"] = refs;
+    }
+  }
+
+  // Lip-sync audio track (honored only by models that declare an audio input).
+  if (params.audioReference) {
+    if (props["reference_audios"]) {
+      body["reference_audios"] = [params.audioReference.url];
+    } else if (props["audio_url"]) {
+      body["audio_url"] = params.audioReference.url;
+    } else if (props["audio_reference"]) {
+      body["audio_reference"] = params.audioReference.url;
+    } else if (props["refers"]) {
+      const refers = (body["refers"] ??= []) as { url: string; type: string }[];
+      refers.push({ url: params.audioReference.url, type: "audio" });
+    }
   }
 
   const submitRes = await fetch(`${MEDIA_BASE}/model/generateVideo`, {
@@ -246,14 +474,37 @@ function detectImageContentType(buffer: Buffer): string {
 
 /** Generate an image via Atlas Cloud (async: submit → poll → download). */
 export async function generateImage(params: GenerateImageParams): Promise<GeneratedImage> {
+  const schema = await getModelSchema(params.model);
+  const props = schema.props;
+
   const body: Record<string, unknown> = {
     model: params.model,
     prompt: params.prompt,
   };
-  if (params.resolution) body.resolution = params.resolution;
-  if (params.aspectRatio) body.aspect_ratio = params.aspectRatio;
-  if (params.references && params.references.length > 0) {
-    body.images = params.references.map((r) => r.url);
+
+  // Reference/source images (edit models) — field name varies per model.
+  const refs = params.references?.map((r) => r.url) ?? [];
+  if (refs.length > 0) {
+    if (props["images"]) {
+      body["images"] = refs;
+    } else if (props["image"]) {
+      body["image"] = refs[0];
+    } else {
+      setParam(body, props, ["input_references", "references"], refs);
+    }
+  }
+
+  // Resolution — "resolution" on some models, "size" (WxH) on others.
+  if (params.resolution) {
+    setParam(body, props, ["resolution", "size", "image_size"], params.resolution);
+  }
+  if (params.aspectRatio) {
+    const set = setParam(body, props, ["aspect_ratio", "ratio"], params.aspectRatio);
+    // No aspect-ratio field but a size enum? Pick the closest WxH.
+    if (!set && props["size"] && body["size"] === undefined) {
+      const size = sizeForAspectRatio(props["size"].enum, params.aspectRatio);
+      if (size) body["size"] = size;
+    }
   }
 
   const submitRes = await fetch(`${MEDIA_BASE}/model/generateImage`, {
