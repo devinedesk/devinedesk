@@ -47,7 +47,8 @@ It is a **bun**-managed **Turborepo** monorepo.
     `src/lib/auth-client.ts`.
   - `src/lib/openrouter.ts` — OpenRouter client: video (submit + poll) **and**
     image (`generateImage`, `listImageModels`) generation, plus video model list.
-    This is the **default** AI provider (`AI_PROVIDER=openrouter`).
+    Used when `AI_PROVIDER=openrouter` (the env default; production currently
+    uses `atlascloud` — see the AI provider note under Deployment).
   - `src/lib/aiProvider.ts` — **AI provider router**. Dispatches generation +
     model-listing calls to the provider selected by the `AI_PROVIDER` env var:
     `openrouter` (default), `atlascloud`, or `vertex`. All routes and
@@ -56,11 +57,18 @@ It is a **bun**-managed **Turborepo** monorepo.
     Each provider module exports the same interface: `listVideoModels`,
     `listImageModels`, `listSwapModels`, `generateVideo`, `generateImage`,
     `swapFaceWithImageModel`.
-  - `src/lib/atlascloud.ts` — **Atlas Cloud** provider (400+ models, OpenAI-
-    compatible API). Used when `AI_PROVIDER=atlascloud`. Async flow:
-    `POST /api/v1/model/generateVideo` → poll `GET /api/v1/model/prediction/{id}`.
-    Eligible for the Atlas Cloud Open Source Sponsorship Program (free monthly
-    credits for active OSS projects — see https://www.atlascloud.ai/oss-program).
+  - `src/lib/atlascloud.ts` — **Atlas Cloud** provider (400+ models). Used when
+    `AI_PROVIDER=atlascloud`. Async flow: `POST /api/v1/model/generateVideo` →
+    poll `GET /api/v1/model/prediction/{id}`. **Param names are per-model** —
+    each catalog entry's `schema` URL publishes its input contract (e.g. first
+    frame is `image` on MiniMax but `start_image_url` on FLUX; references are
+    `refers` vs `reference_images`), so listing and generation both read the
+    schema (cached in-process, 10m catalog / 1h schema) and map our generic
+    params onto whatever fields the model declares. Video models that require a
+    source video (edit/extend/motion-control variants) are filtered out of
+    `/api/models`. Eligible for the Atlas Cloud Open Source Sponsorship Program
+    (free monthly credits for active OSS projects — see
+    https://www.atlascloud.ai/oss-program).
   - `src/lib/vertexai.ts` — **Vertex AI** provider (Google native: Veo video +
     Imagen image). Used when `AI_PROVIDER=vertex`. Video uses `predictLongRunning`
     (async LRO → GCS output → download). Image uses `predict` (synchronous, base64
@@ -368,18 +376,25 @@ DevineDesk project (`fifth-howl-505921-k0`). Cloudflare proxies to the VM.
 
 **GCP VM details:**
 - Project: `fifth-howl-505921-k0` (DevineDesk — NOT lazynext-ai)
-- VM name: `devinedesk`
+- VM name: `devinedesk` (the one with production data — 9 users, payments, templates)
 - Zone: `us-central1-a`
 - Machine type: `e2-medium`
-- External IP: `34.72.99.248`
+- External IP: `34.58.183.116` — **STATIC** (`gcloud compute addresses describe devinedesk-ip --region=us-central1`), survives stop/start; Cloudflare A records point here and never need updating on restart
 - Firewall: HTTP (80), HTTPS (443), SSH (22) open
+- The duplicate VM `devinedesk-prod` (empty DB, abandoned migration attempt) was **deleted 2026-09-16** — `devinedesk` is now the only VM.
 
 **Running containers (all healthy):**
-- `devinedesk-frontend-1` — nginx serving SPA + proxying /api/* (ports 80, 443)
-- `devinedesk-backend-1` — Express API (port 4000)
+- `devinedesk-proxy-1` — nginx edge (ports 80, 443) + Let's Encrypt certs via `devinedesk-certbot-1`
+- `devinedesk-frontend-1` — SPA static files (port 80 internal)
+- `devinedesk-backend-1` — Express API (port 4000 internal)
 - `devinedesk-postgres-1` — PostgreSQL 16 (port 5432)
 - `devinedesk-minio-1` — MinIO object storage (port 9000)
 - `devinedesk-facefusion-1` — FaceFusion face swap (port 7865)
+- `devinedesk-redis-1` — Redis for BullMQ queue (port 6379)
+
+**⚠️ Billing:** the project runs on billing account `0109DF-FA3450-4B5459` (INR, manual-prepay). If the credit balance hits zero, GCP disables billing and force-stops ALL VMs — this caused the 2026-09-11 outage. Fix = console → Billing → "Make a payment" (₹1,000 min); billing re-enables within minutes, then `gcloud compute instances start devinedesk`. A "Verify now" org/identity step is pending in Billing — awaiting company registration docs (in progress, ~1-2 weeks as of 2026-09-16). Upload them via Billing → "Verify now" when ready; if the grace period lapses, billing may suspend again.
+
+**⚠️ AI provider:** production switched to **Atlas Cloud** on 2026-09-16 (`AI_PROVIDER=atlascloud` in the VM's `.env.production` — the VM file is authoritative and NOT in git). The Atlas account balance was **$0.00** at switch time — top up at atlascloud.ai → Console → Billing or generation calls will 402. (OpenRouter had the same problem: ~$0.23 of $5.00 left — kept as a fallback key in `.env.production`.) `OPENROUTER_THUMBNAIL_MODEL`/`OPENROUTER_SWAP_MODEL` now hold Atlas model ids (`bytedance/seedream-v4.7/edit-sequential`, `google/nano-banana-2-lite/edit`) — the env names are historical. Firewall note: `allow-http-https-devinedesk` was tightened 2026-09-16 to tcp:80,443 only (ports 4000/5173 were open but unused — backend is reached through nginx only).
 
 **Deploy command (on VM):**
 ```sh
@@ -458,7 +473,9 @@ docker compose -f docker-compose.deploy.yml --env-file .env.production --profile
 - [x] Templates published (Go Viral + Hero Entry)
 - [x] All 5 containers healthy on GCP VM
 - [ ] Verify email → sign in (check inbox for verification link)
-- [ ] Test Google OAuth sign-in
+- [x] Test Google OAuth sign-in — verified 2026-09-16 (production OAuth client
+      `DevineDesk Production` had been deleted 2026-09-15; restored via GCP console
+      → Credentials → deleted credentials → restore. Round-trip login + `/api/me` OK)
 - [ ] Test password reset
 - [ ] Test credit purchase (Dodo checkout — needs live keys)
 - [ ] Test video/image generation
@@ -469,11 +486,16 @@ docker compose -f docker-compose.deploy.yml --env-file .env.production --profile
 
 - [x] `GET /health` — simple health check (returns `{"status":"ok","queue":"redis","timestamp":"..."}`)
 - [x] `GET /health/detailed` — checks database, MinIO, and Redis connectivity (returns 503 if any service is degraded)
-- [ ] Set up UptimeRobot (free tier):
-      1. Create an account at https://uptimerobot.com
-      2. Add a monitor for `https://devinedesk.com/health` (HTTP keyword, check every 5 min)
-      3. Add a monitor for `https://devinedesk.com/health/detailed` (HTTP status, check every 5 min)
-      4. Enable email alerts for downtime
+- Note: three legacy MinIO objects under `inputs/` were AVIF bytes stored under
+  `.png` keys (uploaded before the `normalizeImage` fix landed, caused video
+  failures "Failed to get the dimensions of the image"). They were transcoded
+  to real PNG in place on 2026-09-16 — same keys, so DB refs stayed valid.
+- [x] UptimeRobot (free tier) — account via Google SSO as `support@devinedesk.com`,
+      set up 2026-09-16. Three HTTP monitors, 5-min checks, all UP, email alerts to
+      `support@devinedesk.com`:
+      1. `devinedesk.com` (homepage)
+      2. `devinedesk.com/health`
+      3. `devinedesk.com/health/detailed` (checks DB, MinIO, Redis — 503 if degraded)
 - [ ] Consider Sentry for error tracking (frontend + backend)
 
 ### Durable job queue (BullMQ + Redis) — DONE ✅
