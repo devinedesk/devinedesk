@@ -129,6 +129,8 @@ jobs:
             git reset --hard origin/main
             echo "2/3: Rebuilding and restarting services..."
             sudo docker compose -f docker-compose.deploy.yml --env-file .env.production --profile facefusion up -d --build
+            # Reload proxy so it re-resolves upstream IPs after recreates.
+            sudo docker exec devinedesk-proxy-1 nginx -s reload || sudo docker compose -f docker-compose.deploy.yml restart proxy
             echo "3/3: Waiting for backend health..."
             for i in $(seq 1 30); do
               if curl -fsS http://127.0.0.1:4000/health > /dev/null 2>&1; then

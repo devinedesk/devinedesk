@@ -412,6 +412,11 @@ docker compose -f docker-compose.deploy.yml --env-file .env.production --profile
   `https://api.devinedesk.com`). Never pass `FRONTEND_URL` — it is a
   comma-separated CORS origin list, and baking it into the bundle breaks every
   API call.
+- `infra/nginx/prod.conf` routes via `resolver 127.0.0.11` + `$upstream`
+  variables so the proxy re-resolves container IPs at request time. Do NOT
+  revert to plain `proxy_pass http://service` — nginx resolves those once at
+  startup, so the site 502s after every recreate until the proxy restarts.
+  (`set $upstream` must precede any `rewrite ... break` in the same block.)
 
 - [x] Site is live and serving the frontend SPA
 - [x] Backend API is responding at `https://devinedesk.com/api/*`
